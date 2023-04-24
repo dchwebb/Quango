@@ -91,21 +91,21 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 100e66f8-030e-4fc8-ae17-d0b0c03b5649)
-    (at 86.766666 43)
+    (at 82 42.6 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
-    (fp_text reference "Ref**" (at 0 -5.4) (layer "F.SilkS") hide
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 81c57f81-7832-4b7a-bc7a-6701996f3a01)
     )
-    (fp_text value "Subminiature_Switch" (at 0 5.1) (layer "F.Fab") hide
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 99af60e5-88b0-44e5-825d-924599755231)
     )
     (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 28b88f19-85f6-4fe1-88c6-2465dcfebb6a))
     (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 9d26e6db-9c8c-435d-8d4b-6829db636072))
-    (pad "" np_thru_hole circle locked (at 0 0) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
     (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
       (offset (xyz -1.27 0 -8.3))
       (scale (xyz 1 1 1))
@@ -137,7 +137,7 @@
     (fp_line (start 8.19 -8.02) (end 8.19 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp f8ea2be9-a4b6-4c57-abf4-68c530ea42d8))
     (fp_arc (start -7.88 8.32) (mid -8.081749 8.227632) (end -8.16 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp afb43a7e-4249-4e3d-a11e-8ef286d1dcb0))
     (fp_arc (start -8.16 -8.02) (mid -8.081443 -8.227347) (end -7.88 -8.32) (layer "Edge.Cuts") (width 0.12) (tstamp b02eadcd-cbc4-48bd-8c9b-659dc1eeb0cb))
-    (fp_arc (start 7.88 -8.32) (mid 8.096588 -8.233658) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp d35e5347-c8dc-4f24-bcdb-e67a6c16c487))
+    (fp_arc (start 7.88 -8.32) (mid 8.096622 -8.233665) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp d35e5347-c8dc-4f24-bcdb-e67a6c16c487))
     (fp_arc (start 8.19 8.02) (mid 8.100917 8.238111) (end 7.88 8.32) (layer "Edge.Cuts") (width 0.12) (tstamp e3c9a9ec-7568-4cf3-96e5-1b27d6e6c151))
     (fp_line (start -8.31 -8.5) (end 8.39 -8.5) (layer "F.CrtYd") (width 0.05) (tstamp 015b8aa8-948a-4718-b736-7d7e3e83a653))
     (fp_line (start -8.31 -8.5) (end -8.31 8.5) (layer "F.CrtYd") (width 0.05) (tstamp 89cc4f36-94a5-4e35-a143-5201ed9bed40))
@@ -152,7 +152,7 @@
 
   (footprint "Potentiometer_THT:Potentiometer_Bourns_PTA4543_Single_Slide" (layer "F.Cu")
     (tedit 5B92F08E) (tstamp 1cbd6284-0575-49a4-8099-9fd4420ed101)
-    (at 79.9 108.7 90)
+    (at 79.95 118.42 90)
     (descr "Bourns single-gang slide potentiometer, 45.0mm travel, https://www.bourns.com/docs/Product-Datasheets/pta.pdf")
     (tags "Bourns single-gang slide potentiometer 45.0mm")
     (attr through_hole)
@@ -216,7 +216,7 @@
 
   (footprint "Custom_Footprints:RJ45_Molex_42878-8506_Mounting_Hole" (layer "F.Cu")
     (tedit 5C214F77) (tstamp 3190a76e-f330-4779-8b32-952458919c1a)
-    (at 79.1 139.3)
+    (at 100.3 139.2)
     (descr "RJ45 vertical connector https://www.on-shore.com/wp-content/uploads/PJ012-8P8CX.pdf")
     (tags "RJ45 PJ012")
     (attr through_hole)
@@ -236,7 +236,7 @@
     (fp_line (start -8.16 -8.02) (end -8.16 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp a0104e2b-84cd-479c-8187-af46c805118d))
     (fp_line (start 8.19 -8.02) (end 8.19 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp c0886dac-ecba-4fd1-b6d3-dd86254d75bd))
     (fp_line (start 7.88 -8.32) (end -7.88 -8.32) (layer "Edge.Cuts") (width 0.12) (tstamp db60fc3d-6eb6-4564-8f3e-f141458cfb7a))
-    (fp_arc (start 7.88 -8.32) (mid 8.096588 -8.233658) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp 2a5a13f4-2004-4cac-b109-c510f8093ae8))
+    (fp_arc (start 7.88 -8.32) (mid 8.096622 -8.233665) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp 2a5a13f4-2004-4cac-b109-c510f8093ae8))
     (fp_arc (start -8.16 -8.02) (mid -8.081443 -8.227347) (end -7.88 -8.32) (layer "Edge.Cuts") (width 0.12) (tstamp 439408f2-21a7-4c20-ae38-f8adfc8cb7ff))
     (fp_arc (start -7.88 8.32) (mid -8.081749 8.227632) (end -8.16 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp cd1114dc-8b1e-4138-99ee-0a51d4bacf79))
     (fp_arc (start 8.19 8.02) (mid 8.100917 8.238111) (end 7.88 8.32) (layer "Edge.Cuts") (width 0.12) (tstamp edd5a856-0ebb-4189-b7c1-3a6b71749c96))
@@ -253,21 +253,45 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 34ff21f7-10fa-474e-976d-e373b345605e)
-    (at 91.533332 43)
+    (at 93.5 42.566668 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
-    (fp_text reference "Ref**" (at 0 -5.4) (layer "F.SilkS") hide
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 81c57f81-7832-4b7a-bc7a-6701996f3a01)
+      (tstamp 95a8b894-60c1-4643-9234-4358448a9d2b)
     )
-    (fp_text value "Subminiature_Switch" (at 0 5.1) (layer "F.Fab") hide
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 99af60e5-88b0-44e5-825d-924599755231)
+      (tstamp 2c5cf119-458e-4aa4-a0ee-d308cdea3db6)
     )
-    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 28b88f19-85f6-4fe1-88c6-2465dcfebb6a))
-    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 9d26e6db-9c8c-435d-8d4b-6829db636072))
-    (pad "" np_thru_hole circle locked (at 0 0) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp f61b870e-7787-4f55-a57d-e5a39c58bd35))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 8c1bfbae-592f-428d-a58e-f73694dd4b9a))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp f350c540-003f-4ef6-b087-3f370edc4f6e))
+    (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
+      (offset (xyz -1.27 0 -8.3))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+  )
+
+  (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
+    (tedit 5F7CCA4A) (tstamp 40a26d0e-3472-4b68-864e-121e1c8339e4)
+    (at 97.7 42.566668 90)
+    (descr "Mounting Hole 6mm, no annular")
+    (tags "mounting hole 6mm no annular")
+    (attr through_hole)
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 95a8b894-60c1-4643-9234-4358448a9d2b)
+    )
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 2c5cf119-458e-4aa4-a0ee-d308cdea3db6)
+    )
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp f61b870e-7787-4f55-a57d-e5a39c58bd35))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 8c1bfbae-592f-428d-a58e-f73694dd4b9a))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers F&B.Cu *.Mask) (tstamp f350c540-003f-4ef6-b087-3f370edc4f6e))
     (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
       (offset (xyz -1.27 0 -8.3))
       (scale (xyz 1 1 1))
@@ -353,7 +377,7 @@
 
   (footprint "Custom_Footprints:Thonkiconn_Socket_MountingHole_6mm" (layer "F.Cu")
     (tedit 5F7C9DF4) (tstamp 5fb42e33-d0df-4bbe-ad94-807bd49365ee)
-    (at 89.9 120.8)
+    (at 81.7 127.7)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -381,7 +405,7 @@
 
   (footprint "Potentiometer_THT:Potentiometer_Bourns_PTA4543_Single_Slide" (layer "F.Cu")
     (tedit 5B92F08E) (tstamp 63b973f1-e6d6-4321-9ba5-1c217892caba)
-    (at 96.2 108.9 90)
+    (at 96.25 118.62 90)
     (descr "Bourns single-gang slide potentiometer, 45.0mm travel, https://www.bourns.com/docs/Product-Datasheets/pta.pdf")
     (tags "Bourns single-gang slide potentiometer 45.0mm")
     (attr through_hole)
@@ -495,7 +519,7 @@
 
   (footprint "Custom_Footprints:USB_B_CUTOUT" (layer "F.Cu")
     (tedit 0) (tstamp 6fa41475-14c1-4390-a429-f98cd725e4f9)
-    (at 99 139.1)
+    (at 81.5 141.1)
     (attr smd)
     (fp_text reference "USB**" (at 0 -7 unlocked) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
@@ -520,21 +544,21 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 6fcabca6-130e-438f-80e3-dcb74d981d0c)
-    (at 82 43)
+    (at 73.6 42.566666 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
-    (fp_text reference "Ref**" (at 0 -5.4) (layer "F.SilkS") hide
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 81c57f81-7832-4b7a-bc7a-6701996f3a01)
+      (tstamp ff295774-981c-4b5f-8e29-98d454438915)
     )
-    (fp_text value "Subminiature_Switch" (at 0 5.1) (layer "F.Fab") hide
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 99af60e5-88b0-44e5-825d-924599755231)
+      (tstamp bca12f1e-c75a-45fb-99a1-bdee122f9c38)
     )
-    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 28b88f19-85f6-4fe1-88c6-2465dcfebb6a))
-    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 9d26e6db-9c8c-435d-8d4b-6829db636072))
-    (pad "" np_thru_hole circle locked (at 0 0) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp e609abf3-3290-4ff2-9310-e90992d50b7f))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp f0a71113-8a7c-483c-8546-fd5730f4f054))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 89935ea9-944b-4774-8238-cee4afa09e6c))
     (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
       (offset (xyz -1.27 0 -8.3))
       (scale (xyz 1 1 1))
@@ -570,21 +594,21 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 8a21b91f-da55-4e25-abca-47523036d9e5)
-    (at 96.3 43)
+    (at 101.9 42.6 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
-    (fp_text reference "Ref**" (at 0 -5.4) (layer "F.SilkS") hide
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 81c57f81-7832-4b7a-bc7a-6701996f3a01)
+      (tstamp f0f53e7d-4d3f-4f0f-b3a2-f1de4f32256c)
     )
-    (fp_text value "Subminiature_Switch" (at 0 5.1) (layer "F.Fab") hide
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 99af60e5-88b0-44e5-825d-924599755231)
+      (tstamp be870b22-ba70-4506-b07f-d69c9ad65600)
     )
-    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 28b88f19-85f6-4fe1-88c6-2465dcfebb6a))
-    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 9d26e6db-9c8c-435d-8d4b-6829db636072))
-    (pad "" np_thru_hole circle locked (at 0 0) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 4389fc96-f8c4-4e20-97d2-73b7fdd3935b))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 046ebf49-7aae-4f24-9dc3-b99f915481c7))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers *.Cu *.Mask) (tstamp 5077abd9-a053-4dbd-aab9-39d0348dee34))
     (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
       (offset (xyz -1.27 0 -8.3))
       (scale (xyz 1 1 1))
@@ -718,7 +742,7 @@
     (fp_arc (start -8.16 -8.02) (mid -8.081443 -8.227347) (end -7.88 -8.32) (layer "Edge.Cuts") (width 0.12) (tstamp 47fe8176-f585-4396-b278-fb51038174d7))
     (fp_arc (start 8.19 8.02) (mid 8.100917 8.238111) (end 7.88 8.32) (layer "Edge.Cuts") (width 0.12) (tstamp 92c09339-65e1-4e1b-a7fd-dab1887d61f2))
     (fp_arc (start -7.88 8.32) (mid -8.081749 8.227632) (end -8.16 8.02) (layer "Edge.Cuts") (width 0.12) (tstamp aca0c836-8bee-4ebb-899d-760f574062c3))
-    (fp_arc (start 7.88 -8.32) (mid 8.096588 -8.233658) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp b07b8942-37c5-4711-affe-7a069a62ea6d))
+    (fp_arc (start 7.88 -8.32) (mid 8.096622 -8.233665) (end 8.19 -8.02) (layer "Edge.Cuts") (width 0.12) (tstamp b07b8942-37c5-4711-affe-7a069a62ea6d))
     (fp_line (start -8.31 -8.5) (end 8.39 -8.5) (layer "F.CrtYd") (width 0.05) (tstamp a1541c8b-1a42-4b39-9a99-4dfd6cb02667))
     (fp_line (start 8.39 -8.5) (end 8.39 8.5) (layer "F.CrtYd") (width 0.05) (tstamp bd88be68-49cf-4ef3-be95-8a3c4d5c7225))
     (fp_line (start -8.31 -8.5) (end -8.31 8.5) (layer "F.CrtYd") (width 0.05) (tstamp c4144423-3755-4a8d-8d0a-80948ae6a5e7))
@@ -755,6 +779,30 @@
     )
   )
 
+  (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
+    (tedit 5F7CCA4A) (tstamp c458ed90-38b0-4b3c-a479-553306c55c5e)
+    (at 106.1 42.6 90)
+    (descr "Mounting Hole 6mm, no annular")
+    (tags "mounting hole 6mm no annular")
+    (attr through_hole)
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp f0f53e7d-4d3f-4f0f-b3a2-f1de4f32256c)
+    )
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp be870b22-ba70-4506-b07f-d69c9ad65600)
+    )
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 4389fc96-f8c4-4e20-97d2-73b7fdd3935b))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 046ebf49-7aae-4f24-9dc3-b99f915481c7))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers F&B.Cu *.Mask) (tstamp 5077abd9-a053-4dbd-aab9-39d0348dee34))
+    (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
+      (offset (xyz -1.27 0 -8.3))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+  )
+
   (footprint "Custom_Footprints:Oval_Mounting_Hole" locked (layer "F.Cu")
     (tedit 5DD7CD6B) (tstamp d19d1bed-3c4f-45db-b62f-3d5cbd942d8b)
     (at 57.5 33)
@@ -781,9 +829,57 @@
     (pad "" np_thru_hole oval locked (at 0 0) (size 5 3.2) (drill oval 5 3.2) (layers *.Cu *.Mask) (tstamp dd1f5292-926e-4234-a09d-ab020084aeb6))
   )
 
+  (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
+    (tedit 5F7CCA4A) (tstamp e2a4d8c1-fbfd-4592-b63e-56bc31d3ebb9)
+    (at 77.8 42.566666 90)
+    (descr "Mounting Hole 6mm, no annular")
+    (tags "mounting hole 6mm no annular")
+    (attr through_hole)
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp ff295774-981c-4b5f-8e29-98d454438915)
+    )
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp bca12f1e-c75a-45fb-99a1-bdee122f9c38)
+    )
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp e609abf3-3290-4ff2-9310-e90992d50b7f))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp f0a71113-8a7c-483c-8546-fd5730f4f054))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers F&B.Cu *.Mask) (tstamp 89935ea9-944b-4774-8238-cee4afa09e6c))
+    (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
+      (offset (xyz -1.27 0 -8.3))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+  )
+
+  (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
+    (tedit 5F7CCA4A) (tstamp f14ef254-33fb-4678-8a28-1b2b8c789d5a)
+    (at 86.2 42.6 90)
+    (descr "Mounting Hole 6mm, no annular")
+    (tags "mounting hole 6mm no annular")
+    (attr through_hole)
+    (fp_text reference "Ref**" (at 0 -5.4 90) (layer "F.SilkS") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 81c57f81-7832-4b7a-bc7a-6701996f3a01)
+    )
+    (fp_text value "Subminiature_Switch" (at 0 5.1 90) (layer "F.Fab") hide
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 99af60e5-88b0-44e5-825d-924599755231)
+    )
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.1) (fill none) (tstamp 28b88f19-85f6-4fe1-88c6-2465dcfebb6a))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp 9d26e6db-9c8c-435d-8d4b-6829db636072))
+    (pad "" np_thru_hole circle locked (at 0 0 90) (size 3 3) (drill 3) (layers F&B.Cu *.Mask) (tstamp 1cb3adf9-9e07-4260-8a7e-0f0bfd7f2f54))
+    (model "${KISYS3DMOD}/LED_THT.3dshapes/LED_D3.0mm_FlatTop.wrl"
+      (offset (xyz -1.27 0 -8.3))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+  )
+
   (footprint "Custom_Footprints:Small_Pushbutton_Hole_3.5mm" (layer "B.Cu")
     (tedit 5F7CC77F) (tstamp 560bb831-2347-4263-acad-6283d560772b)
-    (at 75.8 42.6)
+    (at 79.8 48.6)
     (descr "Button Hole 3.5mm")
     (attr through_hole)
     (fp_text reference "RESET" (at 0 5.4) (layer "B.SilkS") hide
@@ -806,20 +902,20 @@
 
   (footprint "Custom_Footprints:Small_Pushbutton_Hole_3.5mm" (layer "B.Cu")
     (tedit 5F7CC77F) (tstamp f0de0afa-4a5e-47cf-9c22-d3e5dd6f9cc1)
-    (at 102.4 42.8)
+    (at 100 48.6)
     (descr "Button Hole 3.5mm")
     (attr through_hole)
     (fp_text reference "RESET" (at 0 5.4) (layer "B.SilkS") hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
-      (tstamp e17e6c0e-7e5b-43f0-ad48-0a2760b45b04)
+      (tstamp 34c4ad78-db83-44cc-8981-2148462dfe8d)
     )
     (fp_text value "Subminiature_Switch" (at 0 -5.1) (layer "B.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
-      (tstamp e4e20505-1208-4100-a4aa-676f50844c06)
+      (tstamp 66de05c1-6e0e-49aa-87ea-4387d6a00d8d)
     )
-    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.15) (fill none) (tstamp 55992e35-fe7b-468a-9b7a-1e4dc931b904))
-    (fp_circle (center 0 0) (end 1.6 0) (layer "B.CrtYd") (width 0.05) (fill none) (tstamp f9865a9f-edb8-49c7-828f-4896e1f3047a))
-    (pad "" np_thru_hole circle locked (at 0 0) (size 3.5 3.5) (drill 3.5) (layers *.Cu *.Mask) (tstamp a06e8e78-f567-42e6-b645-013b1073ca31))
+    (fp_circle (center 0 0) (end 1.5 0) (layer "Cmts.User") (width 0.15) (fill none) (tstamp 6a0af817-fdf4-4699-b3a6-f6699feba2e1))
+    (fp_circle (center 0 0) (end 1.6 0) (layer "B.CrtYd") (width 0.05) (fill none) (tstamp 8fe30bd6-ce3f-4452-8b9d-658a818b14f2))
+    (pad "" np_thru_hole circle locked (at 0 0) (size 3.5 3.5) (drill 3.5) (layers *.Cu *.Mask) (tstamp c753244f-5373-4a57-ada2-bfca9ee4e228))
     (model "${KISYS3DMOD}/Button_Switch_THT.3dshapes/SW_PUSH_6mm_H13mm.wrl"
       (offset (xyz 3.35 2.25 10))
       (scale (xyz 1 1 1))
