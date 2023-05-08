@@ -24,7 +24,7 @@
       "lockedItems": false,
       "otherItems": true,
       "pads": false,
-      "text": false,
+      "text": true,
       "tracks": true,
       "vias": true,
       "zones": true
@@ -63,7 +63,7 @@
       35,
       36
     ],
-    "visible_layers": "ffdffdf_ffffffff",
+    "visible_layers": "ffdffff_ffffffff",
     "zone_display_mode": 0
   },
   "meta": {
