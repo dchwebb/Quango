@@ -1790,7 +1790,7 @@
     (uuid 06738ae6-6b99-4285-8a79-2cc6ab0044fc)
     (property "Reference" "J8" (id 0) (at 243.84 19.05 0))
     (property "Value" "USB_C_Receptacle" (id 1) (at 243.84 21.59 0))
-    (property "Footprint" "Connector_USB:USB_C_Receptacle_JAE_DX07S024WJ3R400" (id 2) (at 247.65 52.07 0)
+    (property "Footprint" "Custom_Footprints:USB_C_Receptacle_Amphenol_12401951E412A" (id 2) (at 247.65 52.07 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" (id 3) (at 247.65 52.07 0)
@@ -3250,7 +3250,7 @@
       (reference "J7") (unit 1) (value "Out") (footprint "Custom_Footprints:RJ45_Molex_42878-8506")
     )
     (path "/06738ae6-6b99-4285-8a79-2cc6ab0044fc"
-      (reference "J8") (unit 1) (value "USB_C_Receptacle") (footprint "Connector_USB:USB_C_Receptacle_JAE_DX07S024WJ3R400")
+      (reference "J8") (unit 1) (value "USB_C_Receptacle") (footprint "Custom_Footprints:USB_C_Receptacle_Amphenol_12401951E412A")
     )
     (path "/50ae117b-ba18-40c9-8318-325af3127371"
       (reference "J9") (unit 1) (value "Midi_In") (footprint "Custom_Footprints:Thonkiconn_Stereo-PJ366ST")
