@@ -154,7 +154,7 @@
 
   (footprint "Custom_Footprints:LED_D3.0mm" (layer "F.Cu")
     (tedit 613629E3) (tstamp 0c989607-db69-4f26-8afe-4e1029f4f55a)
-    (at 77.9 42.6)
+    (at 77.8 42.6)
     (descr "LED, diameter 3.0mm, 2 pins")
     (tags "LED diameter 3.0mm 2 pins")
     (property "Sheetfile" "Quango_Controls.kicad_sch")
@@ -681,7 +681,7 @@
 
   (footprint "Custom_Footprints:LED_D3.0mm" (layer "F.Cu")
     (tedit 613629E3) (tstamp 76372ecb-8808-4648-8e0b-6955f1b9fc5a)
-    (at 82.5 42.6)
+    (at 82.4 42.6)
     (descr "LED, diameter 3.0mm, 2 pins")
     (tags "LED diameter 3.0mm 2 pins")
     (property "Sheetfile" "Quango_Controls.kicad_sch")
@@ -1188,7 +1188,7 @@
 
   (footprint "Custom_Footprints:LED_D3.0mm" (layer "F.Cu")
     (tedit 613629E3) (tstamp a6b8c473-0b01-4751-915f-1c95b2b65f40)
-    (at 68.7 42.6)
+    (at 68.6 42.6)
     (descr "LED, diameter 3.0mm, 2 pins")
     (tags "LED diameter 3.0mm 2 pins")
     (property "Sheetfile" "Quango_Controls.kicad_sch")
@@ -1407,7 +1407,7 @@
 
   (footprint "Custom_Footprints:LED_D3.0mm" (layer "F.Cu")
     (tedit 613629E3) (tstamp ba92a3e4-d622-47fd-9dc4-919af9d6b191)
-    (at 73.3 42.6)
+    (at 73.2 42.6)
     (descr "LED, diameter 3.0mm, 2 pins")
     (tags "LED diameter 3.0mm 2 pins")
     (property "Sheetfile" "Quango_Controls.kicad_sch")
@@ -2046,7 +2046,8 @@
     )
   )
 
-  (gr_rect (start 50.1 39) (end 130.8 149) (layer "Dwgs.User") (width 0.15) (fill none) (tstamp 5d9a86bd-3ea5-48cf-ad8c-60a1a9879dca))
+  (gr_rect (start 50.1 39) (end 120.8 149) (layer "Dwgs.User") (width 0.15) (fill none) (tstamp 5d9a86bd-3ea5-48cf-ad8c-60a1a9879dca))
+  (gr_line locked (start 85.4 28.6) (end 85.4 160.2) (layer "Dwgs.User") (width 0.15) (tstamp aa0bf71e-6333-4ff1-96b6-6c17090d4e64))
   (gr_rect (start 50 30) (end 120.8 158.5) (layer "Edge.Cuts") (width 0.1) (fill none) (tstamp d55259d7-12af-4a71-a12d-20e3e19269b8))
 
 )
