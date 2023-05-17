@@ -3106,6 +3106,7 @@
   (no_connect (at 99.06 66.04) (uuid 2509a787-0671-4568-a257-25afcd3ad599))
   (no_connect (at 53.34 154.94) (uuid 2ac35351-07cf-4350-a786-3957d5da22a3))
   (no_connect (at 99.06 142.24) (uuid 2bc143eb-9757-4a94-ad3b-2dff7847e408))
+  (no_connect (at 53.34 78.74) (uuid 3d62b192-63cc-43dc-bb93-7d49415c3ef8))
   (no_connect (at 53.34 137.16) (uuid 55fa5fd1-1eb5-49c6-9aed-554b202c66cb))
   (no_connect (at 99.06 154.94) (uuid 5a93c6ef-54c7-4987-9ad8-27f5a8096a3b))
   (no_connect (at 53.34 86.36) (uuid 5ec6a2b8-ada4-4f8b-b020-4675c868ceae))
@@ -3122,6 +3123,7 @@
   (no_connect (at 99.06 165.1) (uuid 956c1237-edfd-4fad-a730-0cd527ba46e9))
   (no_connect (at 99.06 139.7) (uuid 96d63d89-a4fe-45b9-821f-bdd2bb553e4e))
   (no_connect (at 53.34 101.6) (uuid 984fb177-27b5-4a07-8dc3-936797f23b50))
+  (no_connect (at 53.34 81.28) (uuid 9dde3b66-d89a-4329-919e-8299af050373))
   (no_connect (at 99.06 160.02) (uuid a903a07b-7520-454a-a237-780cd57347d8))
   (no_connect (at 99.06 91.44) (uuid ad27a38b-9e3f-427f-956d-f8025e7caf98))
   (no_connect (at 99.06 162.56) (uuid b7b53e01-065d-4208-aab5-808ddd98c95c))
@@ -4948,8 +4950,8 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 448bbbbe-6f30-4d2f-b19a-216456a6be8f)
   )
-  (label "ChannelA_Level" (at 53.34 149.86 180)
-    (effects (font (size 1.27 1.27)) (justify right bottom))
+  (label "ChannelA_Level" (at 99.06 134.62 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 4536cbfe-c8e2-4a33-bbe1-ac7a9dec5e6a)
   )
   (label "AudioA2_In" (at -203.2 -77.47 0)
@@ -10374,19 +10376,19 @@
       (reference "U13") (unit 5) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/1b727df7-cb3f-48d1-be9c-292996b508c3"
-      (reference "U14") (unit 1) (value "TL074") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U14") (unit 1) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/dfb0e318-b14d-499c-a2a3-d6ddf83ef63a"
-      (reference "U14") (unit 2) (value "TL074") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U14") (unit 2) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/b690f45c-fd5f-4e22-a898-b1a3ca1d64ff"
-      (reference "U14") (unit 3) (value "TL074") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U14") (unit 3) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/d7490e05-e2b4-473a-9389-d362b2a1506b"
-      (reference "U14") (unit 4) (value "TL074") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U14") (unit 4) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/9b9b9766-bc41-4a1e-b4e6-58c18cc0519f"
-      (reference "U14") (unit 5) (value "TL074") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U14") (unit 5) (value "TL074") (footprint "Package_SO:TSSOP-14_4.4x5mm_P0.65mm")
     )
     (path "/226694b0-ec80-4137-9308-0689e83ebb68"
       (reference "Y1") (unit 1) (value "8MHz 20pF") (footprint "Crystal:Crystal_SMD_0603-2Pin_6.0x3.5mm")
