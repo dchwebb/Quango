@@ -91,7 +91,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 100e66f8-030e-4fc8-ae17-d0b0c03b5649)
-    (at 77.8 42.6 90)
+    (at 76.9 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -115,7 +115,7 @@
 
   (footprint "Custom_Footprints:RJ45_Molex_42878-8506_Mounting_Hole" (layer "F.Cu")
     (tedit 5C214F77) (tstamp 16d11011-22f4-494d-b1a4-5db3e876bd8f)
-    (at 60.2 139.2)
+    (at 61.2 139.2)
     (descr "RJ45 vertical connector https://www.on-shore.com/wp-content/uploads/PJ012-8P8CX.pdf")
     (tags "RJ45 PJ012")
     (attr through_hole)
@@ -189,7 +189,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 34ff21f7-10fa-474e-976d-e373b345605e)
-    (at 88.4 42.6 90)
+    (at 89.1 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -213,7 +213,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 40a26d0e-3472-4b68-864e-121e1c8339e4)
-    (at 93 42.6 90)
+    (at 93.7 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -237,7 +237,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 4dd4491e-9a2e-4f3e-a6e6-a1ebfeb83b0d)
-    (at 60.5 50.9)
+    (at 61.2 50.9)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -288,7 +288,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 59ea82c9-7cc5-4ab1-85e7-fb61983d71c7)
-    (at 110.3 96.1)
+    (at 109.6 96.1)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -313,7 +313,7 @@
 
   (footprint "Custom_Footprints:Thonkiconn_Socket_MountingHole_6mm" (layer "F.Cu")
     (tedit 5F7C9DF4) (tstamp 5fb42e33-d0df-4bbe-ad94-807bd49365ee)
-    (at 75.6 135.3)
+    (at 76.2 135.3)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -341,7 +341,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 686dbb91-c98d-49dd-a677-1f1e6b914cc4)
-    (at 60.2 118.7)
+    (at 61.2 118.7)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -366,7 +366,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 6b0de1d4-e557-4ac8-84ec-a51f5b9e141b)
-    (at 110.3 73.5)
+    (at 109.6 73.5)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -391,7 +391,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 6fcabca6-130e-438f-80e3-dcb74d981d0c)
-    (at 68.6 42.6 90)
+    (at 67.7 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -441,7 +441,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp 8a21b91f-da55-4e25-abca-47523036d9e5)
-    (at 97.6 42.6 90)
+    (at 98.3 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -465,7 +465,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 8de0c367-3ca6-4037-94a8-bd9c9125029e)
-    (at 110.3 50.9)
+    (at 109.6 50.9)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -490,7 +490,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp 8e3060b3-e646-44b7-9fd2-a98b0c8c8aef)
-    (at 110.3 118.7)
+    (at 109.6 118.7)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -541,7 +541,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp a77aba34-4836-4f1e-b847-df96febb7627)
-    (at 60.4 96.1)
+    (at 61.2 96.1)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -566,7 +566,7 @@
 
   (footprint "Custom_Footprints:USB_C_Cutout" (layer "F.Cu")
     (tedit 0) (tstamp ad984e20-ca61-498b-9dda-ac915009cfd1)
-    (at 75.6 144.5)
+    (at 76.2 144.5)
     (attr smd)
     (fp_text reference "REF**" (at 0 -0.5 unlocked) (layer "F.SilkS")
       (effects (font (size 1 1) (thickness 0.15)))
@@ -603,7 +603,7 @@
 
   (footprint "Custom_Footprints:RJ45_Molex_42878-8506_Mounting_Hole" (layer "F.Cu")
     (tedit 5C214F77) (tstamp b8f0070f-26a4-4e74-9584-c240fdcddfac)
-    (at 110.6 139.3)
+    (at 109.6 139.3)
     (descr "RJ45 vertical connector https://www.on-shore.com/wp-content/uploads/PJ012-8P8CX.pdf")
     (tags "RJ45 PJ012")
     (attr through_hole)
@@ -640,7 +640,7 @@
 
   (footprint "Custom_Footprints:Alpha_9mm_pot_hole" (layer "F.Cu")
     (tedit 5F7C9874) (tstamp bda3de2f-9de2-4dd4-b2fe-ff51a1051cda)
-    (at 60.4 73.5)
+    (at 61.2 73.5)
     (descr "Mounting Hole 7mm")
     (tags "mounting hole 7mm")
     (attr through_hole)
@@ -665,7 +665,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp c458ed90-38b0-4b3c-a479-553306c55c5e)
-    (at 102.2 42.6 90)
+    (at 102.9 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -754,7 +754,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp e2a4d8c1-fbfd-4592-b63e-56bc31d3ebb9)
-    (at 73.2 42.6 90)
+    (at 72.3 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -817,7 +817,7 @@
 
   (footprint "Custom_Footprints:LED_Hole_3mm" (layer "F.Cu")
     (tedit 5F7CCA4A) (tstamp f14ef254-33fb-4678-8a28-1b2b8c789d5a)
-    (at 82.4 42.6 90)
+    (at 81.5 42 90)
     (descr "Mounting Hole 6mm, no annular")
     (tags "mounting hole 6mm no annular")
     (attr through_hole)
@@ -841,7 +841,7 @@
 
   (footprint "Custom_Footprints:Small_Pushbutton_Hole_3.5mm" (layer "B.Cu")
     (tedit 5F7CC77F) (tstamp 560bb831-2347-4263-acad-6283d560772b)
-    (at 75.3 51.1)
+    (at 76.9 51.7)
     (descr "Button Hole 3.5mm")
     (attr through_hole)
     (fp_text reference "RESET" (at 0 5.4) (layer "B.SilkS") hide
@@ -864,7 +864,7 @@
 
   (footprint "Custom_Footprints:Small_Pushbutton_Hole_3.5mm" (layer "B.Cu")
     (tedit 5F7CC77F) (tstamp f0de0afa-4a5e-47cf-9c22-d3e5dd6f9cc1)
-    (at 95.7 51.1)
+    (at 93.7 51.7)
     (descr "Button Hole 3.5mm")
     (attr through_hole)
     (fp_text reference "RESET" (at 0 5.4) (layer "B.SilkS") hide
@@ -885,8 +885,8 @@
     )
   )
 
-  (gr_rect (start 50.1 39) (end 120.7 149) (layer "Dwgs.User") (width 0.15) (fill none) (tstamp 5d9a86bd-3ea5-48cf-ad8c-60a1a9879dca))
-  (gr_line (start 85.4 29) (end 85.4 160.6) (layer "Dwgs.User") (width 0.15) (tstamp 73582365-f490-4e33-993e-ed9aa0d260e5))
-  (gr_rect (start 50 30) (end 120.8 158.5) (layer "Edge.Cuts") (width 0.1) (fill none) (tstamp d55259d7-12af-4a71-a12d-20e3e19269b8))
+  (gr_rect locked (start 50.1 39) (end 120.7 149) (layer "Dwgs.User") (width 0.15) (fill none) (tstamp 5d9a86bd-3ea5-48cf-ad8c-60a1a9879dca))
+  (gr_line locked (start 85.4 29) (end 85.4 160.6) (layer "Dwgs.User") (width 0.15) (tstamp 73582365-f490-4e33-993e-ed9aa0d260e5))
+  (gr_rect locked (start 50 30) (end 120.8 158.5) (layer "Edge.Cuts") (width 0.1) (fill none) (tstamp d55259d7-12af-4a71-a12d-20e3e19269b8))
 
 )
