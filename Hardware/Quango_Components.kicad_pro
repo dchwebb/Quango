@@ -119,7 +119,8 @@
         "use_height_for_length_calcs": true
       },
       "track_widths": [
-        0.0
+        0.0,
+        0.3
       ],
       "via_dimensions": [
         {
@@ -379,9 +380,7 @@
         "microvia_drill": 0.1,
         "name": "Power",
         "nets": [
-          "+3.3V",
           "+3.3VA",
-          "+5V",
           "/-5V_REF"
         ],
         "pcb_color": "rgba(0, 0, 0, 0.000)",
@@ -403,6 +402,8 @@
         "name": "Power_Wide",
         "nets": [
           "+12V",
+          "+3.3V",
+          "+5V",
           "-12V",
           "/+12V_IN",
           "/-12V_IN"

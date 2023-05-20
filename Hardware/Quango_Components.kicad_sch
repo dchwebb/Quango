@@ -5594,7 +5594,7 @@
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid 8c9c659a-b5ec-4322-8d46-bf69de5dc727)
   )
-  (label "Gate4_Out" (at 138.43 96.52 0)
+  (label "Gate4_Out" (at 138.43 93.98 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 8d1ffdde-0291-4339-ae2a-a41dacd7302d)
   )
@@ -5750,7 +5750,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid bfc9a3c2-9181-429b-9bad-d0ea6e7c7fa5)
   )
-  (label "Gate3_Out" (at 138.43 93.98 0)
+  (label "Gate3_Out" (at 138.43 96.52 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid bff0d7f6-bbcf-4cd4-901b-ea4b3de901ac)
   )
@@ -10776,6 +10776,9 @@
     )
     (path "/6505d480-2c4a-43b6-864d-d09e21056980/2e1ddcad-0519-4706-9430-55bb3ce32171"
       (reference "J7") (unit 1) (value "Audio_Breakout") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical")
+    )
+    (path "/6505d480-2c4a-43b6-864d-d09e21056980/3b38388f-acb0-409f-a93f-143c9d8182e4"
+      (reference "J8") (unit 1) (value "Gate_Breakout") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
     )
     (path "/9cc3873a-349e-4fee-be4e-7429042177a8"
       (reference "L1") (unit 1) (value "L_Small") (footprint "Inductor_SMD:L_0805_2012Metric_Pad1.05x1.20mm_HandSolder")
