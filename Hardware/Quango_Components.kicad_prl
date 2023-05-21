@@ -3,9 +3,7 @@
     "active_layer": 37,
     "active_layer_preset": "",
     "auto_track_width": false,
-    "hidden_nets": [
-      "GND"
-    ],
+    "hidden_nets": [],
     "high_contrast_mode": 0,
     "net_color_mode": 1,
     "opacity": {
@@ -64,7 +62,7 @@
       35,
       36
     ],
-    "visible_layers": "ffcffff_fffffffd",
+    "visible_layers": "ffcfeff_fffffffd",
     "zone_display_mode": 1
   },
   "meta": {
