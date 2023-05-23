@@ -121,7 +121,8 @@
       "track_widths": [
         0.0,
         0.3,
-        0.4
+        0.4,
+        0.5
       ],
       "via_dimensions": [
         {
@@ -433,7 +434,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "Quango_Components.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""

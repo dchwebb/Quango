@@ -175,7 +175,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "Quango_Panel.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""
