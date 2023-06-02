@@ -180,7 +180,7 @@ void InitAdcPins(ADC_TypeDef* ADC_No, std::initializer_list<uint8_t> channels) {
 }
 
 
-void InitADC(volatile uint16_t* ADC_array)
+void InitADC1(volatile uint16_t* buffer, uint16_t channels)
 {
 	// Initialize Clocks
 	RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
@@ -217,7 +217,7 @@ void InitADC(volatile uint16_t* ADC_array)
 	ADC1->CFGR |= ADC_CFGR_DMAEN;					// Enable ADC DMA
 
 	// For scan mode: set number of channels to be converted
-	ADC1->SQR1 |= (ADC_BUFFER_LENGTH - 1);
+	ADC1->SQR1 |= (channels - 1);
 
 	// Start calibration
 	ADC1->CR &= ~ADC_CR_ADCALDIF;					// Calibration in single ended mode
@@ -227,21 +227,22 @@ void InitADC(volatile uint16_t* ADC_array)
 
 	/*--------------------------------------------------------------------------------------------
 	Configure ADC Channels to be converted:
-	0	PC0 ADC12_IN6		Env1 Attack
-	1	PC1 ADC12_IN7		Env1 Decay
-	2	PC2 ADC12_IN8		Env1 Sustain
-	3	PC3 ADC12_IN9		Env1 Release
+	0	PE7 ADC3_IN4		Env1 Attack
+	1	PE8 ADC345_IN6		Env1 Decay
+	2	PE9 ADC3_IN2		Env1 Sustain
+	3	PE10 ADC345_IN14	Env1 Release
 
-	4	PA0 ADC12_IN1		Env2 Attack
-	5	PA1 ADC12_IN2		Env2 Decay
-	6	PA3 ADC1_IN4		Env2 Sustain
-	7	PB0 ADC1_IN15		Env2 Release
+	4	PE11 ADC345_IN15	Env2 Attack
+	5	PE12 ADC345_IN16	Env2 Decay
+	6	PE14 ADC4_IN1		Env2 Sustain
+	7	PE15 ADC4_IN2		Env2 Release
 
-	8	PB11 ADC12_IN14		LFO Speed
+	8	PC0 ADC12_IN6		Pitch Detect Audio
 	*/
 
-	InitAdcPins(ADC1, {6, 7, 8, 9, 1, 2, 4, 15, 14});
-
+//	InitAdcPins(ADC3, {4, 6, 2, 14});
+//	InitAdcPins(ADC4, {15, 16, 1, 2});
+	InitAdcPins(ADC1, {6});
 
 	// Enable ADC
 	ADC1->CR |= ADC_CR_ADEN;
@@ -250,9 +251,9 @@ void InitADC(volatile uint16_t* ADC_array)
 	DMAMUX1_ChannelStatus->CFR |= DMAMUX_CFR_CSOF0; // Channel 1 Clear synchronization overrun event flag
 	DMA1->IFCR = 0x3F << DMA_IFCR_CGIF1_Pos;		// clear all five interrupts for this stream
 
-	DMA1_Channel1->CNDTR |= ADC_BUFFER_LENGTH;		// Number of data items to transfer (ie size of ADC buffer)
+	DMA1_Channel1->CNDTR |= channels;				// Number of data items to transfer (ie size of ADC buffer)
 	DMA1_Channel1->CPAR = (uint32_t)(&(ADC1->DR));	// Configure the peripheral data register address 0x40022040
-	DMA1_Channel1->CMAR = (uint32_t)(ADC_array);	// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
+	DMA1_Channel1->CMAR = (uint32_t)(buffer);	// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
 
 	DMA1_Channel1->CCR |= DMA_CCR_EN;				// Enable DMA and wait
 	wait_loop_index = (SystemCoreClock / (100000UL * 2UL));

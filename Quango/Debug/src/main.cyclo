@@ -1,1 +1,12 @@
+../src/interrupts.h:1:6:void SysTick_Handler()	1
+../src/interrupts.h:6:6:void TIM3_IRQHandler()	1
+../src/interrupts.h:12:6:void USB_LP_IRQHandler()	1
+../src/interrupts.h:16:6:void NMI_Handler()	1
+../src/interrupts.h:18:6:void HardFault_Handler()	1
+../src/interrupts.h:22:6:void MemManage_Handler()	1
+../src/interrupts.h:26:6:void BusFault_Handler()	1
+../src/interrupts.h:30:6:void UsageFault_Handler()	1
+../src/interrupts.h:34:6:void SVC_Handler()	1
+../src/interrupts.h:36:6:void DebugMon_Handler()	1
+../src/interrupts.h:38:6:void PendSV_Handler()	1
 ../src/main.cpp:14:5:int main()	1
