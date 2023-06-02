@@ -19,11 +19,7 @@ struct ADSR {
 	uint16_t release;
 };
 
-struct ADCValues {
-	ADSR EnvA;
-	ADSR EnvB;
-	uint16_t PitchDetect;
-};
+
 
 void SystemClock_Config();
 void InitSysTick();
@@ -31,6 +27,8 @@ void InitDAC();
 void InitIO();
 void InitEnvTimer();
 void InitADC1(volatile uint16_t* buffer, uint16_t channels);
+void InitADC3(volatile uint16_t* buffer, uint16_t channels);
+void InitADC4(volatile uint16_t* buffer, uint16_t channels);
 void InitUart();
 void InitCordic();
 /*

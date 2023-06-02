@@ -107,7 +107,7 @@ void InitIO()
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// reset and clock control - advanced high performance bus - GPIO port C
-
+/*
 	GPIOB->MODER &= ~GPIO_MODER_MODER13;			// configure PB13 gate 1 input
 	GPIOB->MODER &= ~GPIO_MODER_MODER14;			// configure PB14 gate 2 input
 	GPIOB->MODER &= ~GPIO_MODER_MODER15;			// configure PB15 gate 3 input
@@ -136,6 +136,7 @@ void InitIO()
 
 	GPIOA->MODER &= ~GPIO_MODER_MODER9;				// configure PA9 clock input
 	GPIOB->MODER &= ~GPIO_MODER_MODER9_1;			// configure PB9 debug out
+	*/
 }
 
 
@@ -180,13 +181,28 @@ void InitAdcPins(ADC_TypeDef* ADC_No, std::initializer_list<uint8_t> channels) {
 }
 
 
+/*--------------------------------------------------------------------------------------------
+Configure ADC Channels to be converted:
+0	PE7 ADC3_IN4		Env1 Attack
+1	PE8 ADC345_IN6		Env1 Decay
+2	PE9 ADC3_IN2		Env1 Sustain
+3	PE10 ADC345_IN14	Env1 Release
+
+4	PE11 ADC345_IN15	Env2 Attack
+5	PE12 ADC345_IN16	Env2 Decay
+6	PE14 ADC4_IN1		Env2 Sustain
+7	PE15 ADC4_IN2		Env2 Release
+
+8	PC0 ADC12_IN6		Pitch Detect Audio
+*/
+
 void InitADC1(volatile uint16_t* buffer, uint16_t channels)
 {
 	// Initialize Clocks
 	RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_DMAMUX1EN;
 	RCC->AHB2ENR |= RCC_AHB2ENR_ADC12EN;
-	RCC->CCIPR |= RCC_CCIPR_ADC12SEL_1;				// 00: pll2_p_ck (default), 01: pll3_r_ck clock, 10: per_ck clock
+	RCC->CCIPR |= RCC_CCIPR_ADC12SEL_1;				// 00: no clock, 01: PLL P clk clock, *10: System clock
 
 	DMA1_Channel1->CCR &= ~DMA_CCR_EN;
 	DMA1_Channel1->CCR |= DMA_CCR_CIRC;				// Circular mode to keep refilling buffer
@@ -225,24 +241,13 @@ void InitADC1(volatile uint16_t* buffer, uint16_t channels)
 	while ((ADC1->CR & ADC_CR_ADCAL) == ADC_CR_ADCAL) {};
 
 
-	/*--------------------------------------------------------------------------------------------
+	/*
 	Configure ADC Channels to be converted:
-	0	PE7 ADC3_IN4		Env1 Attack
-	1	PE8 ADC345_IN6		Env1 Decay
-	2	PE9 ADC3_IN2		Env1 Sustain
-	3	PE10 ADC345_IN14	Env1 Release
-
-	4	PE11 ADC345_IN15	Env2 Attack
-	5	PE12 ADC345_IN16	Env2 Decay
-	6	PE14 ADC4_IN1		Env2 Sustain
-	7	PE15 ADC4_IN2		Env2 Release
-
-	8	PC0 ADC12_IN6		Pitch Detect Audio
+	PC0 ADC12_IN6		Pitch Detect Audio
+	PC2 ADC12_IN8		ChannelALevel
 	*/
 
-//	InitAdcPins(ADC3, {4, 6, 2, 14});
-//	InitAdcPins(ADC4, {15, 16, 1, 2});
-	InitAdcPins(ADC1, {6});
+	InitAdcPins(ADC1, {6, 8});
 
 	// Enable ADC
 	ADC1->CR |= ADC_CR_ADEN;
@@ -253,7 +258,7 @@ void InitADC1(volatile uint16_t* buffer, uint16_t channels)
 
 	DMA1_Channel1->CNDTR |= channels;				// Number of data items to transfer (ie size of ADC buffer)
 	DMA1_Channel1->CPAR = (uint32_t)(&(ADC1->DR));	// Configure the peripheral data register address 0x40022040
-	DMA1_Channel1->CMAR = (uint32_t)(buffer);	// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
+	DMA1_Channel1->CMAR = (uint32_t)(buffer);		// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
 
 	DMA1_Channel1->CCR |= DMA_CCR_EN;				// Enable DMA and wait
 	wait_loop_index = (SystemCoreClock / (100000UL * 2UL));
@@ -262,6 +267,161 @@ void InitADC1(volatile uint16_t* buffer, uint16_t channels)
 	}
 
 	ADC1->CR |= ADC_CR_ADSTART;						// Start ADC
+}
+
+
+
+
+void InitADC3(volatile uint16_t* buffer, uint16_t channels)
+{
+	// Initialize Clocks
+	//RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+	//RCC->AHB1ENR |= RCC_AHB1ENR_DMAMUX1EN;
+	RCC->AHB2ENR |= RCC_AHB2ENR_ADC345EN;
+	RCC->CCIPR |= RCC_CCIPR_ADC345SEL_1;			// 00: no clock, 01: PLL P clk clock, *10: System clock
+
+	DMA1_Channel2->CCR &= ~DMA_CCR_EN;
+	DMA1_Channel2->CCR |= DMA_CCR_CIRC;				// Circular mode to keep refilling buffer
+	DMA1_Channel2->CCR |= DMA_CCR_MINC;				// Memory in increment mode
+	DMA1_Channel2->CCR |= DMA_CCR_PSIZE_0;			// Peripheral size: 8 bit; 01 = 16 bit; 10 = 32 bit
+	DMA1_Channel2->CCR |= DMA_CCR_MSIZE_0;			// Memory size: 8 bit; 01 = 16 bit; 10 = 32 bit
+	DMA1_Channel2->CCR |= DMA_CCR_PL_0;				// Priority: 00 = low; 01 = Medium; 10 = High; 11 = Very High
+
+	DMA1->IFCR = 0x3F << DMA_IFCR_CGIF2_Pos;		// clear all five interrupts for this stream
+
+	DMAMUX1_Channel1->CCR |= 37; 					// DMA request MUX input 37 = ADC3 (See p.426)
+	DMAMUX1_ChannelStatus->CFR |= DMAMUX_CFR_CSOF1; // Channel 2 Clear synchronization overrun event flag
+
+	ADC3->CR &= ~ADC_CR_DEEPPWD;					// Deep power down: 0: ADC not in deep-power down	1: ADC in deep-power-down (default reset state)
+	ADC3->CR |= ADC_CR_ADVREGEN;					// Enable ADC internal voltage regulator
+
+	// Wait until voltage regulator settled
+	volatile uint32_t wait_loop_index = (SystemCoreClock / (100000UL * 2UL));
+	while (wait_loop_index != 0UL) {
+		wait_loop_index--;
+	}
+	while ((ADC3->CR & ADC_CR_ADVREGEN) != ADC_CR_ADVREGEN) {}
+
+	ADC345_COMMON->CCR |= ADC_CCR_CKMODE;			// adc_hclk/4 (Synchronous clock mode)
+	ADC3->CFGR |= ADC_CFGR_CONT;					// 1: Continuous conversion mode for regular conversions
+	ADC3->CFGR |= ADC_CFGR_OVRMOD;					// Overrun Mode 1: ADC_DR register is overwritten with the last conversion result when an overrun is detected.
+	ADC3->CFGR |= ADC_CFGR_DMACFG;					// 0: DMA One Shot Mode selected, 1: DMA Circular Mode selected
+	ADC3->CFGR |= ADC_CFGR_DMAEN;					// Enable ADC DMA
+
+	// For scan mode: set number of channels to be converted
+	ADC3->SQR1 |= (channels - 1);
+
+	// Start calibration
+	ADC3->CR &= ~ADC_CR_ADCALDIF;					// Calibration in single ended mode
+	ADC3->CR |= ADC_CR_ADCAL;
+	while ((ADC3->CR & ADC_CR_ADCAL) == ADC_CR_ADCAL) {};
+
+
+	/*--------------------------------------------------------------------------------------------
+	Configure ADC Channels to be converted:
+	PE7 ADC3_IN4		Env1 Attack
+	PE8 ADC345_IN6		Env1 Decay
+	PE9 ADC3_IN2		Env1 Sustain
+	PE10 ADC345_IN14	Env1 Release
+	*/
+
+	InitAdcPins(ADC3, {4, 6, 2, 14});
+
+	// Enable ADC
+	ADC3->CR |= ADC_CR_ADEN;
+	while ((ADC3->ISR & ADC_ISR_ADRDY) == 0) {}
+
+	DMAMUX1_ChannelStatus->CFR |= DMAMUX_CFR_CSOF1; // Channel 2 Clear synchronization overrun event flag
+	DMA1->IFCR = 0x3F << DMA_IFCR_CGIF2_Pos;		// clear all five interrupts for this stream
+
+	DMA1_Channel2->CNDTR |= channels;				// Number of data items to transfer (ie size of ADC buffer)
+	DMA1_Channel2->CPAR = (uint32_t)(&(ADC3->DR));	// Configure the peripheral data register address 0x40022040
+	DMA1_Channel2->CMAR = (uint32_t)(buffer);		// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
+
+	DMA1_Channel2->CCR |= DMA_CCR_EN;				// Enable DMA and wait
+	wait_loop_index = (SystemCoreClock / (100000UL * 2UL));
+	while (wait_loop_index != 0UL) {
+		wait_loop_index--;
+	}
+
+	ADC3->CR |= ADC_CR_ADSTART;						// Start ADC
+}
+
+
+void InitADC4(volatile uint16_t* buffer, uint16_t channels)
+{
+	// Initialize Clocks
+	//RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+	//RCC->AHB1ENR |= RCC_AHB1ENR_DMAMUX1EN;
+	//RCC->AHB2ENR |= RCC_AHB2ENR_ADC345EN;
+	//RCC->CCIPR |= RCC_CCIPR_ADC345SEL_1;			// 00: no clock, 01: PLL P clk clock, *10: System clock
+
+	DMA1_Channel3->CCR &= ~DMA_CCR_EN;
+	DMA1_Channel3->CCR |= DMA_CCR_CIRC;				// Circular mode to keep refilling buffer
+	DMA1_Channel3->CCR |= DMA_CCR_MINC;				// Memory in increment mode
+	DMA1_Channel3->CCR |= DMA_CCR_PSIZE_0;			// Peripheral size: 8 bit; 01 = 16 bit; 10 = 32 bit
+	DMA1_Channel3->CCR |= DMA_CCR_MSIZE_0;			// Memory size: 8 bit; 01 = 16 bit; 10 = 32 bit
+	DMA1_Channel3->CCR |= DMA_CCR_PL_0;				// Priority: 00 = low; 01 = Medium; 10 = High; 11 = Very High
+
+	DMA1->IFCR = 0x3F << DMA_IFCR_CGIF3_Pos;		// clear all five interrupts for this stream
+
+	DMAMUX1_Channel2->CCR |= 38; 					// DMA request MUX input 38 = ADC4 (See p.426)
+	DMAMUX1_ChannelStatus->CFR |= DMAMUX_CFR_CSOF2; // Channel 2 Clear synchronization overrun event flag
+
+	ADC4->CR &= ~ADC_CR_DEEPPWD;					// Deep power down: 0: ADC not in deep-power down	1: ADC in deep-power-down (default reset state)
+	ADC4->CR |= ADC_CR_ADVREGEN;					// Enable ADC internal voltage regulator
+
+	// Wait until voltage regulator settled
+	volatile uint32_t wait_loop_index = (SystemCoreClock / (100000UL * 2UL));
+	while (wait_loop_index != 0UL) {
+		wait_loop_index--;
+	}
+	while ((ADC4->CR & ADC_CR_ADVREGEN) != ADC_CR_ADVREGEN) {}
+
+	//ADC345_COMMON->CCR |= ADC_CCR_CKMODE;			// adc_hclk/4 (Synchronous clock mode)
+	ADC4->CFGR |= ADC_CFGR_CONT;					// 1: Continuous conversion mode for regular conversions
+	ADC4->CFGR |= ADC_CFGR_OVRMOD;					// Overrun Mode 1: ADC_DR register is overwritten with the last conversion result when an overrun is detected.
+	ADC4->CFGR |= ADC_CFGR_DMACFG;					// 0: DMA One Shot Mode selected, 1: DMA Circular Mode selected
+	ADC4->CFGR |= ADC_CFGR_DMAEN;					// Enable ADC DMA
+
+	// For scan mode: set number of channels to be converted
+	ADC4->SQR1 |= (channels - 1);
+
+	// Start calibration
+	ADC4->CR &= ~ADC_CR_ADCALDIF;					// Calibration in single ended mode
+	ADC4->CR |= ADC_CR_ADCAL;
+	while ((ADC4->CR & ADC_CR_ADCAL) == ADC_CR_ADCAL) {};
+
+
+	/*--------------------------------------------------------------------------------------------
+	Configure ADC Channels to be converted:
+	PD9 ADC4_IN13 		ChannelBLevel
+	PE11 ADC345_IN15	Env2 Attack
+	PE12 ADC345_IN16	Env2 Decay
+	PE14 ADC4_IN1		Env2 Sustain
+	PE15 ADC4_IN2		Env2 Release
+	*/
+
+	InitAdcPins(ADC4, {13, 15, 16, 1, 2});
+
+	// Enable ADC
+	ADC4->CR |= ADC_CR_ADEN;
+	while ((ADC4->ISR & ADC_ISR_ADRDY) == 0) {}
+
+	DMAMUX1_ChannelStatus->CFR |= DMAMUX_CFR_CSOF2; // Channel 3 Clear synchronization overrun event flag
+	DMA1->IFCR = 0x3F << DMA_IFCR_CGIF3_Pos;		// clear all five interrupts for this stream
+
+	DMA1_Channel3->CNDTR |= channels;				// Number of data items to transfer (ie size of ADC buffer)
+	DMA1_Channel3->CPAR = (uint32_t)(&(ADC4->DR));	// Configure the peripheral data register address 0x40022040
+	DMA1_Channel3->CMAR = (uint32_t)(buffer);		// Configure the memory address (note that M1AR is used for double-buffer mode) 0x24000040
+
+	DMA1_Channel3->CCR |= DMA_CCR_EN;				// Enable DMA and wait
+	wait_loop_index = (SystemCoreClock / (100000UL * 2UL));
+	while (wait_loop_index != 0UL) {
+		wait_loop_index--;
+	}
+
+	ADC4->CR |= ADC_CR_ADSTART;						// Start ADC
 }
 
 

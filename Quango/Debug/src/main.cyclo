@@ -9,4 +9,4 @@
 ../src/interrupts.h:34:6:void SVC_Handler()	1
 ../src/interrupts.h:36:6:void DebugMon_Handler()	1
 ../src/interrupts.h:38:6:void PendSV_Handler()	1
-../src/main.cpp:14:5:int main()	1
+../src/main.cpp:21:5:int main()	1

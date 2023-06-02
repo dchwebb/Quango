@@ -5,10 +5,12 @@
 ../src/initialisation.cpp:43:6:void InitSysTick()	1
 ../src/initialisation.cpp:49:6:void InitDAC()	1
 ../src/initialisation.cpp:103:6:void InitIO()	1
-../src/initialisation.cpp:143:6:void InitEnvTimer()	1
-../src/initialisation.cpp:157:6:void InitAdcPins(ADC_TypeDef*, std::initializer_list<unsigned char>)	6
-../src/initialisation.cpp:183:6:void InitADC1(volatile uint16_t*, uint16_t)	6
-../src/initialisation.cpp:268:6:void InitCordic()	1
+../src/initialisation.cpp:144:6:void InitEnvTimer()	1
+../src/initialisation.cpp:158:6:void InitAdcPins(ADC_TypeDef*, std::initializer_list<unsigned char>)	6
+../src/initialisation.cpp:199:6:void InitADC1(volatile uint16_t*, uint16_t)	6
+../src/initialisation.cpp:275:6:void InitADC3(volatile uint16_t*, uint16_t)	6
+../src/initialisation.cpp:351:6:void InitADC4(volatile uint16_t*, uint16_t)	6
+../src/initialisation.cpp:428:6:void InitCordic()	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\initializer_list:75:7:constexpr const _E* std::initializer_list<_E>::begin() const [with _E = unsigned char]	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\initializer_list:79:7:constexpr const _E* std::initializer_list<_E>::end() const [with _E = unsigned char]	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\initializer_list:71:7:constexpr std::initializer_list<_E>::size_type std::initializer_list<_E>::size() const [with _E = unsigned char]	1

@@ -2,7 +2,14 @@
 
 
 volatile uint32_t SysTickVal;
-volatile ADCValues ADC_array;
+
+volatile struct ADCValues {
+	uint16_t PitchDetect;
+	uint16_t ChannelALevel;
+	ADSR EnvA;
+	uint16_t ChannelBLevel;
+	ADSR EnvB;
+} adc;
 
 
 extern "C" {
@@ -17,11 +24,12 @@ int main(void)
 	SystemClock_Config();					// Configure the clock and PLL
 	SystemCoreClockUpdate();				// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
-	InitDAC();
-//	InitIO();
+	InitDAC();			// FIXME - calibrate
+	InitIO();
 //	InitEnvTimer();
-	InitADC1(&ADC_array.PitchDetect, 1);
-	//InitADC1(reinterpret_cast<volatile uint16_t*>(&ADC_array.PitchDetect), 1);
+	InitADC1(&adc.PitchDetect, 2);
+	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA), 4);
+	InitADC4(&adc.ChannelBLevel, 5);
 //	InitUart();
 //	InitCordic();
 //
