@@ -22,7 +22,7 @@ void SystemClock_Config(void) {
 	RCC->PLLCFGR = RCC_PLLCFGR_PLLREN;			// Enable PLL R (drives AHB clock)
 	while ((RCC->CR & RCC_CR_PLLRDY) == 0);		// Wait till the main PLL is ready
 
-	// Configure Flash prefetch and wait state. NB STM32G431 is a category 2 device (128KB flash in 1 bank)
+	// Configure Flash prefetch and wait state. NB STM32G473 is a category 3 device
 	FLASH->ACR |= FLASH_ACR_LATENCY_4WS | FLASH_ACR_PRFTEN;
 	FLASH->ACR &= ~FLASH_ACR_LATENCY_1WS;
 
@@ -48,18 +48,20 @@ void InitSysTick()
 
 void InitDAC()
 {
-	// Configure 4 DAC outputs PA4 and PA5 are regular DAC1 buffered outputs; PA2 and PB1 are DAC3 via OpAmp1 and OpAmp3 (Manual p.789)
+	// Configure 4 DAC outputs PA4 and PA5 are regular DAC1 buffered outputs; PA2 and PB1 are DAC3 via OpAmp1 and OpAmp3 (Manual p.782)
 
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// Enable GPIO Clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// Enable GPIO Clock
-	RCC->AHB2ENR |= RCC_AHB2ENR_DAC1EN;				// Enable DAC Clock
-	RCC->AHB2ENR |= RCC_AHB2ENR_DAC3EN;				// Enable DAC Clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_DAC1EN | RCC_AHB2ENR_DAC2EN | RCC_AHB2ENR_DAC3EN | RCC_AHB2ENR_DAC4EN;				// Enable DAC Clock
 
-	DAC1->MCR &= ~DAC_MCR_MODE1_Msk;				// Set to normal mode: DAC channel1 is connected to external pin with Buffer enabled
+	DAC1->MCR &= ~DAC_MCR_MODE1_Msk;				// Set to normal mode: DAC1 channel1 is connected to external pin with Buffer enabled
 	DAC1->CR |= DAC_CR_EN1;							// Enable DAC using PA4 (DAC_OUT1)
 
-	DAC1->MCR &= ~DAC_MCR_MODE2_Msk;				// Set to normal mode: DAC channel2 is connected to external pin with Buffer enabled
+	DAC1->MCR &= ~DAC_MCR_MODE2_Msk;				// Set to normal mode: DAC1 channel2 is connected to external pin with Buffer enabled
 	DAC1->CR |= DAC_CR_EN2;							// Enable DAC using PA5 (DAC_OUT2)
+
+	DAC2->MCR &= ~DAC_MCR_MODE1_Msk;				// Set to normal mode: DAC2 channel1 is connected to external pin with Buffer enabled
+	DAC2->CR |= DAC_CR_EN1;							// Enable DAC using PA6 (DAC_OUT1)
 
 	// output triggered with DAC->DHR12R1 = x;
 
@@ -72,13 +74,28 @@ void InitDAC()
 	OPAMP1->CSR |= OPAMP_CSR_OPAMPxEN;				// Enable OpAmp: voltage on pin OPAMPx_VINP is buffered to pin OPAMPx_VOUT (PA2)
 
 	// Opamp for DAC3 Channel 2: Follower configuration mode - output on PB1
-	// NB According to manual p.790 this should only work on category 3/4 devices and STM32G431 is category 2, but tested working
 	DAC3->MCR |= DAC_MCR_MODE2_0 | DAC_MCR_MODE2_1;	// 011: DAC channel2 is connected to on chip peripherals with Buffer disabled
 	DAC3->CR |= DAC_CR_EN2;							// Enable DAC
 
 	OPAMP3->CSR |= OPAMP_CSR_VMSEL;					// 11: Opamp_out connected to OPAMPx_VINM input
 	OPAMP3->CSR |= OPAMP_CSR_VPSEL;					// 11: DAC3_CH2  connected to OPAMP1 VINP input
 	OPAMP3->CSR |= OPAMP_CSR_OPAMPxEN;				// Enable OpAmp: voltage on pin OPAMPx_VINP is buffered to pin OPAMPx_VOUT (PB1)
+
+	// Opamp for DAC4 Channel 1: Follower configuration mode - output on PB12
+	DAC4->MCR |= DAC_MCR_MODE1_0 | DAC_MCR_MODE1_1;	// 011: DAC channel1 is connected to on chip peripherals with Buffer disabled
+	DAC4->CR |= DAC_CR_EN1;							// Enable DAC
+
+	OPAMP4->CSR |= OPAMP_CSR_VMSEL;					// 11: Opamp_out connected to OPAMPx_VINM input
+	OPAMP4->CSR |= OPAMP_CSR_VPSEL;					// 11: DAC4_CH1  connected to OPAMP1 VINP input
+	OPAMP4->CSR |= OPAMP_CSR_OPAMPxEN;				// Enable OpAmp: voltage on pin OPAMPx_VINP is buffered to pin OPAMPx_VOUT (PB12)
+
+	// Opamp for DAC4 Channel 2: Follower configuration mode - output on PA8
+	DAC4->MCR |= DAC_MCR_MODE2_0 | DAC_MCR_MODE2_1;	// 011: DAC channel2 is connected to on chip peripherals with Buffer disabled
+	DAC4->CR |= DAC_CR_EN2;							// Enable DAC
+
+	OPAMP5->CSR |= OPAMP_CSR_VMSEL;					// 11: Opamp_out connected to OPAMPx_VINM input
+	OPAMP5->CSR |= OPAMP_CSR_VPSEL;					// 11: DAC4_CH2  connected to OPAMP1 VINP input
+	OPAMP5->CSR |= OPAMP_CSR_OPAMPxEN;				// Enable OpAmp: voltage on pin OPAMPx_VINP is buffered to pin OPAMPx_VOUT (PA8)
 
 }
 
