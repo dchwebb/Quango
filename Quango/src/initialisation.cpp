@@ -140,6 +140,39 @@ void InitIO()
 }
 
 
+void InitSPI2()
+{
+	// Controls MCP48CMB21 single channel DAC
+	// PA10: SPI2_MISO; PB13: SPI2_SCK; PB15: SPI2_MOSI; PD15: SPI2_NSS
+	RCC->APB1ENR1 |= RCC_APB1ENR1_SPI2EN;			// SPI2 clock enable
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN | RCC_AHB2ENR_GPIODEN;			// GPIO clocks
+
+	// PB13: SPI2_SCK
+	GPIOB->MODER  &= ~GPIO_MODER_MODE13_0;			// 10: Alternate function mode
+	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL13_Pos;	// Alternate Function 5 (SPI2)
+
+	// PB15: SPI2_MOSI
+	GPIOB->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
+	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI2)
+
+	// PD15: SPI2_NSS
+	GPIOD->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
+	GPIOD->AFR[1] |= 6 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 6 (SPI2)
+
+	// Configure SPI
+	SPI2->CR1 |= SPI_CR1_MSTR;						// Master mode
+	SPI2->CR1 |= SPI_CR1_SSI;						// Internal slave select
+	SPI2->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_0;		// Baud rate p2238: 100: SPI clock/32; *101: SPI clock/64
+	SPI2->CR1 &= ~SPI_CR1_SSM;						// Hardware NSS management
+	SPI2->CR2 |= SPI_CR2_SSOE;						// SS output is enabled in master mode and when SPI is enabled
+	SPI2->CR2 |= SPI_CR2_NSSP;						// NSS pulse management
+	SPI2->CR2 |= 0b1011 << SPI_CR2_DS_Pos;				// Data Size: 0b1011 = 12-bit
+	//	SPI2->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
+
+
+	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
+
+}
 
 void InitMidiUART()
 {

@@ -19,6 +19,15 @@ extern "C" {
 }
 
 
+/*
+ * MCP48 commmand structure:
+ * Address 0x00: Volatile DAC Wiper Register 0
+ * Command: 0x00: Write data
+ * Data: 12 bit
+ * 24 bit message Structure: AAAAA CC X XXXX DDDDDDDDDDDD
+ * So basically send a 24 bit word with the 12 bit data (0x0 - 0xFFF) right aligned
+ */
+
 extern uint32_t SystemCoreClock;
 int main(void)
 {
@@ -28,14 +37,15 @@ int main(void)
 	InitSysTick();
 	InitDAC();			// FIXME - calibrate
 	InitIO();
-//	InitEnvTimer();
 	InitPWMTimer();
 	InitADC1(&adc.PitchDetect, 2);
 	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA), 4);
 	InitADC4(&adc.ChannelBLevel, 5);
 	InitMidiUART();
-//	InitUart();
-//	InitCordic();
+	InitSPI2();
+
+	//	InitEnvTimer();
+	//	InitCordic();
 
 	usb.InitUSB();
 
