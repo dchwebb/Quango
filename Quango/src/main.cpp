@@ -1,5 +1,6 @@
 #include "initialisation.h"
-
+#include "usb.h"
+#include "SerialHandler.h"
 
 volatile uint32_t SysTickVal;
 
@@ -10,7 +11,8 @@ volatile struct ADCValues {
 	uint16_t ChannelBLevel;
 	ADSR EnvB;
 } adc;
-
+USBHandler usb;
+SerialHandler serial(usb);
 
 extern "C" {
 #include "interrupts.h"
@@ -34,11 +36,11 @@ int main(void)
 	InitMidiUART();
 //	InitUart();
 //	InitCordic();
-//
-//	usb.InitUSB();
+
+	usb.InitUSB();
 
 	while (1) {
-//		serial.Command();			// Check for incoming CDC commands
+		serial.Command();			// Check for incoming CDC commands
 	}
 }
 

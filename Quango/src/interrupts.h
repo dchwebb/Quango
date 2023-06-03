@@ -26,7 +26,7 @@ void UART4_IRQHandler(void) {
 }
 
 void USB_LP_IRQHandler() {
-//	usb.USBInterruptHandler();
+	usb.USBInterruptHandler();
 }
 
 void NMI_Handler(void) {}
