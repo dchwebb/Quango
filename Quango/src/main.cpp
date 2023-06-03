@@ -27,6 +27,7 @@ int main(void)
 	InitDAC();			// FIXME - calibrate
 	InitIO();
 //	InitEnvTimer();
+	InitPWMTimer();
 	InitADC1(&adc.PitchDetect, 2);
 	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA), 4);
 	InitADC4(&adc.ChannelBLevel, 5);
