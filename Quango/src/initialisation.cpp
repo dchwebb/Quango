@@ -140,6 +140,34 @@ void InitIO()
 }
 
 
+
+void InitMidiUART()
+{
+	// PC11: UART4_RX (AF5) or USART3_RX (AF7)
+
+	RCC->APB1ENR1 |= RCC_APB1ENR1_UART4EN;			// UART4 clock enable
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// GPIO port C
+
+	GPIOC->MODER &= ~GPIO_MODER_MODE11_0;			// Set alternate function on PE0
+	GPIOC->AFR[1] |= 5 << GPIO_AFRH_AFSEL11_Pos;	// Alternate function on PC11 for USART4_RX is AF5
+
+	// By default clock source is muxed to peripheral clock 1 which is system clock
+	// Calculations depended on oversampling mode set in CR1 OVER8. Default = 0: Oversampling by 16
+
+	UART4->BRR = SystemCoreClock / 31250;			// clk / desired_baud
+	UART4->CR1 &= ~USART_CR1_M;						// 0: 1 Start bit, 8 Data bits, n Stop bit; 	1: 1 Start bit, 9 Data bits, n Stop bit
+	UART4->CR1 |= USART_CR1_RE;						// Receive enable
+	UART4->CR2 |= USART_CR2_RXINV;					// Invert UART receive to allow use of inverting buffer
+
+	// Set up interrupts
+	UART4->CR1 |= USART_CR1_RXNEIE;
+	NVIC_SetPriority(UART4_IRQn, 3);				// Lower is higher priority
+	NVIC_EnableIRQ(UART4_IRQn);
+
+	UART4->CR1 |= USART_CR1_UE;						// UART Enable
+}
+
+
 void InitPWMTimer()
 {
 	// TIM3: Channel 1: PE2 (AF2)

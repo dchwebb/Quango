@@ -32,6 +32,7 @@ void InitADC4(volatile uint16_t* buffer, uint16_t channels);
 void InitUart();
 void InitCordic();
 void InitPWMTimer();
+void InitMidiUART();
 /*
 void InitCoverageTimer();
 void InitDebounceTimer();

@@ -31,6 +31,7 @@ int main(void)
 	InitADC1(&adc.PitchDetect, 2);
 	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA), 4);
 	InitADC4(&adc.ChannelBLevel, 5);
+	InitMidiUART();
 //	InitUart();
 //	InitCordic();
 //
