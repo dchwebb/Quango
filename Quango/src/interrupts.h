@@ -10,11 +10,25 @@ void TIM2_IRQHandler()
 	TIM2->SR &= ~TIM_SR_UIF;
 //	envelopes.calcEnvelopes();
 
+	uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
+	GPIOD->ODR &= ~GPIO_ODR_OD15;
+
+//	uint8_t* spi8Bit = (uint8_t*)(&SPI1->DR);
+//	GPIOA->ODR &= ~GPIO_ODR_OD15;
+
+
 	// Output test signal
-	SPI1->DR = triOut;
+	*spi8Bit = (uint8_t)0;
+	*spi8Bit = (uint8_t)(triOut >> 8);
+	*spi8Bit = (uint8_t)(triOut & 0xFF);
+
+	//while ((SPI1->SR & SPI_SR_BSY) != 0 || (SPI1->SR & SPI_SR_FTLVL) != 0) {};		//  && (SPI1->SR & SPI_SR_BSY) != 0
+	while ((SPI2->SR & SPI_SR_BSY) != 0 || (SPI2->SR & SPI_SR_FTLVL) != 0) {};		//  && (SPI1->SR & SPI_SR_BSY) != 0
 	if (++triOut > 4095) {
 		triOut = 0;
 	}
+	GPIOD->ODR |= GPIO_ODR_OD15;
+	//GPIOA->ODR |= GPIO_ODR_OD15;
 }
 
 uint32_t debugUartOR = 0;
