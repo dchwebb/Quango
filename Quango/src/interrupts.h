@@ -3,10 +3,18 @@ void SysTick_Handler(void)
 	SysTickVal++;
 }
 
-void TIM3_IRQHandler()
+uint16_t triOut = 0;
+
+void TIM2_IRQHandler()
 {
-	TIM3->SR &= ~TIM_SR_UIF;
+	TIM2->SR &= ~TIM_SR_UIF;
 //	envelopes.calcEnvelopes();
+
+	// Output test signal
+	SPI1->DR = triOut;
+	if (++triOut > 4095) {
+		triOut = 0;
+	}
 }
 
 uint32_t debugUartOR = 0;

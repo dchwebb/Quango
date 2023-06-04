@@ -166,12 +166,46 @@ void InitSPI2()
 	SPI2->CR1 &= ~SPI_CR1_SSM;						// Hardware NSS management
 	SPI2->CR2 |= SPI_CR2_SSOE;						// SS output is enabled in master mode and when SPI is enabled
 	SPI2->CR2 |= SPI_CR2_NSSP;						// NSS pulse management
-	SPI2->CR2 |= 0b1011 << SPI_CR2_DS_Pos;				// Data Size: 0b1011 = 12-bit
+	SPI2->CR2 &= ~SPI_CR2_DS_2;						// Clear Data Size as defaults to 0x7
+	SPI2->CR2 |= 0b1011 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit
 	//	SPI2->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
 
 
 	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
+}
 
+
+void InitSPI1()
+{
+	// Controls AD5676 8 channel DAC
+	// PB3: SPI1_SCK; PB4: SPI1_MISO; PB5: SPI1_MOSI; PA15: SPI1_NSS (AF5)
+	RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;			// SPI1 clock enable
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN;			// GPIO clocks
+
+	// PB3: SPI1_SCK
+	GPIOB->MODER  &= ~GPIO_MODER_MODE3_0;			// 10: Alternate function mode
+	GPIOB->AFR[0] |= 5 << GPIO_AFRL_AFSEL3_Pos;		// Alternate Function 5 (SPI1)
+
+	// PB5: SPI1_MOSI
+	GPIOB->MODER  &= ~GPIO_MODER_MODE5_0;			// 10: Alternate function mode
+	GPIOB->AFR[0] |= 5 << GPIO_AFRL_AFSEL5_Pos;		// Alternate Function 5 (SPI1)
+
+	// PA15: SPI1_NSS
+	GPIOA->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
+	GPIOA->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI1)
+
+	// Configure SPI
+	SPI1->CR1 |= SPI_CR1_MSTR;						// Master mode
+	SPI1->CR1 |= SPI_CR1_SSI;						// Internal slave select
+	SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_0;		// Baud rate: 100: SPI clock/32; *101: SPI clock/64
+	SPI1->CR1 &= ~SPI_CR1_SSM;						// Hardware NSS management
+	SPI1->CR2 |= SPI_CR2_SSOE;						// SS output is enabled in master mode and when SPI is enabled
+	SPI1->CR2 |= SPI_CR2_NSSP;						// NSS pulse management
+	SPI1->CR2 &= ~SPI_CR2_DS_2;						// Clear Data Size as defaults to 0x7
+	SPI1->CR2 |= 0b1011 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit
+	//	SPI1->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
+
+	SPI1->CR1 |= SPI_CR1_SPE;						// Enable SPI
 }
 
 void InitMidiUART()
@@ -288,18 +322,18 @@ void InitPWMTimer()
 
 
 
-//	Setup Timer 3 on an interrupt to trigger sample output
+//	Setup Timer 2 on an interrupt to trigger sample output
 void InitEnvTimer() {
-	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;			// Enable Timer 3
-	TIM3->PSC = 34;									// Set prescaler
-	TIM3->ARR = 103; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;			// Enable Timer 3
+	TIM2->PSC = 34;									// Set prescaler
+	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
 
-	TIM3->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
-	NVIC_EnableIRQ(TIM3_IRQn);
-	NVIC_SetPriority(TIM3_IRQn, 0);					// Lower is higher priority
+	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+	NVIC_EnableIRQ(TIM2_IRQn);
+	NVIC_SetPriority(TIM2_IRQn, 0);					// Lower is higher priority
 
-	TIM3->CR1 |= TIM_CR1_CEN;
-	TIM3->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
+	TIM2->CR1 |= TIM_CR1_CEN;
+	TIM2->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
 }
 
 

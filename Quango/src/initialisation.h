@@ -34,6 +34,7 @@ void InitCordic();
 void InitPWMTimer();
 void InitMidiUART();
 void InitSPI2();
+void InitSPI1();
 /*
 void InitCoverageTimer();
 void InitDebounceTimer();

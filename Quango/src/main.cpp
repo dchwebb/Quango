@@ -43,8 +43,9 @@ int main(void)
 	InitADC4(&adc.ChannelBLevel, 5);
 	InitMidiUART();
 	InitSPI2();
+	InitSPI1();
 
-	//	InitEnvTimer();
+	InitEnvTimer();
 	//	InitCordic();
 
 	usb.InitUSB();
