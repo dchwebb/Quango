@@ -11,7 +11,7 @@ void TIM2_IRQHandler()
 //	envelopes.calcEnvelopes();
 
 	uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
-	GPIOD->ODR &= ~GPIO_ODR_OD15;
+	GPIOD->ODR &= ~GPIO_ODR_OD15;			// SPI2 NSS
 
 //	uint8_t* spi8Bit = (uint8_t*)(&SPI1->DR);
 //	GPIOA->ODR &= ~GPIO_ODR_OD15;
@@ -27,7 +27,7 @@ void TIM2_IRQHandler()
 	if (++triOut > 4095) {
 		triOut = 0;
 	}
-	GPIOD->ODR |= GPIO_ODR_OD15;
+	//GPIOD->ODR |= GPIO_ODR_OD15;			// SPI2 NSS: MCP48 doesn't need NSS toggled
 	//GPIOA->ODR |= GPIO_ODR_OD15;
 }
 

@@ -104,39 +104,16 @@ void InitIO()
 {
 	// MODER 00: Input mode, 01: General purpose output mode, 10: Alternate function mode, 11: Analog mode (reset state)
 
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// reset and clock control - advanced high performance bus - GPIO port A
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// reset and clock control - advanced high performance bus - GPIO port C
-/*
-	GPIOB->MODER &= ~GPIO_MODER_MODER13;			// configure PB13 gate 1 input
-	GPIOB->MODER &= ~GPIO_MODER_MODER14;			// configure PB14 gate 2 input
-	GPIOB->MODER &= ~GPIO_MODER_MODER15;			// configure PB15 gate 3 input
-	GPIOC->MODER &= ~GPIO_MODER_MODER6;				// configure PC6  gate 4 input
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// GPIO A clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// GPIO B clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// GPIO C clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOFEN;			// GPIO F clock
 
-	// NB PB6 is used in USB Power delivery and by default has a pull down to ground - disable in the PWR register (datasheet p.60 note 5)
-	PWR->CR3 |= PWR_CR3_UCPD_DBDIS;
+	//	Init Multiplexer pins PA1, PA3, PF2
+	GPIOA->MODER &= ~GPIO_MODER_MODER1_1;			// PA1: Multiplexer A0 out
+	GPIOA->MODER &= ~GPIO_MODER_MODER3_1;			// PA3: Multiplexer A1 out
+	GPIOF->MODER &= ~GPIO_MODER_MODER2_1;			// PF2: Multiplexer A2 out
 
-	GPIOB->MODER &= ~GPIO_MODER_MODER5;				// configure PB5  Env 1 Short input
-	GPIOB->MODER &= ~GPIO_MODER_MODER6;				// configure PB6  Env 1 tremolo input*
-	GPIOB->MODER &= ~GPIO_MODER_MODER3;				// configure PB3  Env 2 Short input
-	GPIOB->MODER &= ~GPIO_MODER_MODER4;				// configure PB4  Env 2 tremolo input
-	GPIOC->MODER &= ~GPIO_MODER_MODER10;			// configure PC10 Env 3 Short input
-	GPIOC->MODER &= ~GPIO_MODER_MODER12;			// configure PC12 Env 3 tremolo input
-	GPIOB->MODER &= ~GPIO_MODER_MODER12;			// configure PB12 Env 4 Short input
-	GPIOA->MODER &= ~GPIO_MODER_MODER15;			// configure PA15 Env 4 tremolo input
-
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR5_0;			// configure PB5  Env 1 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR6_0;			// configure PB6  Env 1 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR3_0;			// configure PB3  Env 2 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR4_0;			// configure PB4  Env 2 Pull-up
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR10_0;			// configure PC10 Env 3 Pull-up
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// configure PC12 Env 3 Pull-up
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// configure PB12 Env 4 Pull-up
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR15_0;			// configure PA15 Env 4 Pull-up
-
-	GPIOA->MODER &= ~GPIO_MODER_MODER9;				// configure PA9 clock input
-	GPIOB->MODER &= ~GPIO_MODER_MODER9_1;			// configure PB9 debug out
-	*/
 }
 
 
