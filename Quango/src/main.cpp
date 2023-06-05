@@ -20,6 +20,12 @@ extern "C" {
 
 
 /*
+ * AD5676 command structure:
+ * CCCC AAAA DDDDDDD DDDDDDDD
+ * Command 0011 is update DAC channel.
+ * Channel selected with bottom three address bits
+ * Eg Update channel 5: 0011 0101 DDDDDDDD DDDDDDDD
+
  * MCP48 commmand structure:
  * Address 0x00: Volatile DAC Wiper Register 0
  * Command: 0x00: Write data
