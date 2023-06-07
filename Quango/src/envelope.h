@@ -16,14 +16,15 @@ struct ADSR {
 
 struct Envelope {
 public:
-	Envelope(volatile uint32_t* envDAC)
-	 : envDAC{envDAC} {}
+	Envelope(volatile uint32_t* envDAC, volatile uint32_t* envLED)
+	 : envDAC{envDAC}, envLED{envLED} {}
 
 	Envelope() {}
 
 	void calcEnvelope();							// Sets the DAC level for envelope
 
 	volatile uint32_t* envDAC;
+	volatile uint32_t* envLED;
 private:
 	float CordicExp(float x);
 
