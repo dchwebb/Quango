@@ -1,6 +1,8 @@
 #include "initialisation.h"
 #include "usb.h"
 #include "SerialHandler.h"
+#include "MidiHandler.h"
+#include "VoiceManager.h"
 
 volatile uint32_t SysTickVal;
 
@@ -13,6 +15,7 @@ volatile struct ADCValues {
 } adc;
 USBHandler usb;
 SerialHandler serial(usb);
+MidiHandler midi;
 
 extern "C" {
 #include "interrupts.h"

@@ -150,8 +150,10 @@ void InitSPI2()
 	SPI2->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit; 0b111 = 8 bit
 	//	SPI2->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
 
-
 	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
+
+	GPIOD->ODR &= ~GPIO_ODR_OD15;					// SPI2 NSS - this can be left low
+
 }
 
 

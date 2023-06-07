@@ -12,15 +12,6 @@ extern volatile uint32_t SysTickVal;
 #define DEBUG_ON  GPIOB->ODR |= GPIO_ODR_OD9;
 #define DEBUG_OFF GPIOB->ODR &= ~GPIO_ODR_OD9;
 
-struct ADSR {
-	uint16_t attack;
-	uint16_t decay;
-	uint16_t sustain;
-	uint16_t release;
-};
-
-
-
 void SystemClock_Config();
 void InitSysTick();
 void InitDAC();
