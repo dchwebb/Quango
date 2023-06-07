@@ -6,13 +6,7 @@
 
 volatile uint32_t SysTickVal;
 
-volatile struct ADCValues {
-	uint16_t PitchDetect;
-	uint16_t ChannelALevel;
-	ADSR EnvA;
-	uint16_t ChannelBLevel;
-	ADSR EnvB;
-} adc;
+volatile ADCValues adc;
 USBHandler usb;
 SerialHandler serial(usb);
 MidiHandler midi;
@@ -55,7 +49,7 @@ int main(void)
 	InitSPI1();
 
 	InitEnvTimer();
-	//	InitCordic();
+	InitCordic();
 
 	usb.InitUSB();
 

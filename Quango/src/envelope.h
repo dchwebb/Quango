@@ -2,18 +2,6 @@
 
 #include "initialisation.h"
 
-
-struct ADSR {
-	uint16_t attack;
-	uint16_t decay;
-	uint16_t sustain;
-	uint16_t release;
-};
-
-
-
-//extern volatile ADSR adsr;
-
 struct Envelope {
 public:
 	Envelope(volatile uint32_t* envDAC, volatile uint32_t* envLED)
@@ -21,10 +9,11 @@ public:
 
 	Envelope() {}
 
-	void calcEnvelope();							// Sets the DAC level for envelope
+	void calcEnvelope(volatile ADSR* adsr);							// Sets the DAC level for envelope
 
 	volatile uint32_t* envDAC;
 	volatile uint32_t* envLED;
+	bool noteOn = false;
 private:
 	float CordicExp(float x);
 
@@ -37,10 +26,6 @@ private:
 	enum class      gateStates {off, attack, decay, sustain, release};
 	gateStates      gateState = gateStates::off;
 
-	ADSR adsr;										// Hold the channel ADSR
-
-	void SetEnvelope(uint16_t value);
-
-
+	void SetEnvelope(uint32_t value);
 };
 

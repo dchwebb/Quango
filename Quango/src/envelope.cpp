@@ -3,7 +3,7 @@
 #include <cstring>
 
 
-void Envelope::SetEnvelope(uint16_t value) {
+void Envelope::SetEnvelope(uint32_t value) {
 
 	if (envDAC != nullptr) {
 		*envDAC = value;
@@ -15,16 +15,15 @@ void Envelope::SetEnvelope(uint16_t value) {
 		*spi8Bit = (uint8_t)(value >> 8);
 		*spi8Bit = (uint8_t)(value & 0xFF);
 	}
+	*envLED = value;
 }
 
 
-void Envelope::calcEnvelope()
+void Envelope::calcEnvelope(volatile ADSR* adsr)
 {
-	// Gate on
-	bool gateOnFIXME = true;
-	if (gateOnFIXME) {
+	if (noteOn) {
 
-		sustain = adsr.sustain;
+		sustain = adsr->sustain;
 
 		switch (gateState) {
 		case gateStates::off:
@@ -37,7 +36,7 @@ void Envelope::calcEnvelope()
 
 		case gateStates::attack: {
 
-			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr.attack)) / 32.0f);
+			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);
 
 			// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
 			const float fullRange = 5000.0f;
@@ -83,7 +82,7 @@ void Envelope::calcEnvelope()
 			const float maxDurationMult = 5.28f * 0.227f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr.decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
+			float rc = std::pow(static_cast<float>(adsr->decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
 
 			if (rc != 0.0f && currentLevel > sustain) {
 				/*
@@ -125,7 +124,7 @@ void Envelope::calcEnvelope()
 			const float maxDurationMult = 1.15f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr.release) / 4096.0f, 2.0f) * maxDurationMult;
+			float rc = std::pow(static_cast<float>(adsr->release) / 4096.0f, 2.0f) * maxDurationMult;
 
 			if (rc != 0.0f && currentLevel > 1.0f) {
 				/*
@@ -146,7 +145,7 @@ void Envelope::calcEnvelope()
 		}
 	}
 
-	//*outputDAC = static_cast<uint32_t>(currentLevel);
+	SetEnvelope(static_cast<uint32_t>(currentLevel));
 }
 
 

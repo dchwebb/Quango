@@ -17,7 +17,7 @@ c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externalt
 ../src/interrupts.h:87:6:void SVC_Handler()	1
 ../src/interrupts.h:89:6:void DebugMon_Handler()	1
 ../src/interrupts.h:91:6:void PendSV_Handler()	1
-../src/main.cpp:41:5:int main()	1
+../src/main.cpp:35:5:int main()	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\basic_string.h:158:14:constexpr std::__cxx11::basic_string<char>::_Alloc_hider::~_Alloc_hider()	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\basic_string.h:671:7:std::__cxx11::basic_string<_CharT, _Traits, _Alloc>::~basic_string() [with _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>]	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\std_function.h:239:5:constexpr std::_Function_base::_Function_base()	1
@@ -35,6 +35,6 @@ c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externalt
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\move.h:49:5:constexpr _Tp* std::__addressof(_Tp&) [with _Tp = const char]	1
 ../src/SerialHandler.h:7:7:SerialHandler::~SerialHandler()	1
 ../src/usb.h:46:7:USBHandler::~USBHandler()	1
-../src/main.cpp:65:1:void __static_initialization_and_destruction_0(int, int)	5
-../src/main.cpp:65:1:cpp)	1
-../src/main.cpp:65:1:cpp)	1
+../src/main.cpp:59:1:void __static_initialization_and_destruction_0(int, int)	5
+../src/main.cpp:59:1:cpp)	1
+../src/main.cpp:59:1:cpp)	1

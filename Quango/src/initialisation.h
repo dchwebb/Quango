@@ -5,6 +5,24 @@
 
 extern volatile uint32_t SysTickVal;
 
+
+struct ADSR {
+	uint16_t attack;
+	uint16_t decay;
+	uint16_t sustain;
+	uint16_t release;
+};
+
+struct ADCValues {
+	uint16_t PitchDetect;
+	uint16_t ChannelALevel;
+	ADSR EnvA;
+	uint16_t ChannelBLevel;
+	ADSR EnvB;
+};
+
+extern volatile ADCValues adc;
+
 #define SYSTICK 1000						// 1ms
 #define SAMPLERATE 48000.0f
 //#define ADC_BUFFER_LENGTH 9

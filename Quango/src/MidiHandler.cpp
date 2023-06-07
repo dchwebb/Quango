@@ -1,6 +1,7 @@
 //#include <configManager.h>
 //#include "USB.h"
 #include "MidiHandler.h"
+#include "VoiceManager.h"
 
 /*
 void MidiHandler::DataIn()
@@ -66,11 +67,12 @@ void MidiHandler::midiEvent(const uint32_t data)
 
 	switch (midiData.msg) {
 	case NoteOff:
+		voiceManager.NoteOnOff(midiNote.noteValue, false);
 		midiDebug[midiCounter++] = midiData;
 		break;
 
 	case NoteOn:
-		//voiceManager.NoteOn(midiNote);
+		voiceManager.NoteOnOff(midiNote.noteValue, true);
 		midiDebug[midiCounter++] = midiData;
 		break;
 

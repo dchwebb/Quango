@@ -2,17 +2,34 @@
 
 VoiceManager voiceManager;
 
-//VoiceManager::VoiceManager() {
-//	channel[channelA].voice[0].envelope.envDAC = &(DAC1->DHR12R1);
-//	channel[channelA].voice[1].envelope.envDAC = &(DAC3->DHR12R1);
-//	channel[channelA].voice[2].envelope.envDAC = &(DAC2->DHR12R1);
-//	channel[channelA].voice[3].envelope.envDAC = &(DAC1->DHR12R2);
-//
-//	channel[channelB].voice[0].envelope.envDAC = &(DAC4->DHR12R2);
-//	channel[channelB].voice[1].envelope.envDAC = &(DAC3->DHR12R2);
-//	channel[channelB].voice[2].envelope.envDAC = &(DAC4->DHR12R1);
-//
-//}
+void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
+{
+	if (on) {
+		// Locate next available note in each channel
+		Channel::Voice* voiceA;
+		for (auto& v: channel[channelA].voice) {
+			if (v.start == 0) {
+				voiceA = &v;
+				break;
+			}
+		}
+		voiceA->midiNote = midiNote;
+		voiceA->start = SysTickVal;
+		voiceA->envelope.noteOn = true;
+	} else {
+		for (auto& v: channel[channelA].voice) {
+			if (v.midiNote == midiNote) {
+				v.start = 0;
+				v.envelope.noteOn = false;
+			}
+		}
+	}
+}
 
-
+void VoiceManager::calcEnvelopes()
+{
+	for (auto& v: channel[channelA].voice) {
+		v.envelope.calcEnvelope(channel[channelA].adsr);
+	}
+}
 

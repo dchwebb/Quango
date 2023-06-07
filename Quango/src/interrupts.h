@@ -9,7 +9,7 @@ uint16_t triOut16 = 0;
 void TIM2_IRQHandler()
 {
 	TIM2->SR &= ~TIM_SR_UIF;
-//	envelopes.calcEnvelopes();
+	voiceManager.calcEnvelopes();
 
 	uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
 
