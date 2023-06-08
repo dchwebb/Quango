@@ -6,23 +6,30 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
 	if (on) {
 		// Locate next available note in each channel
-		Channel::Voice* voiceA;
-		for (auto& v: channel[channelA].voice) {
-			if (v.start == 0) {
-				voiceA = &v;
-				break;
+		for (auto& chn: channel) {
+			Channel::Voice* chnVoice;
+			for (auto& v: chn.voice) {
+				if (v.start == 0) {
+					chnVoice = &v;
+					break;
+				}
+			}
+			chnVoice->midiNote = midiNote;
+			chnVoice->start = SysTickVal;
+			chnVoice->envelope.noteOn = true;
+			if (chn.index == channelNo::channelA) {
+				gates[chnVoice->index].GateOn();
 			}
 		}
-		voiceA->midiNote = midiNote;
-		voiceA->start = SysTickVal;
-		voiceA->envelope.noteOn = true;
-		gates[voiceA->index].GateOn();
+
 	} else {
-		for (auto& v: channel[channelA].voice) {
-			if (v.midiNote == midiNote) {
-				v.start = 0;
-				v.envelope.noteOn = false;
-				gates[v.index].GateOff();
+		for (auto& chn: channel) {
+			for (auto& v: chn.voice) {
+				if (v.midiNote == midiNote) {
+					v.start = 0;
+					v.envelope.noteOn = false;
+					gates[v.index].GateOff();
+				}
 			}
 		}
 	}
@@ -30,8 +37,10 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 
 void VoiceManager::calcEnvelopes()
 {
-	for (auto& v: channel[channelA].voice) {
-		v.envelope.calcEnvelope(channel[channelA].adsr);
+	for (auto& chn: channel) {
+		for (auto& v: chn.voice) {
+			v.envelope.calcEnvelope(chn.adsr);
+		}
 	}
 }
 
