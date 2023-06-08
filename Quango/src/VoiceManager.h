@@ -17,8 +17,9 @@ public:
 		volatile uint16_t* level;	// pointer to ADC value for level slider
 
 		struct Voice {
-			Voice() {};
-			Voice(volatile uint32_t* dac, volatile uint32_t* led) : envelope{dac, led} {};
+			Voice(uint8_t index, volatile uint32_t* dac, volatile uint32_t* led) : index(index), envelope{dac, led} {};
+
+			uint8_t index = 0;
 			Envelope envelope;
 			uint8_t midiNote = 0;
 			uint32_t start = 0;			// time that note was started
@@ -34,20 +35,37 @@ public:
 		{
 			&adc.EnvA,
 			&adc.ChannelALevel,
-			{&DAC1->DHR12R1, &TIM3->CCR1},
-			{&DAC3->DHR12R1, &TIM3->CCR2},
-			{&DAC2->DHR12R1, &TIM3->CCR3},
-			{&DAC1->DHR12R2, &TIM3->CCR4},
+			{0, &DAC1->DHR12R1, &TIM3->CCR1},
+			{1, &DAC3->DHR12R1, &TIM3->CCR2},
+			{2, &DAC2->DHR12R1, &TIM3->CCR3},
+			{3, &DAC1->DHR12R2, &TIM3->CCR4},
 		},
 		{
 			&adc.EnvB,
 			&adc.ChannelBLevel,
-			{&DAC4->DHR12R2, &TIM4->CCR1},
-			{&DAC3->DHR12R2, &TIM4->CCR2},
-			{&DAC4->DHR12R1, &TIM4->CCR3},
-			{nullptr, &(TIM4->CCR4)},				// B4 is handled with an external DAC
+			{0, &DAC4->DHR12R2, &TIM4->CCR1},
+			{1, &DAC3->DHR12R2, &TIM4->CCR2},
+			{2, &DAC4->DHR12R1, &TIM4->CCR3},
+			{3, nullptr,        &(TIM4->CCR4)},				// B4 is handled with an external DAC
 		}
 	};
+
+	struct Gate {
+		volatile uint32_t* gateODR;
+		uint32_t gatePin;
+
+		void GateOn()	{ *gateODR |= gatePin; }
+		void GateOff()	{ *gateODR &= ~gatePin; }
+	};
+
+	Gate gates[4] = {
+		{&GPIOD->ODR, GPIO_ODR_OD2},
+		{&GPIOD->ODR, GPIO_ODR_OD3},
+		{&GPIOD->ODR, GPIO_ODR_OD4},
+		{&GPIOD->ODR, GPIO_ODR_OD5}
+	};
+
+
 };
 
 extern VoiceManager voiceManager;

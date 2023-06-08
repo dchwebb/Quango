@@ -16,11 +16,13 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 		voiceA->midiNote = midiNote;
 		voiceA->start = SysTickVal;
 		voiceA->envelope.noteOn = true;
+		gates[voiceA->index].GateOn();
 	} else {
 		for (auto& v: channel[channelA].voice) {
 			if (v.midiNote == midiNote) {
 				v.start = 0;
 				v.envelope.noteOn = false;
+				gates[v.index].GateOff();
 			}
 		}
 	}

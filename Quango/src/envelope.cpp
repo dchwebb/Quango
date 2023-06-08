@@ -21,6 +21,7 @@ void Envelope::SetEnvelope(uint32_t value) {
 
 void Envelope::calcEnvelope(volatile ADSR* adsr)
 {
+	float level = currentLevel;
 	if (noteOn) {
 
 		sustain = adsr->sustain;
@@ -36,7 +37,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 
 		case gateStates::attack: {
 
-			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);
+			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
 
 			// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
 			const float fullRange = 5000.0f;
@@ -62,14 +63,14 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 				 * currentLevel = newYPos * fullRange;
 				 */
 
-				currentLevel = fullRange - (fullRange - currentLevel) * CordicExp(-timeStep / rc);
+				level = fullRange - (fullRange - level) * CordicExp(-timeStep / rc);
 
 			} else {
-				currentLevel = fullRange;
+				level = fullRange;
 			}
 
-			if (currentLevel >= 4095.0f) {
-				currentLevel = 4095.0f;
+			if (level >= 4095.0f) {
+				level = 4095.0f;
 				gateState = gateStates::decay;
 			}
 
@@ -84,7 +85,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
 			float rc = std::pow(static_cast<float>(adsr->decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
 
-			if (rc != 0.0f && currentLevel > sustain) {
+			if (rc != 0.0f && level > sustain) {
 				/*
 				 * Long hand calculations:
 				 * Capacitor discharge equation: Vc = Vo * e ^ -t/RC
@@ -99,26 +100,26 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 				 * currentLevel = (newYPos * yHeight) + sustain;
 				 */
 
-				currentLevel = sustain + (currentLevel - sustain) * CordicExp(-timeStep / rc);
+				level = sustain + (level - sustain) * CordicExp(-timeStep / rc);
 
 			} else {
-				currentLevel = 0.0f;
+				level = 0.0f;
 			}
 
-			if (currentLevel <= sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
-				currentLevel = sustain;
+			if (level <= sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
+				level = sustain;
 				gateState = gateStates::sustain;
 			}
 
 			break;
 		}
 		case gateStates::sustain:
-			currentLevel = sustain;
+			level = sustain;
 			break;
 		}
 
 	} else {
-		if (currentLevel > 0.0f) {
+		if (level > 0.0f) {
 			gateState = gateStates::release;
 
 			const float maxDurationMult = 1.15f;		// to scale maximum delay time
@@ -126,7 +127,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
 			float rc = std::pow(static_cast<float>(adsr->release) / 4096.0f, 2.0f) * maxDurationMult;
 
-			if (rc != 0.0f && currentLevel > 1.0f) {
+			if (rc != 0.0f && level > 1.0f) {
 				/*
 				 * Long hand calculations:
 				 * float xPos = -rc * std::log(currentLevel / 4096.0f);
@@ -135,9 +136,9 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 				 * currentLevel = newYPos * 4096.0f;
 				 */
 
-				currentLevel = currentLevel * CordicExp(-timeStep / rc);
+				level = level * CordicExp(-timeStep / rc);
 			} else {
-				currentLevel = 0.0f;
+				level = 0.0f;
 			}
 
 		} else {
@@ -145,7 +146,10 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 		}
 	}
 
-	SetEnvelope(static_cast<uint32_t>(currentLevel));
+	if (currentLevel != level) {
+		currentLevel = level;
+		SetEnvelope(static_cast<uint32_t>(currentLevel));
+	}
 }
 
 

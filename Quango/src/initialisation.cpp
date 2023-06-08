@@ -107,12 +107,19 @@ void InitIO()
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// GPIO A clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// GPIO B clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;			// GPIO C clock
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIODEN;			// GPIO D clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOFEN;			// GPIO F clock
 
 	//	Init Multiplexer pins PA1, PA3, PF2
 	GPIOA->MODER &= ~GPIO_MODER_MODER1_1;			// PA1: Multiplexer A0 out
 	GPIOA->MODER &= ~GPIO_MODER_MODER3_1;			// PA3: Multiplexer A1 out
 	GPIOF->MODER &= ~GPIO_MODER_MODER2_1;			// PF2: Multiplexer A2 out
+
+	// Init Gate outputs PD2 - PD5
+	GPIOD->MODER &= ~GPIO_MODER_MODER2_1;			// PD2: Gate1 Out
+	GPIOD->MODER &= ~GPIO_MODER_MODER3_1;			// PD3: Gate2 Out
+	GPIOD->MODER &= ~GPIO_MODER_MODER4_1;			// PD4: Gate3 Out
+	GPIOD->MODER &= ~GPIO_MODER_MODER5_1;			// PD5: Gate4 Out
 
 }
 
@@ -249,11 +256,11 @@ void InitPWMTimer()
 	TIM3->CCR4 = 0;
 
 	// Timing calculations: Clock = 170MHz / (PSC + 1) = 21.25m counts per second
-	// ARR = number of counts per PWM tick = 2047
-	// 21.25m / ARR ~= 10.4kHz of PWM square wave with 2047 levels of output
+	// ARR = number of counts per PWM tick = 4095
+	// 21.25m / ARR ~= 5.2kHz of PWM square wave with 4095 levels of output
 
-	TIM3->ARR = 2047;								// Total number of PWM ticks
-	TIM3->PSC = 7;									// Should give ~10kHz
+	TIM3->ARR = 4095;								// Total number of PWM ticks
+	TIM3->PSC = 7;									// Should give ~5.2kHz
 	TIM3->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM3->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM3->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
@@ -294,10 +301,10 @@ void InitPWMTimer()
 
 	// Timing calculations: Clock = 170MHz / (PSC + 1) = 21.25m counts per second
 	// ARR = number of counts per PWM tick = 2047
-	// 21.25m / ARR ~= 10.4kHz of PWM square wave with 2047 levels of output
+	// 21.25m / ARR ~= 5.2kHz of PWM square wave with 2047 levels of output
 
-	TIM4->ARR = 2047;								// Total number of PWM ticks
-	TIM4->PSC = 7;									// Should give ~10kHz
+	TIM4->ARR = 4095;								// Total number of PWM ticks
+	TIM4->PSC = 7;									// Should give ~5.2kHz
 	TIM4->CR1 |= TIM_CR1_ARPE;						// 1: TIMx_ARR register is buffered
 	TIM4->CCER |= (TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E);		// Capture mode enabled / OC1 signal is output on the corresponding output pin
 	TIM4->EGR |= TIM_EGR_UG;						// 1: Re-initialize the counter and generates an update of the registers
