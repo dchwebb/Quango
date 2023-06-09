@@ -7,9 +7,9 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 	if (on) {
 		// Locate next available note in each channel
 		for (auto& chn: channel) {
-			Channel::Voice* chnVoice;
+			Channel::Voice* chnVoice = nullptr;
 			for (auto& v: chn.voice) {
-				if (v.start == 0) {
+				if (v.envelope.gateState == Envelope::gateStates::off) {
 					chnVoice = &v;
 					break;
 				}
@@ -18,7 +18,7 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 				chnVoice->midiNote = midiNote;
 				chnVoice->start = ++chn.counter;
 				chnVoice->envelope.noteOn = true;
-				//chnVoice->SetPitch();
+				chnVoice->SetPitch(chn.index);
 				if (chn.index == channelNo::channelA) {
 					gates[chnVoice->index].GateOn();
 				}
@@ -50,7 +50,7 @@ void VoiceManager::calcEnvelopes()
 }
 
 
-void VoiceManager::Channel::Voice::SetPitch()
+void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {
 	/*
 	 * AD5676 command structure:
@@ -59,19 +59,17 @@ void VoiceManager::Channel::Voice::SetPitch()
 	 * Channel selected with bottom three address bits
 	 * Eg Update channel 5: 0011 0101 DDDDDDDD DDDDDDDD
 	*/
+	uint16_t dacOutput = 0xFFFF * (float)(std::min(std::max((float)midiNote + voiceManager.pitchbend, 24.0f), 96.0f) - 24) / 72;		// limit C1 to C7
 
-	uint16_t dacOutput = 0xFFFF * (float)(std::min(std::max((float)currentNote + channelNotes[channel - 1].pitchbend, 24.0f), 96.0f) - 24) / 72;		// limit C1 to C7
+	GPIOA->ODR &= ~GPIO_ODR_OD15;		// NSS low
 
-	uint8_t* spi8Bit = (uint8_t*)(&SPI1->DR);
-	//uint16_t* spi16Bit = (uint16_t*)(&SPI1->DR);
-	GPIOA->ODR &= ~GPIO_ODR_OD15;
-
-	// Output test signal
-	*spi8Bit = (uint8_t)0b00110000 | index;
+	// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send
+	auto spi8Bit = reinterpret_cast<volatile uint8_t*>(&SPI1->DR);
+	*spi8Bit = (uint8_t)(0b00110000 | (index + (4 * chn)));
 	*spi8Bit = (uint8_t)(dacOutput >> 8);
 	*spi8Bit = (uint8_t)(dacOutput & 0xFF);
 
 	while ((SPI1->SR & SPI_SR_BSY) != 0 || (SPI1->SR & SPI_SR_FTLVL) != 0) {};
 
-	GPIOA->ODR |= GPIO_ODR_OD15;
+	GPIOA->ODR |= GPIO_ODR_OD15;		// NSS high
 }

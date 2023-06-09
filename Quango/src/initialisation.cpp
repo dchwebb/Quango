@@ -179,26 +179,20 @@ void InitSPI1()
 	GPIOB->MODER  &= ~GPIO_MODER_MODE5_0;			// 10: Alternate function mode
 	GPIOB->AFR[0] |= 5 << GPIO_AFRL_AFSEL5_Pos;		// Alternate Function 5 (SPI1)
 
-	// PA15: SPI1_NSS
-//	GPIOA->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
-//	GPIOA->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI1)
+	// PA15: SPI1_NSS (uses GPIO rather than hardware NSS which doesn't work with 24 bit data)
 	GPIOA->MODER |= GPIO_MODER_MODE15_0;			// 01: Output mode
 	GPIOA->MODER &= ~GPIO_MODER_MODE15_1;			// 01: Output mode
 
 	// Configure SPI
 	SPI1->CR1 |= SPI_CR1_MSTR;						// Master mode
-	SPI1->CR1 |= SPI_CR1_SSI;						// Internal slave select
 	SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_0;		// Baud rate: 100: SPI clock/32; *101: SPI clock/64
+	SPI1->CR1 |= SPI_CR1_SSI;						// Internal slave select
 	SPI1->CR1 |= SPI_CR1_SSM;						// Software NSS management
-//	SPI1->CR1 &= ~SPI_CR1_SSM;						// Hardware NSS management
-//	SPI1->CR2 |= SPI_CR2_SSOE;						// SS output is enabled in master mode and when SPI is enabled
-//	SPI1->CR2 |= SPI_CR2_NSSP;						// NSS pulse management
-	//SPI1->CR2 &= ~SPI_CR2_DS_2;						// Clear Data Size as defaults to 0x7
-	SPI1->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit; 0b111 = 8 bit
-	//	SPI1->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
+	SPI1->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b111 = 8 bit
 
 	SPI1->CR1 |= SPI_CR1_SPE;						// Enable SPI
 }
+
 
 void InitMidiUART()
 {

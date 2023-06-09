@@ -11,6 +11,7 @@ public:
 	enum channelNo {channelA = 0, channelB = 1};
 	void NoteOnOff(uint8_t midiNote, bool on);
 	void calcEnvelopes();
+	float pitchbend = 0.0f;
 
 	struct Channel {
 		channelNo index;
@@ -27,7 +28,7 @@ public:
 			uint8_t midiNote = 0;
 			uint32_t start = 0;		// time that note was started (for note stealing)
 
-			void SetPitch();
+			void SetPitch(channelNo chn);
 		} voice[4];
 
 		Channel(channelNo chn, volatile ADSR* adsr, volatile uint16_t* level, Voice v1, Voice v2, Voice v3, Voice v4)

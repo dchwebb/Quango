@@ -4,6 +4,8 @@
 
 struct Envelope {
 public:
+	enum class      gateStates {off, attack, decay, sustain, release};
+
 	Envelope(volatile uint32_t* envDAC, volatile uint32_t* envLED)
 	 : envDAC{envDAC}, envLED{envLED} {}
 
@@ -13,6 +15,7 @@ public:
 
 	volatile uint32_t* envDAC;
 	volatile uint32_t* envLED;
+	gateStates gateState = gateStates::off;
 	bool noteOn = false;
 private:
 	float CordicExp(float x);
@@ -23,8 +26,6 @@ private:
 	float           sustain = 4095.0f;
 	float           currentLevel = 0.0f;			// The current level of the envelope (held as a float for accuracy of calulculation)
 
-	enum class      gateStates {off, attack, decay, sustain, release};
-	gateStates      gateState = gateStates::off;
 
 	void SetEnvelope(uint32_t value);
 };

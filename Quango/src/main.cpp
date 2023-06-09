@@ -16,21 +16,6 @@ extern "C" {
 }
 
 
-/*
- * AD5676 command structure:
- * CCCC AAAA DDDDDDD DDDDDDDD
- * Command 0011 is update DAC channel.
- * Channel selected with bottom three address bits
- * Eg Update channel 5: 0011 0101 DDDDDDDD DDDDDDDD
-
- * MCP48 commmand structure:
- * Address 0x00: Volatile DAC Wiper Register 0
- * Command: 0x00: Write data
- * Data: 12 bit
- * 24 bit message Structure: AAAAA CC X XXXX DDDDDDDDDDDD
- * So basically send a 24 bit word with the 12 bit data (0x0 - 0xFFF) right aligned
- */
-
 extern uint32_t SystemCoreClock;
 int main(void)
 {

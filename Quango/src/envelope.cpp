@@ -9,11 +9,18 @@ void Envelope::SetEnvelope(uint32_t value) {
 		*envDAC = value;
 	} else {
 		// Channel B voice 4 is the only one controlled by an external DAC (MCP48) on SPI2
+		// MCP48 commmand structure:
+		// Address 0x00: Volatile DAC Wiper Register 0
+		// Command: 0x00: Write data
+		// Data: 12 bit
+		// 24 bit message Structure: AAAAA CC X XXXX DDDDDDDDDDDD
+
+		// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send
 		uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
 
-		*spi8Bit = (uint8_t)0;
-		*spi8Bit = (uint8_t)(value >> 8);
-		*spi8Bit = (uint8_t)(value & 0xFF);
+		*spi8Bit = uint8_t{0};
+		*spi8Bit = uint8_t{value >> 8};
+		*spi8Bit = uint8_t{value & 0xFF};
 	}
 	*envLED = value;
 }
