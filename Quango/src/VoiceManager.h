@@ -10,7 +10,9 @@ class VoiceManager
 public:
 	enum channelNo {channelA = 0, channelB = 1};
 	void NoteOnOff(uint8_t midiNote, bool on);
-	void calcEnvelopes();
+	void CalcEnvelopes();
+	void RetriggerGates();
+
 	float pitchbend = 0.0f;
 
 	struct Channel {
@@ -26,7 +28,7 @@ public:
 			Envelope envelope;
 			//volatile uint32_t* pitchDAC;
 			uint8_t midiNote = 0;
-			uint32_t start = 0;		// time that note was started (for note stealing)
+			uint32_t startTime = 0;		// time that note was started (for note stealing)
 
 			void SetPitch(channelNo chn);
 		} voice[4];
@@ -61,6 +63,7 @@ public:
 	struct Gate {
 		volatile uint32_t* gateODR;
 		uint32_t gatePin;
+		uint32_t gateRetrigger;		// Used to apply a gap in the gate signal when note stealing
 
 		void GateOn()	{ *gateODR |= gatePin; }
 		void GateOff()	{ *gateODR &= ~gatePin; }

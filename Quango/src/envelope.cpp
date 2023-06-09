@@ -19,8 +19,8 @@ void Envelope::SetEnvelope(uint32_t value) {
 		uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
 
 		*spi8Bit = uint8_t{0};
-		*spi8Bit = uint8_t{value >> 8};
-		*spi8Bit = uint8_t{value & 0xFF};
+		*spi8Bit = (uint8_t)(value >> 8);
+		*spi8Bit = (uint8_t)(value & 0xFF);
 	}
 	*envLED = value;
 }
@@ -29,106 +29,98 @@ void Envelope::SetEnvelope(uint32_t value) {
 void Envelope::calcEnvelope(volatile ADSR* adsr)
 {
 	float level = currentLevel;
-	if (noteOn) {
 
-		sustain = adsr->sustain;
+	sustain = adsr->sustain;
 
-		switch (gateState) {
-		case gateStates::off:
-			gateState = gateStates::attack;
-			break;
+	switch (gateState) {
+	case gateStates::off:
+		break;
 
-		case gateStates::release:
-			gateState = gateStates::attack;
-			break;
+	case gateStates::attack: {
 
-		case gateStates::attack: {
+		attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
 
-			attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
+		// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
+		const float fullRange = 5000.0f;
 
-			// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
-			const float fullRange = 5000.0f;
+		// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
+		const float maxDurationMult = 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
 
-			// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
-			const float maxDurationMult = 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
+		// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
+		float rc = std::pow(attack / 4096.f, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
 
-			// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
-			float rc = std::pow(attack / 4096.f, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
+		if (rc != 0.0f) {
+			/*
+			 * Long hand calculations:
+			 * Capacitor charging equation: Vc = Vs(1 - e ^ -t/RC)
+			 * 1. Invert capacitor equation to calculate current 'time' based on y/voltage value
+			 * float ln = std::log(1.0f - (currentLevel / fullRange));
+			 * float xPos = -rc * ln;
+			 * float newXPos = xPos + timeStep;		// Add timeStep (based on sample rate) to current X position
+			 *
+			 * 2. Calculate exponential of time for capacitor charging equation
+			 * float exponent = -newXPos / rc;
+			 * float newYPos = 1.0f - std::exp(exponent);
+			 * currentLevel = newYPos * fullRange;
+			 */
 
-			if (rc != 0.0f) {
-				/*
-				 * Long hand calculations:
-				 * Capacitor charging equation: Vc = Vs(1 - e ^ -t/RC)
-				 * 1. Invert capacitor equation to calculate current 'time' based on y/voltage value
-				 * float ln = std::log(1.0f - (currentLevel / fullRange));
-				 * float xPos = -rc * ln;
-				 * float newXPos = xPos + timeStep;		// Add timeStep (based on sample rate) to current X position
-				 *
-				 * 2. Calculate exponential of time for capacitor charging equation
-				 * float exponent = -newXPos / rc;
-				 * float newYPos = 1.0f - std::exp(exponent);
-				 * currentLevel = newYPos * fullRange;
-				 */
+			level = fullRange - (fullRange - level) * CordicExp(-timeStep / rc);
 
-				level = fullRange - (fullRange - level) * CordicExp(-timeStep / rc);
-
-			} else {
-				level = fullRange;
-			}
-
-			if (level >= 4095.0f) {
-				level = 4095.0f;
-				gateState = gateStates::decay;
-			}
-
-			break;
-
+		} else {
+			level = fullRange;
 		}
 
-		case gateStates::decay: {
-			// scales decay pot to allow more range at low end of pot, exponentially longer times at upper end
-			const float maxDurationMult = 5.28f * 0.227f;		// to scale maximum delay time
-
-			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr->decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
-
-			if (rc != 0.0f && level > sustain) {
-				/*
-				 * Long hand calculations:
-				 * Capacitor discharge equation: Vc = Vo * e ^ -t/RC
-				 * 1. Invert capacitor discharge equation to calculate current 'time' based on y/voltage
-				 * float yHeight = 4096.0f - sustain;		// Height of decay curve
-				 * float xPos = -rc * std::log((currentLevel - sustain) / yHeight);
-				 * float newXPos = xPos + timeStep;
-				 *
-				 * 2. Calculate exponential of time for capacitor discharging equation
-				 * float exponent = -newXPos / rc;
-				 * float newYPos = std::exp(exponent);		// Capacitor discharging equation
-				 * currentLevel = (newYPos * yHeight) + sustain;
-				 */
-
-				level = sustain + (level - sustain) * CordicExp(-timeStep / rc);
-
-			} else {
-				level = 0.0f;
-			}
-
-			if (level <= sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
-				level = sustain;
-				gateState = gateStates::sustain;
-			}
-
-			break;
+		if (level >= 4095.0f) {
+			level = 4095.0f;
+			gateState = gateStates::decay;
 		}
-		case gateStates::sustain:
+
+		break;
+
+	}
+
+	case gateStates::decay: {
+		// scales decay pot to allow more range at low end of pot, exponentially longer times at upper end
+		const float maxDurationMult = 5.28f * 0.227f;		// to scale maximum delay time
+
+		// RC value - decayScale represents R component; maxDurationMult represents capacitor size
+		float rc = std::pow(static_cast<float>(adsr->decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
+
+		if (rc != 0.0f && level > sustain) {
+			/*
+			 * Long hand calculations:
+			 * Capacitor discharge equation: Vc = Vo * e ^ -t/RC
+			 * 1. Invert capacitor discharge equation to calculate current 'time' based on y/voltage
+			 * float yHeight = 4096.0f - sustain;		// Height of decay curve
+			 * float xPos = -rc * std::log((currentLevel - sustain) / yHeight);
+			 * float newXPos = xPos + timeStep;
+			 *
+			 * 2. Calculate exponential of time for capacitor discharging equation
+			 * float exponent = -newXPos / rc;
+			 * float newYPos = std::exp(exponent);		// Capacitor discharging equation
+			 * currentLevel = (newYPos * yHeight) + sustain;
+			 */
+
+			level = sustain + (level - sustain) * CordicExp(-timeStep / rc);
+
+		} else {
+			level = 0.0f;
+		}
+
+		if (level <= sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
 			level = sustain;
-			break;
+			gateState = gateStates::sustain;
 		}
 
-	} else {
-		if (level > 0.0f) {
-			gateState = gateStates::release;
+		break;
+	}
 
+	case gateStates::sustain:
+		level = sustain;
+		break;
+
+	case gateStates::release:
+		if (level > 0.0f) {
 			const float maxDurationMult = 1.15f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
@@ -151,6 +143,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 		} else {
 			gateState = gateStates::off;
 		}
+		break;
 	}
 
 	if (currentLevel != level) {

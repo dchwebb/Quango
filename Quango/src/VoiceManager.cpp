@@ -1,4 +1,5 @@
 #include "VoiceManager.h"
+#include <limits>
 
 VoiceManager voiceManager;
 
@@ -8,18 +9,35 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 		// Locate next available note in each channel
 		for (auto& chn: channel) {
 			Channel::Voice* chnVoice = nullptr;
+			bool noteStealing = false;
 			for (auto& v: chn.voice) {
 				if (v.envelope.gateState == Envelope::gateStates::off) {
 					chnVoice = &v;
 					break;
 				}
 			}
-			if (chnVoice != nullptr) {				// FIXME - not necessary once note stealing implemented
-				chnVoice->midiNote = midiNote;
-				chnVoice->start = ++chn.counter;
-				chnVoice->envelope.noteOn = true;
-				chnVoice->SetPitch(chn.index);
-				if (chn.index == channelNo::channelA) {
+
+			// Voice stealing: overwrite oldest note playing
+			if (chnVoice == nullptr) {
+				noteStealing = true;
+				uint32_t oldestStart = -1;
+				for (auto& v: chn.voice) {
+					if (v.startTime < oldestStart) {
+						oldestStart = v.startTime;
+						chnVoice = &v;
+					}
+				}
+			}
+
+			chnVoice->midiNote = midiNote;
+			chnVoice->startTime = ++chn.counter;
+			chnVoice->envelope.gateState = Envelope::gateStates::attack;
+			chnVoice->SetPitch(chn.index);
+			if (chn.index == channelNo::channelA) {
+				if (noteStealing) {
+					gates[chnVoice->index].gateRetrigger = 5;			// trigger a time before resetting gate
+					gates[chnVoice->index].GateOff();
+				} else {
 					gates[chnVoice->index].GateOn();
 				}
 			}
@@ -31,8 +49,8 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 		for (auto& chn: channel) {
 			for (auto& v: chn.voice) {
 				if (v.midiNote == midiNote) {
-					v.start = 0;
-					v.envelope.noteOn = false;
+					v.startTime = 0;
+					v.envelope.gateState = Envelope::gateStates::release;
 					gates[v.index].GateOff();
 				}
 			}
@@ -40,7 +58,7 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 	}
 }
 
-void VoiceManager::calcEnvelopes()
+void VoiceManager::CalcEnvelopes()
 {
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
@@ -49,6 +67,18 @@ void VoiceManager::calcEnvelopes()
 	}
 }
 
+
+void VoiceManager::RetriggerGates()
+{
+	// Check if any gates are being paused when voice stealing
+	for (auto& g: gates) {
+		if (g.gateRetrigger > 0) {
+			if (--g.gateRetrigger == 0) {
+				g.GateOn();
+			}
+		}
+	}
+}
 
 void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {

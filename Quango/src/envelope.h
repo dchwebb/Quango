@@ -16,7 +16,7 @@ public:
 	volatile uint32_t* envDAC;
 	volatile uint32_t* envLED;
 	gateStates gateState = gateStates::off;
-	bool noteOn = false;
+
 private:
 	float CordicExp(float x);
 
