@@ -5,6 +5,8 @@ VoiceManager voiceManager;
 
 void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
+	GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
+
 	if (on) {
 		// Locate next available note in each channel
 		for (auto& chn: channel) {
@@ -20,7 +22,7 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 			// Voice stealing: overwrite oldest note playing
 			if (chnVoice == nullptr) {
 				noteStealing = true;
-				uint32_t oldestStart = -1;
+				uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
 				for (auto& v: chn.voice) {
 					if (v.startTime < oldestStart) {
 						oldestStart = v.startTime;
@@ -33,9 +35,10 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 			chnVoice->startTime = ++chn.counter;
 			chnVoice->envelope.gateState = Envelope::gateStates::attack;
 			chnVoice->SetPitch(chn.index);
+
 			if (chn.index == channelNo::channelA) {
 				if (noteStealing) {
-					gates[chnVoice->index].gateRetrigger = 5;			// trigger a time before resetting gate
+					gates[chnVoice->index].gateRetrigger = 5;			// trigger a countdown before resetting gate
 					gates[chnVoice->index].GateOff();
 				} else {
 					gates[chnVoice->index].GateOn();
@@ -56,15 +59,22 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 			}
 		}
 	}
+
+	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
 }
+
 
 void VoiceManager::CalcEnvelopes()
 {
+	GPIOD->ODR |= GPIO_ODR_OD0;		// Toggle test pin 1
+
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
 			v.envelope.calcEnvelope(chn.adsr);
 		}
 	}
+
+	GPIOD->ODR &= ~GPIO_ODR_OD0;		// Toggle test pin 1
 }
 
 
@@ -79,6 +89,7 @@ void VoiceManager::RetriggerGates()
 		}
 	}
 }
+
 
 void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {
@@ -103,3 +114,22 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 
 	GPIOA->ODR |= GPIO_ODR_OD15;		// NSS high
 }
+
+
+void VoiceManager::Pitchbend(uint16_t pitch)
+{
+	GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
+
+	pitchbend = (static_cast<float>(pitch - 8192) / 8192.0f) * pitchbendSemitones;
+	for (auto& chn: channel) {
+		for (auto& v: chn.voice) {
+			if (v.envelope.gateState != Envelope::gateStates::off) {
+				v.SetPitch(chn.index);
+			}
+		}
+	}
+
+	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
+
+}
+

@@ -121,6 +121,9 @@ void InitIO()
 	GPIOD->MODER &= ~GPIO_MODER_MODER4_1;			// PD4: Gate3 Out
 	GPIOD->MODER &= ~GPIO_MODER_MODER5_1;			// PD5: Gate4 Out
 
+	// Debug pins PD0, PC12
+	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD5: Test pin 1
+	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
 }
 
 
@@ -312,7 +315,7 @@ void InitPWMTimer()
 void InitEnvTimer() {
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;			// Enable Timer 3
 	TIM2->PSC = 34;									// Set prescaler
-	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / 33 / 103 = ~50kHz
+	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / (PSC + 1) / ARR = ~10kHz
 
 	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
 	NVIC_EnableIRQ(TIM2_IRQn);

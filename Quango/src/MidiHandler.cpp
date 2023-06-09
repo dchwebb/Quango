@@ -58,7 +58,6 @@ void MidiHandler::ActivateEP()
 */
 
 
-uint8_t midiCounter = 0;
 
 void MidiHandler::midiEvent(const uint32_t data)
 {
@@ -68,16 +67,15 @@ void MidiHandler::midiEvent(const uint32_t data)
 	switch (midiData.msg) {
 	case NoteOff:
 		voiceManager.NoteOnOff(midiNote.noteValue, false);
-		midiDebug[midiCounter++] = midiData;
 		break;
 
 	case NoteOn:
 		voiceManager.NoteOnOff(midiNote.noteValue, true);
-		midiDebug[midiCounter++] = midiData;
 		break;
 
 	case PitchBend:
-		pitchBend = static_cast<uint32_t>(midiData.db1) + (midiData.db2 << 7);
+		pitchBend = static_cast<uint16_t>(midiData.db1) + (midiData.db2 << 7);
+		voiceManager.Pitchbend(pitchBend);
 		break;
 	}
 

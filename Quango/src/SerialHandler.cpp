@@ -42,7 +42,7 @@ SerialHandler::SerialHandler(USBHandler& usbObj)
 // Check if a command has been received from USB, parse and action as required
 bool SerialHandler::Command()
 {
-	char buf[50];
+	//char buf[50];
 
 	if (!CmdPending) {
 		return false;

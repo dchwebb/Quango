@@ -12,8 +12,10 @@ public:
 	void NoteOnOff(uint8_t midiNote, bool on);
 	void CalcEnvelopes();
 	void RetriggerGates();
+	void Pitchbend(uint16_t pitch);
 
 	float pitchbend = 0.0f;
+	static constexpr float pitchbendSemitones = 12.0f;
 
 	struct Channel {
 		channelNo index;

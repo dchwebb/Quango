@@ -61,8 +61,6 @@ private:
 		};
 	};
 
-	MidiHandler::MidiData midiDebug[256];
-
 	static constexpr uint8_t SerialQueueSize = 50;
 	uint8_t Queue[SerialQueueSize];			// hold incoming serial MIDI bytes
 	uint8_t QueueRead = 0;
