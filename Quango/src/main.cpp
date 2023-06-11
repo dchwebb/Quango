@@ -3,6 +3,7 @@
 #include "SerialHandler.h"
 #include "MidiHandler.h"
 #include "VoiceManager.h"
+#include "Tuner.h"
 
 volatile uint32_t SysTickVal;
 
@@ -11,10 +12,18 @@ USBHandler usb;
 SerialHandler serial(usb);
 MidiHandler midi;
 
+int16_t vCalibOffset = 2047;
+float vCalibScale = 1.0f;
+uint16_t calibZeroPos = 2047;
+
 extern "C" {
 #include "interrupts.h"
 }
 
+
+inline uint16_t CalcZeroSize() {			// returns ADC size that corresponds to 0v
+	return (4096 - vCalibOffset) / vCalibScale;
+}
 
 extern uint32_t SystemCoreClock;
 int main(void)
@@ -32,12 +41,11 @@ int main(void)
 	InitMidiUART();
 	InitSPI2();
 	InitSPI1();
-
 	InitEnvTimer();
 	InitCordic();
-
 	usb.InitUSB();
 
+	calibZeroPos = CalcZeroSize();
 	while (1) {
 		serial.Command();			// Check for incoming CDC commands
 	}

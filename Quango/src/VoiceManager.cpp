@@ -66,7 +66,7 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 
 void VoiceManager::CalcEnvelopes()
 {
-	GPIOD->ODR |= GPIO_ODR_OD0;		// Toggle test pin 1
+	GPIOD->ODR |= GPIO_ODR_OD0;			// Toggle test pin 1
 
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
@@ -120,6 +120,7 @@ void VoiceManager::Pitchbend(uint16_t pitch)
 {
 	GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
 
+	// Raw pitchbend data is 0-16384 centered at 8192
 	pitchbend = (static_cast<float>(pitch - 8192) / 8192.0f) * pitchbendSemitones;
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
@@ -130,6 +131,5 @@ void VoiceManager::Pitchbend(uint16_t pitch)
 	}
 
 	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
-
 }
 

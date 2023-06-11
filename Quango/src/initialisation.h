@@ -22,6 +22,7 @@ struct ADCValues {
 };
 
 extern volatile ADCValues adc;
+extern uint16_t calibZeroPos;
 
 #define SYSTICK 1000						// 1ms
 #define SAMPLERATE 48000.0f
@@ -44,7 +45,8 @@ void InitPWMTimer();
 void InitMidiUART();
 void InitSPI2();
 void InitSPI1();
+void InitTunerTimer();
+
 /*
 void InitCoverageTimer();
-void InitDebounceTimer();
 */

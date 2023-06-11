@@ -103,6 +103,7 @@ void InitDAC()
 void InitIO()
 {
 	// MODER 00: Input mode, 01: General purpose output mode, 10: Alternate function mode, 11: Analog mode (reset state)
+	// PUPDR 01: Pull-up; 10: Pull-down
 
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;			// GPIO A clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;			// GPIO B clock
@@ -120,6 +121,12 @@ void InitIO()
 	GPIOD->MODER &= ~GPIO_MODER_MODER3_1;			// PD3: Gate2 Out
 	GPIOD->MODER &= ~GPIO_MODER_MODER4_1;			// PD4: Gate3 Out
 	GPIOD->MODER &= ~GPIO_MODER_MODER5_1;			// PD5: Gate4 Out
+
+	// Calibration buttons input
+	GPIOB->MODER &= ~GPIO_MODER_MODER10;			// PB10: channel A
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPD10_0;			// Activate pull-up
+	GPIOB->MODER &= ~GPIO_MODER_MODER11;			// PB11: channel B
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPD11_0;			// Activate pull-up
 
 	// Debug pins PD0, PC12
 	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD5: Test pin 1
@@ -186,9 +193,9 @@ void InitSPI1()
 	GPIOA->MODER |= GPIO_MODER_MODE15_0;			// 01: Output mode
 	GPIOA->MODER &= ~GPIO_MODER_MODE15_1;			// 01: Output mode
 
-	// Configure SPI
+	// Configure SPI - baud rate tested working at /4 (42MHz) but run at /8 for now
 	SPI1->CR1 |= SPI_CR1_MSTR;						// Master mode
-	SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_0;		// Baud rate: 100: SPI clock/32; *101: SPI clock/64
+	SPI1->CR1 |= SPI_CR1_BR_1;						// Baud rate (170Mhz/x): 000: /2; 001: /4; *010: /8; 011: /16; 100: /32; 101: /64
 	SPI1->CR1 |= SPI_CR1_SSI;						// Internal slave select
 	SPI1->CR1 |= SPI_CR1_SSM;						// Software NSS management
 	SPI1->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b111 = 8 bit
@@ -313,7 +320,7 @@ void InitPWMTimer()
 
 //	Setup Timer 2 on an interrupt to trigger sample output
 void InitEnvTimer() {
-	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;			// Enable Timer 3
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;			// Enable Timer 2
 	TIM2->PSC = 34;									// Set prescaler
 	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / (PSC + 1) / ARR = ~10kHz
 
@@ -323,6 +330,19 @@ void InitEnvTimer() {
 
 	TIM2->CR1 |= TIM_CR1_CEN;
 	TIM2->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
+}
+
+
+//	Setup Timer 5 on an interrupt to trigger tuner sample capture
+void InitTunerTimer()
+{
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM5EN;			// Enable Timer 5
+	TIM5->PSC = 1;									// Set prescaler
+	TIM5->ARR = 500; 								// Set auto reload register - 170Mhz / (PSC + 1) / ARR = ~10kHz
+
+	TIM5->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+	NVIC_EnableIRQ(TIM5_IRQn);
+	NVIC_SetPriority(TIM5_IRQn, 0);					// Lower is higher priority
 }
 
 
@@ -615,12 +635,7 @@ void InitCoverageTimer() {
 
 }
 
-//	Setup Timer 5 to count time between bounces
-void InitDebounceTimer() {
-	RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;				// Enable Timer
-	TIM5->PSC = 10000;
-	TIM5->ARR = 65535;
-}
+
 
 */
 
