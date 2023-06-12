@@ -3,7 +3,7 @@
 #include <cstring>
 
 
-void Envelope::SetEnvelope(uint32_t value) {
+void Envelope::SetEnvelope(const uint32_t value) {
 
 	if (envDAC != nullptr) {
 		*envDAC = value;

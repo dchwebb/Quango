@@ -7,7 +7,7 @@
 
 
 
-void SystemClock_Config(void) {
+void InitSystemClock(void) {
 	// See page 236 for clock configuration
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;		// SYSCFG + COMP + VREFBUF + OPAMP clock enable
 	RCC->APB1ENR1 |= RCC_APB1ENR1_PWREN;		// Enable Power Control clock

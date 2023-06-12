@@ -28,11 +28,11 @@ inline uint16_t CalcZeroSize() {			// returns ADC size that corresponds to 0v
 extern uint32_t SystemCoreClock;
 int main(void)
 {
-	SystemInit();							// Activates floating point coprocessor and resets clock
-	SystemClock_Config();					// Configure the clock and PLL
-	SystemCoreClockUpdate();				// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
+	SystemInit();						// Activates floating point coprocessor and resets clock
+	InitSystemClock();					// Configure the clock and PLL
+	SystemCoreClockUpdate();			// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
-	InitDAC();			// FIXME - calibrate
+	InitDAC();							// FIXME - calibrate
 	InitIO();
 	InitPWMTimer();
 	InitADC1(&adc.PitchDetect, 2);
@@ -42,12 +42,13 @@ int main(void)
 	InitSPI2();
 	InitSPI1();
 	InitEnvTimer();
+	InitTunerTimer();
 	InitCordic();
 	usb.InitUSB();
 
 	calibZeroPos = CalcZeroSize();
 	while (1) {
-		serial.Command();			// Check for incoming CDC commands
+		serial.Command();				// Check for incoming CDC commands
 	}
 }
 

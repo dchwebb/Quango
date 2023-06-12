@@ -96,7 +96,7 @@ void FFT::CalcFFT(float* sinBuffer, uint32_t sampleCount)
 
 float FFT::HarmonicFreq(const float harmonicNumber)
 {
-	return static_cast<float>(SystemCoreClock) * harmonicNumber / (2.0f * fftSamples * (TIM3->PSC + 1) * (TIM3->ARR + 1));
+	return static_cast<float>(SystemCoreClock) * harmonicNumber / (fftSamples * (TIM5->PSC + 1) * (TIM5->ARR + 1));
 }
 
 

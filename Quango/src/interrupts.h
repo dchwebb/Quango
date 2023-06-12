@@ -7,9 +7,10 @@ void SysTick_Handler(void)
 void TIM2_IRQHandler()
 {
 	TIM2->SR &= ~TIM_SR_UIF;
-	tuner.CheckStart();							// Check if calibration buttons are pressed to activate tuning
-	voiceManager.CalcEnvelopes();
-	voiceManager.RetriggerGates();				// Check if any gates paused during note stealing need to be reactivated
+	if (!tuner.CheckStart()) {					// Check if calibration buttons are pressed to activate tuning
+		voiceManager.CalcEnvelopes();
+		voiceManager.RetriggerGates();			// Check if any gates paused during note stealing need to be reactivated
+	}
 }
 
 

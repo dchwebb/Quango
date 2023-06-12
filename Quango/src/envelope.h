@@ -11,7 +11,8 @@ public:
 
 	Envelope() {}
 
-	void calcEnvelope(volatile ADSR* adsr);							// Sets the DAC level for envelope
+	void calcEnvelope(volatile ADSR* adsr);			// Sets the DAC level for envelope
+	void SetEnvelope(const uint32_t value);
 
 	volatile uint32_t* envDAC;
 	volatile uint32_t* envLED;
@@ -26,7 +27,5 @@ private:
 	float           sustain = 4095.0f;
 	float           currentLevel = 0.0f;			// The current level of the envelope (held as a float for accuracy of calulculation)
 
-
-	void SetEnvelope(uint32_t value);
 };
 

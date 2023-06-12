@@ -31,7 +31,7 @@ extern uint16_t calibZeroPos;
 #define DEBUG_ON  GPIOB->ODR |= GPIO_ODR_OD9;
 #define DEBUG_OFF GPIOB->ODR &= ~GPIO_ODR_OD9;
 
-void SystemClock_Config();
+void InitSystemClock();
 void InitSysTick();
 void InitDAC();
 void InitIO();

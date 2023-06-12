@@ -93,22 +93,28 @@ void VoiceManager::RetriggerGates()
 
 void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {
-	/*
-	 * AD5676 command structure:
-	 * CCCC AAAA DDDDDDD DDDDDDDD
-	 * Command 0011 is update DAC channel.
-	 * Channel selected with bottom three address bits
-	 * Eg Update channel 5: 0011 0101 DDDDDDDD DDDDDDDD
-	*/
-	uint16_t dacOutput = 0xFFFF * (float)(std::min(std::max((float)midiNote + voiceManager.pitchbend, 24.0f), 96.0f) - 24) / 72;		// limit C1 to C7
+	uint16_t dacOutput = 0xFFFF * (float)(std::clamp((float)midiNote + voiceManager.pitchbend, 24.0f, 96.0f) - 24) / 72;		// limit C1 to C7
+	SetPitch(chn, dacOutput);
+}
+
+
+void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
+{
+	// AD5676 command structure:
+	// CCCC AAAA DDDDDDD DDDDDDDD
+	// Command 0011 is update DAC channel.
+	// Channel selected with bottom three address bits
+	// Eg Update channel 5: 0011 0101 DDDDDDDD DDDDDDDD
 
 	GPIOA->ODR &= ~GPIO_ODR_OD15;		// NSS low
 
+	static uint8_t& spi8Bit = (uint8_t&)(SPI1->DR);		// Pitch DAC cast to 8 bit value
+
+
 	// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send
-	auto spi8Bit = reinterpret_cast<volatile uint8_t*>(&SPI1->DR);
-	*spi8Bit = (uint8_t)(0b00110000 | (index + (4 * chn)));
-	*spi8Bit = (uint8_t)(dacOutput >> 8);
-	*spi8Bit = (uint8_t)(dacOutput & 0xFF);
+	spi8Bit = (uint8_t)(0b00110000 | (index + (4 * chn)));
+	spi8Bit = (uint8_t)(dacOutput >> 8);
+	spi8Bit = (uint8_t)(dacOutput & 0xFF);
 
 	while ((SPI1->SR & SPI_SR_BSY) != 0 || (SPI1->SR & SPI_SR_FTLVL) != 0) {};
 

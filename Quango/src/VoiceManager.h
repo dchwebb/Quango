@@ -16,6 +16,7 @@ public:
 
 	float pitchbend = 0.0f;
 	static constexpr float pitchbendSemitones = 12.0f;
+	bool calibrating = false;		// To ensure midi notes etc do not interfere with calibration process
 
 	struct Channel {
 		channelNo index;
@@ -33,6 +34,7 @@ public:
 			uint32_t startTime = 0;		// time that note was started (for note stealing)
 
 			void SetPitch(channelNo chn);
+			void SetPitch(channelNo chn, uint16_t dacOutput);
 		} voice[4];
 
 		Channel(channelNo chn, volatile ADSR* adsr, volatile uint16_t* level, Voice v1, Voice v2, Voice v3, Voice v4)

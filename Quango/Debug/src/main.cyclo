@@ -5,18 +5,18 @@ c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externalt
 ../src/usb.h:46:7:USBHandler::USBHandler()	1
 ../src/MidiHandler.h:9:7:constexpr MidiHandler::MidiHandler()	1
 ../src/interrupts.h:1:6:void SysTick_Handler()	1
-../src/interrupts.h:7:6:void TIM2_IRQHandler()	1
-../src/interrupts.h:17:6:void TIM5_IRQHandler()	1
-../src/interrupts.h:25:6:void UART4_IRQHandler()	2
-../src/interrupts.h:38:6:void USB_LP_IRQHandler()	1
-../src/interrupts.h:44:6:void NMI_Handler()	1
-../src/interrupts.h:46:6:void HardFault_Handler()	1
-../src/interrupts.h:50:6:void MemManage_Handler()	1
-../src/interrupts.h:54:6:void BusFault_Handler()	1
-../src/interrupts.h:58:6:void UsageFault_Handler()	1
-../src/interrupts.h:62:6:void SVC_Handler()	1
-../src/interrupts.h:64:6:void DebugMon_Handler()	1
-../src/interrupts.h:66:6:void PendSV_Handler()	1
+../src/interrupts.h:7:6:void TIM2_IRQHandler()	2
+../src/interrupts.h:18:6:void TIM5_IRQHandler()	1
+../src/interrupts.h:26:6:void UART4_IRQHandler()	2
+../src/interrupts.h:39:6:void USB_LP_IRQHandler()	1
+../src/interrupts.h:45:6:void NMI_Handler()	1
+../src/interrupts.h:47:6:void HardFault_Handler()	1
+../src/interrupts.h:51:6:void MemManage_Handler()	1
+../src/interrupts.h:55:6:void BusFault_Handler()	1
+../src/interrupts.h:59:6:void UsageFault_Handler()	1
+../src/interrupts.h:63:6:void SVC_Handler()	1
+../src/interrupts.h:65:6:void DebugMon_Handler()	1
+../src/interrupts.h:67:6:void PendSV_Handler()	1
 ../src/main.cpp:24:17:uint16_t CalcZeroSize()	1
 ../src/main.cpp:29:5:int main()	1
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\basic_string.h:158:14:constexpr std::__cxx11::basic_string<char>::_Alloc_hider::~_Alloc_hider()	1
@@ -36,6 +36,6 @@ c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externalt
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\arm-none-eabi\include\c++\11.3.1\bits\move.h:49:5:constexpr _Tp* std::__addressof(_Tp&) [with _Tp = const char]	1
 ../src/SerialHandler.h:7:7:SerialHandler::~SerialHandler()	1
 ../src/usb.h:46:7:USBHandler::~USBHandler()	1
-../src/main.cpp:52:1:void __static_initialization_and_destruction_0(int, int)	5
-../src/main.cpp:52:1:cpp)	1
-../src/main.cpp:52:1:cpp)	1
+../src/main.cpp:53:1:void __static_initialization_and_destruction_0(int, int)	5
+../src/main.cpp:53:1:cpp)	1
+../src/main.cpp:53:1:cpp)	1

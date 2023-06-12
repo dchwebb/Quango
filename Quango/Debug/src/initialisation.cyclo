@@ -2,7 +2,7 @@
 ../Drivers/CMSIS/Include/core_cm4.h:1809:22:void __NVIC_SetPriority(IRQn_Type, uint32_t)	2
 ../Drivers/CMSIS/Include/core_cm4.h:2017:26:uint32_t SysTick_Config(uint32_t)	2
 c:\st\stm32cubeide_1.0.2\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.0.100.202301251239\tools\bin\../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/c++/11.3.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits/gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	1
-../src/initialisation.cpp:10:6:void SystemClock_Config()	4
+../src/initialisation.cpp:10:6:void InitSystemClock()	4
 ../src/initialisation.cpp:43:6:void InitSysTick()	1
 ../src/initialisation.cpp:49:6:void InitDAC()	1
 ../src/initialisation.cpp:103:6:void InitIO()	1

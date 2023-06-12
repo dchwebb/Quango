@@ -1,5 +1,3 @@
-//#include <configManager.h>
-//#include "USB.h"
 #include "MidiHandler.h"
 #include "VoiceManager.h"
 
@@ -84,6 +82,10 @@ void MidiHandler::midiEvent(const uint32_t data)
 
 void MidiHandler::serialHandler(uint32_t data)
 {
+	if (voiceManager.calibrating) {
+		return;
+	}
+
 	Queue[QueueWrite] = data;			// Queue handles MIDI data divided into individual bytes
 	QueueSize++;
 	QueueWrite = (QueueWrite + 1) % SerialQueueSize;
