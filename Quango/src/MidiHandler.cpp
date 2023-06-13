@@ -1,5 +1,6 @@
 #include "MidiHandler.h"
 #include "VoiceManager.h"
+#include "Calib.h"
 
 /*
 void MidiHandler::DataIn()
@@ -82,7 +83,7 @@ void MidiHandler::midiEvent(const uint32_t data)
 
 void MidiHandler::serialHandler(uint32_t data)
 {
-	if (voiceManager.calibrating) {
+	if (calib.running) {
 		return;
 	}
 

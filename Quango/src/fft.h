@@ -4,11 +4,11 @@
 #include <numbers>
 #include <cmath>
 
-class Tuner;
+class Calib;
 
 
 class FFT {
-	friend class Tuner;
+	friend class Calib;
 
 public:
 	void Capture();

@@ -16,7 +16,6 @@ public:
 
 	float pitchbend = 0.0f;
 	static constexpr float pitchbendSemitones = 12.0f;
-	bool calibrating = false;		// To ensure midi notes etc do not interfere with calibration process
 
 	struct Channel {
 		channelNo index;

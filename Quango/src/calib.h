@@ -2,27 +2,40 @@
 
 #include "initialisation.h"
 #include "fft.h"
+#include "VoiceManager.h"
 
-
-class Tuner {
+class Calib {
 public:
-	enum tunerMode {FFT, ZeroCrossing};
 
 	void Capture();									// Called from timer interrupt
 	void Activate(bool startTimer);					// Tuning mode started
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
 
-	tunerMode mode = FFT;
+	bool running = false;
 
 private:
-	float FreqFromPos(const uint16_t pos);
+	enum tunerMode {FFT, ZeroCrossing};
 
-	bool running = false;
+	float FreqFromPos(const uint16_t pos);
+	void Multiplexer(VoiceManager::channelNo chn, uint8_t voice);
+
+	tunerMode mode = FFT;
 	uint32_t bufferPos = 0;							// Capture buffer position
-	float currFreq = 0.0f;
+	float currFreq = 0.0f;							// estimate of current frequency to optimise timer interval
 	uint32_t lastValid = 0;							// Store time we last saw a good signal to show 'No signal' as appropriate
 	bool convBlink = false;							// Show a flashing cursor each time a conversion has finished
+
+	// Calibration state machine settings
+	static constexpr uint8_t calibNoteStart = 33;	// Start with MIDI note 33 which should be A1
+	VoiceManager::channelNo calibchannel;			// channel being calibrated
+	uint8_t calibVoice;								// voice 0-3 being calibrated
+	uint8_t calibNote;								// current MIDI note being calibrated
+	uint8_t calibOctave;							// octave being calibrated
+	uint8_t calibCount;								// number of calibration passes per voice to be averaged
+	uint8_t calibOffset;							// offset octave of frequency found from expected octave (eg A0 vs A1)
+	float calibFrequencies[3];						// each octave tuning pass averages three measurements
+	float calibOffsets[4][6];
 
 	// Phase Adjusted FFT settings
 	int8_t sampleRateAdj = 0;						// Used to make small adjustments to fft sample rate to avoid phase errors
@@ -36,5 +49,5 @@ private:
 
 };
 
-extern Tuner tuner;
+extern Calib calib;
 

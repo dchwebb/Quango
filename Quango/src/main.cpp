@@ -1,9 +1,9 @@
+#include "calib.h"
 #include "initialisation.h"
 #include "usb.h"
 #include "SerialHandler.h"
 #include "MidiHandler.h"
 #include "VoiceManager.h"
-#include "Tuner.h"
 
 volatile uint32_t SysTickVal;
 

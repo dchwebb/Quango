@@ -1,10 +1,10 @@
-#include "tuner.h"
-#include "VoiceManager.h"
+#include "calib.h"
+
 #include <cstring>
 
-Tuner tuner;
+Calib calib;
 
-void Tuner::Capture()
+void Calib::Capture()
 {
 	GPIOD->ODR |= GPIO_ODR_OD0;			// Toggle test pin 1
 
@@ -51,12 +51,11 @@ void Tuner::Capture()
 }
 
 
-bool Tuner::CheckStart()
+bool Calib::CheckStart()
 {
 	// check if calibration button is pressed (PB10 - channel A, PB11 - channel B)
 	if ((GPIOB->IDR & GPIO_IDR_ID10) == 0 && !running) {				// PB10: channel A
 		running = true;
-		voiceManager.calibrating = true;
 
 		// set Envelopes to silent
 		for (auto c : voiceManager.channel) {
@@ -65,11 +64,13 @@ bool Tuner::CheckStart()
 			}
 		}
 
-		// set pitch to A2 (midi note 57)
-		voiceManager.channel[VoiceManager::channelA].voice[0].midiNote = 69;
-		voiceManager.channel[VoiceManager::channelA].voice[0].SetPitch(VoiceManager::channelA);
-		currFreq = 220.0f;
-		voiceManager.channel[VoiceManager::channelA].voice[0].envelope.SetEnvelope(4095);
+		// Initialise calibration state machine information
+		calibchannel = VoiceManager::channelA;
+		calibVoice = 0;
+		calibNote = calibNoteStart;
+		calibOctave = 0;
+		calibCount = 0;;
+		currFreq = 27.5f;		// Guess the frequency
 
 		// start tuner
 		Activate(true);
@@ -78,8 +79,45 @@ bool Tuner::CheckStart()
 }
 
 
-void Tuner::Activate(bool startTimer)
+void Calib::Multiplexer(VoiceManager::channelNo chn, uint8_t voice)
 {
+	// Configure multiplexer for correct voice; Multiplexer pins PA1, PA3, PF2
+	uint8_t bits = voice + (4 * chn);
+	GPIOA->ODR &= ~GPIO_ODR_OD1;
+	GPIOA->ODR &= ~GPIO_ODR_OD3;
+	GPIOF->ODR &= ~GPIO_ODR_OD2;
+	if (bits & 0b001) {
+		GPIOA->ODR |= GPIO_ODR_OD1;
+	}
+	if (bits & 0b010) {
+		GPIOA->ODR |= GPIO_ODR_OD3;
+	}
+	if (bits & 0b100) {
+		GPIOF->ODR |= GPIO_ODR_OD2;
+	}
+}
+
+
+
+void Calib::Activate(bool startTimer)
+{
+	// set pitch of oscillator
+	voiceManager.channel[calibchannel].voice[calibVoice].midiNote = calibNote;
+	voiceManager.channel[calibchannel].voice[calibVoice].SetPitch(calibchannel);
+
+	// FIXME - for debugging
+	if (calibVoice > 0) {
+		voiceManager.channel[calibchannel].voice[calibVoice - 1].envelope.SetEnvelope(0);
+	}
+	voiceManager.channel[calibchannel].voice[calibVoice].envelope.SetEnvelope(4095);
+
+	convBlink = !convBlink;
+	*(voiceManager.channel[calibchannel].voice[calibVoice].envelope.envLED) = convBlink ? 0xFFF : 0;
+
+
+	// Set multiplexer to correct channel and voice
+	Multiplexer(calibchannel, calibVoice);
+
 	if (mode == FFT) {
 		if (currFreq > 800.0f) {
 			TIM5->ARR = (FFT::timerDefault / 2) + sampleRateAdj;
@@ -105,7 +143,7 @@ void Tuner::Activate(bool startTimer)
 
 
 
-void Tuner::CalcFreq()
+void Calib::CalcFreq()
 {
 	float frequency = 0.0f;
 	const uint32_t start = SysTickVal;
@@ -222,22 +260,52 @@ void Tuner::CalcFreq()
 	}
 
 	if (frequency > 16.35f) {
-		currFreq = frequency;
 
-		// Formula to get musical note from frequency is (ln(freq) - ln(16.35)) / ln(2 ^ (1/12))
-		// Where 16.35 is frequency of low C and return value is semi-tones from low C
-		const std::string noteNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-		constexpr float numRecip = 1.0f / log(pow(2.0f, 1.0f / 12.0f));		// Store reciprocal to avoid division
-		constexpr float logBase = log(16.35160f);
-		float note = (log(currFreq) - logBase) * numRecip;
+		calibFrequencies[calibCount++] = frequency;
 
+		if (calibCount == 3) {
+			// normalise the frequency differences - below gives a value of 1/12 for a one note difference
+			float diff1 = std::abs(log2(calibFrequencies[0] / calibFrequencies[1]));
+			float diff2 = std::abs(log2(calibFrequencies[1] / calibFrequencies[2]));
 
-		const uint32_t pitch = std::lround(note) % 12;
-		const uint32_t octave = std::lround(note) / 12;
-		const int32_t centDiff = static_cast<int32_t>(100.0f * (note - std::round(note)));
+			// Check that the frequencies are within half a note - FIXME
+			if (diff1 < 0.5f && diff2 < 0.5f) {
+				// Get average frequency
+				currFreq = (calibFrequencies[0] + calibFrequencies[1] + calibFrequencies[2]) / 3.0f;
 
+				// Formula to get musical note from frequency is (ln(freq) - ln(16.3516)) / ln(2 ^ (1/12))
+				// Where 16.35 is frequency of low C and return value is semi-tones from low C
+				constexpr float numRecip = 1.0f / log(pow(2.0f, 1.0f / 12.0f));		// Store reciprocal to avoid division
+				constexpr float logBase = log(16.35160f);
+				float currNote = (log(frequency) - logBase) * numRecip;
 
-		convBlink = !convBlink;
+				// If first note establish nearest A so that offset can be applied to other notes
+				if (calibVoice == 0 && calibNote == calibNoteStart) {
+					while (currNote + calibOffset < calibNoteStart - 6 && calibOffset < 72) {
+						calibOffset += 12;
+					}
+				}
+				float noteDiff = (calibNote - calibOffset) - currNote;
+				calibOffsets[calibVoice][calibOctave] = noteDiff;
+
+				// Move to next octave
+				calibNote += 12;
+				++calibOctave;
+				calibCount = 0;
+				currFreq *= 2;					// Set the next frequency so the timer rate can be optimised
+
+				if (calibNote > 96) {
+					if (++calibVoice < 4) {
+						calibNote = calibNoteStart;
+						calibOctave = 0;
+						currFreq /= 32;			// reset predicted frequency dividing by 2^5
+					}
+				}
+
+			}
+
+		}
+
 
 		lastValid = SysTickVal;
 
@@ -247,14 +315,24 @@ void Tuner::CalcFreq()
 		*/
 	}
 
-
-	Activate(true);
+	// Check if calibration complete
+	if (calibVoice == 4) {
+		running = false;
+		voiceManager.channel[calibchannel].voice[3].envelope.SetEnvelope(0);
+	} else {
+		Activate(true);
+	}
 
 }
 
 
-float Tuner::FreqFromPos(const uint16_t pos)
+float Calib::FreqFromPos(const uint16_t pos)
 {
 	// returns frequency of signal based on number of samples wide the signal is versus the sampling rate
 	return static_cast<float>(SystemCoreClock) / (pos * (TIM5->PSC + 1) * (TIM5->ARR + 1));
 }
+
+//float Tuner::FreqFromMidiNote(const uint8_t note)
+//{
+//	return 16.35160 * std::pow(2.0f, note / 12.0f);
+//}
