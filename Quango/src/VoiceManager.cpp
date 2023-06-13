@@ -1,5 +1,7 @@
 #include "VoiceManager.h"
+#include "Calib.h"
 #include <limits>
+#include <cmath>
 
 VoiceManager voiceManager;
 
@@ -93,7 +95,14 @@ void VoiceManager::RetriggerGates()
 
 void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {
-	uint16_t dacOutput = 0xFFFF * (float)(std::clamp((float)midiNote + voiceManager.pitchbend, 24.0f, 96.0f) - 24) / 72;		// limit C1 to C7
+	// apply calibration offsets
+	float note = std::clamp(static_cast<float>(midiNote) + voiceManager.pitchbend, 24.0f, 96.0f);		// limit C1 to C7
+
+	// locate nearest pitch offset
+	uint8_t calibOctave = std::round((note - 33.0f) / 12);
+	note = std::min(note + calib.calibOffsets[chn][index][calibOctave], 96.0f);
+
+	uint16_t dacOutput = 0xFFFF * (note - 24.0f) / 72.0f;
 	SetPitch(chn, dacOutput);
 }
 

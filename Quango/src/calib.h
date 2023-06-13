@@ -12,6 +12,7 @@ public:
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
 
+	float calibOffsets[2][4][6];					// Calibration offsets for channel | voice | octave
 	bool running = false;
 
 private:
@@ -34,8 +35,8 @@ private:
 	uint8_t calibOctave;							// octave being calibrated
 	uint8_t calibCount;								// number of calibration passes per voice to be averaged
 	uint8_t calibOffset;							// offset octave of frequency found from expected octave (eg A0 vs A1)
-	float calibFrequencies[3];						// each octave tuning pass averages three measurements
-	float calibOffsets[4][6];
+	static constexpr uint8_t calibPasses = 3;
+	float calibFrequencies[calibPasses];						// each octave tuning pass averages three measurements
 
 	// Phase Adjusted FFT settings
 	int8_t sampleRateAdj = 0;						// Used to make small adjustments to fft sample rate to avoid phase errors
