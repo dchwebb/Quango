@@ -61,19 +61,21 @@ public:
 	};
 
 	struct Gate {
+		uint8_t index;
 		volatile uint32_t* gateODR;
 		uint32_t gatePin;
 		uint32_t gateRetrigger;		// Used to apply a gap in the gate signal when note stealing
+		bool gateOn;
 
-		void GateOn()	{ *gateODR |= gatePin; }
-		void GateOff()	{ *gateODR &= ~gatePin; }
+		void GateOn()	{ *gateODR |= gatePin;  gateOn = true; }
+		void GateOff()	{ *gateODR &= ~gatePin; gateOn = false; }
 	};
 
 	Gate gates[4] = {
-		{&GPIOD->ODR, GPIO_ODR_OD2},
-		{&GPIOD->ODR, GPIO_ODR_OD3},
-		{&GPIOD->ODR, GPIO_ODR_OD4},
-		{&GPIOD->ODR, GPIO_ODR_OD5}
+		{0, &GPIOD->ODR, GPIO_ODR_OD2},
+		{1, &GPIOD->ODR, GPIO_ODR_OD3},
+		{2, &GPIOD->ODR, GPIO_ODR_OD4},
+		{3, &GPIOD->ODR, GPIO_ODR_OD5}
 	};
 
 

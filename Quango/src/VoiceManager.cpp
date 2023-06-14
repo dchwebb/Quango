@@ -13,7 +13,6 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 		// Locate next available note in each channel
 		for (auto& chn: channel) {
 			Channel::Voice* chnVoice = nullptr;
-			bool noteStealing = false;
 			for (auto& v: chn.voice) {
 				if (v.envelope.gateState == Envelope::gateStates::off) {
 					chnVoice = &v;
@@ -23,7 +22,6 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 
 			// Voice stealing: overwrite oldest note playing
 			if (chnVoice == nullptr) {
-				noteStealing = true;
 				uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
 				for (auto& v: chn.voice) {
 					if (v.startTime < oldestStart) {
@@ -37,13 +35,18 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 			chnVoice->startTime = ++chn.counter;
 			chnVoice->envelope.gateState = Envelope::gateStates::attack;
 			chnVoice->SetPitch(chn.index);
+		}
 
-			if (chn.index == channelNo::channelA) {
-				if (noteStealing) {
-					gates[chnVoice->index].gateRetrigger = 5;			// trigger a countdown before resetting gate
-					gates[chnVoice->index].GateOff();
+		// Check if gate status has changed
+		for (auto& gate : gates) {
+			auto& voiceA = channel[channelA].voice[gate.index].envelope.gateState;
+			auto& voiceB = channel[channelB].voice[gate.index].envelope.gateState;
+			if (voiceA == Envelope::gateStates::attack || voiceB == Envelope::gateStates::attack) {
+				if (!gate.gateOn) {
+					gate.GateOn();
 				} else {
-					gates[chnVoice->index].GateOn();
+					gate.gateRetrigger = 5;			// trigger a countdown before resetting gate
+					gate.GateOff();
 				}
 			}
 		}
@@ -56,11 +59,23 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 				if (v.midiNote == midiNote) {
 					v.startTime = 0;
 					v.envelope.gateState = Envelope::gateStates::release;
-					gates[v.index].GateOff();
 				}
 			}
 		}
+
+		// Check if gate status has changed
+		for (auto& gate : gates) {
+			auto& voiceA = channel[channelA].voice[gate.index].envelope.gateState;
+			auto& voiceB = channel[channelB].voice[gate.index].envelope.gateState;
+			if ((voiceA == Envelope::gateStates::release || voiceA == Envelope::gateStates::off) &&
+					(voiceB == Envelope::gateStates::release || voiceB == Envelope::gateStates::off)) {
+				gate.GateOff();
+			}
+		}
 	}
+
+
+
 
 	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
 }

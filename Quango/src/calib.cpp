@@ -68,7 +68,7 @@ bool Calib::CheckStart()
 {
 	// check if calibration button is pressed (PB10 - channel A, PB11 - channel B)
 	bool started = false;
-	if (SysTickVal > calibStart + 10) { 						// Check for button bounce
+	if (SysTickVal > calibStart + 500) { 						// Check for button bounce
 		if ((GPIOB->IDR & GPIO_IDR_ID10) == 0) {				// PB10: channel A
 			if (!running) {
 				started = true;
@@ -306,21 +306,15 @@ void Calib::CalcFreq()
 		calibFrequencies[calibCount++] = frequency;
 
 		if (calibCount == calibPasses) {
+
 			// normalise the frequency differences - below gives a value of 1/12 for a one note difference
-			bool passesMatch = true;
-			float freqAcc = calibFrequencies[0];
-			for (uint8_t i = 0; i < calibPasses - 1; ++i) {
-				if (std::abs(log2(calibFrequencies[i] / calibFrequencies[i + 1])) > 0.5f) {
-					passesMatch = false;
-					break;
-				}
-				freqAcc = calibFrequencies[i + 1];
-			}
+			float diff1 = std::abs(log2(calibFrequencies[0] / calibFrequencies[1]));
+			float diff2 = std::abs(log2(calibFrequencies[1] / calibFrequencies[2]));
 
 			// All frequencies are within half a note of each other
-			if (passesMatch) {
+			if (diff1 < 0.5f && diff2 < 0.5f) {
 				// Get average frequency
-				currFreq = freqAcc / static_cast<float>(calibPasses);
+				currFreq = (calibFrequencies[0] + calibFrequencies[1] + calibFrequencies[2]) / 3.0f;
 
 				// Formula to get musical note from frequency is (ln(freq) - ln(16.3516)) / ln(2 ^ (1/12))
 				// Where 16.35 is frequency of low C and return value is semi-tones from low C
