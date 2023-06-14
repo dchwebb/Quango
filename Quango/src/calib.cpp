@@ -47,18 +47,50 @@ void Calib::Capture()
 	GPIOD->ODR &= ~GPIO_ODR_OD0;			// Toggle test pin 1
 
 	if (samplesReady) {
-		TIM5->CR1 &= ~TIM_CR1_CEN;					// Disable the sample acquisiton timer
+		TIM5->CR1 &= ~TIM_CR1_CEN;			// Disable the sample acquisiton timer
 		CalcFreq();
 	}
+}
+
+
+void Calib::End()
+{
+	calibStart = SysTickVal;				// For debouncing
+	TIM5->CR1 &= ~TIM_CR1_CEN;				// Disable the sample acquisiton timer
+	running = false;
+
+	// If sounding mute the last played note (may be set to 4 if successfully completed - mute voice 3)
+	voiceManager.channel[calibchannel].voice[calibVoice == 4 ? 3 : calibVoice].envelope.SetEnvelope(0);
 }
 
 
 bool Calib::CheckStart()
 {
 	// check if calibration button is pressed (PB10 - channel A, PB11 - channel B)
-	if ((GPIOB->IDR & GPIO_IDR_ID10) == 0 && !running) {				// PB10: channel A
+	bool started = false;
+	if (SysTickVal > calibStart + 10) { 						// Check for button bounce
+		if ((GPIOB->IDR & GPIO_IDR_ID10) == 0) {				// PB10: channel A
+			if (!running) {
+				started = true;
+				calibchannel = VoiceManager::channelA;
+			} else {											// Cancel calibration
+				End();
+			}
+		}
+
+		if ((GPIOB->IDR & GPIO_IDR_ID11) == 0 && !started) {	// PB11: channel B
+			if (!running) {
+				started = true;
+				calibchannel = VoiceManager::channelB;
+			} else {
+				End();
+			}
+		}
+	}
+
+	if (started) {
 		running = true;
-		calibDebugTime = SysTickVal;
+		calibStart = SysTickVal;				// For debouncing
 
 		// set Envelopes to silent
 		for (auto c : voiceManager.channel) {
@@ -68,12 +100,12 @@ bool Calib::CheckStart()
 		}
 
 		// Initialise calibration state machine information
-		calibchannel = VoiceManager::channelA;
 		calibVoice = 0;
 		calibNote = calibNoteStart;
 		calibOctave = 0;
 		calibCount = 0;;
 		currFreq = 27.5f;		// Guess the frequency
+		calibErrors = 0;
 
 		// Clear offsets
 		for (uint8_t v = 0; v < 4; ++v) {
@@ -327,16 +359,13 @@ void Calib::CalcFreq()
 		lastValid = SysTickVal;
 
 	} else if (SysTickVal - lastValid > 4000) {
-		/*lcd.DrawString(30, 50, "  No Signal    ", &lcd.Font_XLarge, LCD_GREY, LCD_BLACK);
-		lcd.DrawString(80, 100, ui.FloatToString(currFreq, false) + "Hz    ", &lcd.Font_XLarge, LCD_GREY, LCD_BLACK);
-		*/
+		++calibErrors;
 	}
 
 	// Check if calibration complete
 	if (calibVoice == 4) {
-		calibDebugTime = SysTickVal - calibDebugTime;
-		running = false;
-		voiceManager.channel[calibchannel].voice[3].envelope.SetEnvelope(0);
+		calibDebugTime = SysTickVal - calibStart;
+		End();
 	} else {
 		Activate(true);
 	}

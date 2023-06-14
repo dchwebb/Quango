@@ -47,21 +47,9 @@ bool SerialHandler::Command()
 		return false;
 	}
 
-	// Provide option to switch to USB DFU mode - this allows the MCU to be programmed with STM32CubeProgrammer in DFU mode
-	if (state == serialState::dfuConfirm) {
-		if (ComCmd.compare("y\n") == 0 || ComCmd.compare("Y\n") == 0) {
-			usb->SendString("Switching to DFU Mode ...\r\n");
-			uint32_t old = SysTickVal;
-			while (SysTickVal < old + 100) {};		// Give enough time to send the message
-			//bootloader.BootDFU();
-		} else {
-			state = serialState::pending;
-			usb->SendString("Upgrade cancelled\r\n");
-		}
+	if (ComCmd.compare("info\n") == 0) {		// Print diagnostic information
 
-	} else if (ComCmd.compare("info\n") == 0) {		// Print diagnostic information
-
-		//usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
+		usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
 
 	} else if (ComCmd.compare("help\n") == 0) {
 
@@ -105,16 +93,6 @@ bool SerialHandler::Command()
 	} else if (ComCmd.compare("s\n") == 0) {				// Short envelope times
 		//envelope.longTimes = false;
 
-/*	} else if (ComCmd.compare(0, 9, "mdlength:") == 0) {		// Modulated Delay length
-		uint16_t val = ParseInt(ComCmd, ':', 1, 65535);
-		if (val > 0) {
-			delay.modOffsetMax = val;
-			delay.modOffset[left] = delay.modOffsetMax / 2;
-			delay.modOffset[right] = delay.modOffsetMax / 2;
-			config.SaveConfig();
-		}
-		usb->SendString("Modulated delay length set to: " + std::to_string(delay.modOffsetMax) + "\r\n");
-*/
 
 	} else {
 		usb->SendString("Unrecognised command: " + ComCmd + "Type 'help' for supported commands\r\n");
