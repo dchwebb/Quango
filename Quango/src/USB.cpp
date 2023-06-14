@@ -2,6 +2,18 @@
 
 bool USBDebug = true;		// Used if outputting debug over USB
 
+extern "C" {
+// To enable USB for printf commands (To print floats enable 'Use float with printf from newlib-nano' MCU Build Settings)
+size_t _write(int handle, const unsigned char* buf, size_t bufSize)
+{
+	if (usb.devState == USBHandler::DeviceState::Configured) {
+		return usb.SendString(buf, bufSize);
+	} else {
+		return 0;
+	}
+}
+}
+
 inline void ClearRxInterrupt(uint8_t ep)
 {
 	uint16_t wRegVal = (USB_EPR[ep].EPR & USB_EPREG_MASK) & ~USB_EP_CTR_RX;
@@ -470,15 +482,16 @@ bool USBHandler::ReadInterrupts(uint32_t interrupt)
 }
 
 
-void USBHandler::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
+size_t USBHandler::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
 {
-	if (devState == DeviceState::Configured) {
-		if (!transmitting) {
-			transmitting = true;
-			txBuff = (uint8_t*)data;
-			txBuffSize = len;
-			EPStartXfer(Direction::in, endpoint, len);
-		}
+	if (devState == DeviceState::Configured && !transmitting) {
+		transmitting = true;
+		txBuff = (uint8_t*)data;
+		txBuffSize = len;
+		EPStartXfer(Direction::in, endpoint, len);
+		return len;
+	} else {
+		return 0;
 	}
 }
 
@@ -498,6 +511,15 @@ void USBHandler::SendString(std::string s)
 	SendString(s.c_str());
 }
 
+
+size_t USBHandler::SendString(const unsigned char* s, size_t len)
+{
+	uint16_t counter = 0;
+	while (transmitting && counter < 10000) {
+		++counter;
+	}
+	return SendData((uint8_t*)s, len, CDC_In);
+}
 
 #if (USB_DEBUG)
 

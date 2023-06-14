@@ -21,6 +21,8 @@ private:
 	bool CmdPending = false;
 	std::string ComCmd;
 	USBHandler* usb;
+
+	char buf[1024];
 };
 
 extern SerialHandler serial;

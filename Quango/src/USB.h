@@ -45,11 +45,14 @@ typedef struct {
 
 class USBHandler {
 public:
+	enum class DeviceState {Suspended, Addressed, Configured} devState;
+
 	void USBInterruptHandler();
 	void InitUSB();
-	void SendData(const uint8_t *data, uint16_t len, uint8_t endpoint);
+	size_t SendData(const uint8_t *data, uint16_t len, uint8_t endpoint);
 	void SendString(const char* s);
 	void SendString(std::string s);
+	size_t SendString(const unsigned char* s, size_t len);
 
 	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
 
@@ -88,8 +91,6 @@ private:
 	uint32_t txRemaining;			// If transfer is larger than maximum packet size store remaining byte count
 	uint8_t cmdOpCode;				// stores class specific operation codes (eg CDC set line config)
 	uint8_t devAddress = 0;			// Temporarily hold the device address as it cannot stored in the register until the 0 address response has been handled
-
-	enum class DeviceState {Suspended, Addressed, Configured} devState;
 
 	struct usbRequest {
 		uint8_t bmRequest;
@@ -290,3 +291,6 @@ public:
 	void OutputDebug();
 #endif
 };
+
+
+extern USBHandler usb;

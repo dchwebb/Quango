@@ -1,4 +1,5 @@
 #include "SerialHandler.h"
+#include "Calib.h"
 
 #include <stdio.h>
 #include <cmath>		// for cordic test
@@ -42,8 +43,6 @@ SerialHandler::SerialHandler(USBHandler& usbObj)
 // Check if a command has been received from USB, parse and action as required
 bool SerialHandler::Command()
 {
-	//char buf[50];
-
 	if (!CmdPending) {
 		return false;
 	}
@@ -62,14 +61,14 @@ bool SerialHandler::Command()
 
 	} else if (ComCmd.compare("info\n") == 0) {		// Print diagnostic information
 
-		usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
+		//usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
 
 	} else if (ComCmd.compare("help\n") == 0) {
 
 		usb->SendString("Mountjoy Quango\r\n"
 				"\r\nSupported commands:\r\n"
 				"info        -  Show diagnostic information\r\n"
-				"l/s         -  Long or Short envelope times\r\n"
+				"calib       -  Show calibration settings\r\n"
 				"lfo         -  Tremolo LFO on/off\r\n"
 				"\r\n"
 #if (USB_DEBUG)
@@ -84,9 +83,21 @@ bool SerialHandler::Command()
 		usb->SendString("Press link button to dump output\r\n");
 #endif
 
-	} else if (ComCmd.compare("lfo\n") == 0) {				// LFO on/off
-//		envelope.tremolo = !envelope.tremolo;
-//		usb->SendString("LFO " + std::string(envelope.tremolo ? "on" : "off") + "\r\n");
+	} else if (ComCmd.compare("calib\n") == 0) {				// Print calibration settings
+		auto buffPos = buf;
+		buffPos += sprintf(buffPos, "\r\nCalibration Settings: ");
+		for (uint8_t chn = 0; chn < 2; ++chn) {
+			buffPos += sprintf(buffPos, "\r\nChannel %c", chn ? 'B' : 'A');
+			for (uint8_t v = 0; v < 4; ++v) {
+				buffPos += sprintf(buffPos, "\r\nVoice %d\r\n", v + 1);
+				for (uint8_t octave = 0; octave < 6; ++octave) {
+					buffPos += sprintf(buffPos, "%f  ", calib.calibOffsets[chn][v][octave]);
+				}
+			}
+		}
+		sprintf(buffPos, "\r\n\0");
+		usb->SendString(buf);
+
 
 	} else if (ComCmd.compare("l\n") == 0) {				// Long envelope times
 		//envelope.longTimes = true;
