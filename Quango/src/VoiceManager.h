@@ -21,7 +21,6 @@ public:
 		channelNo index;
 		uint32_t counter = 0;		// Used to determine oldest note for note stealing
 		volatile ADSR* adsr;		// pointer to ADC values for ADSR pots
-		volatile uint16_t* level;	// pointer to ADC value for level slider
 
 		struct Voice {
 			Voice(uint8_t index, volatile uint32_t* dac, volatile uint32_t* led) : index(index), envelope{dac, led} {};
@@ -36,8 +35,8 @@ public:
 			void SetPitch(channelNo chn, uint16_t dacOutput);
 		} voice[4];
 
-		Channel(channelNo chn, volatile ADSR* adsr, volatile uint16_t* level, Voice v1, Voice v2, Voice v3, Voice v4)
-		 : index{chn}, adsr{adsr}, level{level}, voice{v1, v2, v3, v4} {};
+		Channel(channelNo chn, volatile ADSR* adsr, Voice v1, Voice v2, Voice v3, Voice v4)
+		 : index{chn}, adsr{adsr}, voice{v1, v2, v3, v4} {};
 
 	};
 
@@ -46,7 +45,6 @@ public:
 		{
 			channelA,
 			&adc.EnvA,
-			&adc.ChannelALevel,
 			{0, &DAC1->DHR12R1, &TIM3->CCR1},
 			{1, &DAC3->DHR12R1, &TIM3->CCR2},
 			{2, &DAC2->DHR12R1, &TIM3->CCR3},
@@ -55,7 +53,6 @@ public:
 		{
 			channelB,
 			&adc.EnvB,
-			&adc.ChannelBLevel,
 			{0, &DAC4->DHR12R2, &TIM4->CCR1},
 			{1, &DAC3->DHR12R2, &TIM4->CCR2},
 			{2, &DAC4->DHR12R1, &TIM4->CCR3},

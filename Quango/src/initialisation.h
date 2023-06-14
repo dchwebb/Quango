@@ -7,6 +7,7 @@ extern volatile uint32_t SysTickVal;
 
 
 struct ADSR {
+	uint16_t level;
 	uint16_t attack;
 	uint16_t decay;
 	uint16_t sustain;
@@ -15,9 +16,7 @@ struct ADSR {
 
 struct ADCValues {
 	uint16_t PitchDetect;
-	uint16_t ChannelALevel;
 	ADSR EnvA;
-	uint16_t ChannelBLevel;
 	ADSR EnvB;
 };
 

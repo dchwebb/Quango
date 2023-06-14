@@ -36,8 +36,8 @@ int main(void)
 	InitIO();
 	InitPWMTimer();
 	InitADC1(&adc.PitchDetect, 2);
-	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA), 4);
-	InitADC4(&adc.ChannelBLevel, 5);
+	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA.attack), 4);
+	InitADC4(&adc.EnvB.level, 5);
 	InitMidiUART();
 	InitSPI2();
 	InitSPI1();

@@ -148,7 +148,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 
 	if (currentLevel != level) {
 		currentLevel = level;
-		SetEnvelope(static_cast<uint32_t>(currentLevel));
+		SetEnvelope(static_cast<uint32_t>(currentLevel * (float)adsr->level / 4096.0f));			// FIXME - use reciprocal for performance
 	}
 }
 
