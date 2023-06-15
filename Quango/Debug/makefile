@@ -74,7 +74,7 @@ main-build: Quango.elf secondary-outputs
 
 # Tool invocations
 Quango.elf Quango.map: $(OBJS) $(USER_OBJS) D:\Eurorack\Quango\Quango\STM32G473VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "Quango.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Eurorack\Quango\Quango\STM32G473VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quango.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	arm-none-eabi-g++ -o "Quango.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Eurorack\Quango\Quango\STM32G473VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Quango.map" -Wl,--gc-sections -Wl,--verbose -static -flto --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

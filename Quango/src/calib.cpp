@@ -151,7 +151,8 @@ void Calib::Activate(bool startTimer)
 	if (calibVoice > 0) {
 		voiceManager.channel[calibchannel].voice[calibVoice - 1].envelope.SetEnvelope(0);
 	}
-	voiceManager.channel[calibchannel].voice[calibVoice].envelope.SetEnvelope(4095);
+	voiceManager.channel[calibchannel].voice[calibVoice].envelope.SetEnvelope(
+			calibchannel ==	VoiceManager::channelA ? adc.EnvA.level : adc.EnvB.level);
 
 	convBlink = !convBlink;
 	*(voiceManager.channel[calibchannel].voice[calibVoice].envelope.envLED) = convBlink ? 0xFFF : 0;
@@ -305,7 +306,7 @@ void Calib::CalcFreq()
 
 		calibFrequencies[calibCount++] = frequency;
 
-		if (calibCount == calibPasses) {
+		if (calibCount == 3) {
 
 			// normalise the frequency differences - below gives a value of 1/12 for a one note difference
 			float diff1 = std::abs(log2(calibFrequencies[0] / calibFrequencies[1]));
@@ -324,6 +325,7 @@ void Calib::CalcFreq()
 
 				// If first note establish nearest A so that offset can be applied to other notes
 				if (calibVoice == 0 && calibNote == calibNoteStart) {
+					calibOffset = 0;
 					while (currNote + calibOffset < calibNoteStart - 6 && calibOffset < 72) {
 						calibOffset += 12;
 					}

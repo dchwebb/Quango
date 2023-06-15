@@ -4,6 +4,7 @@
 #include "fft.h"
 #include "VoiceManager.h"
 
+
 class Calib {
 public:
 
@@ -36,9 +37,8 @@ private:
 	uint8_t calibOctave;							// octave being calibrated
 	uint8_t calibCount;								// number of calibration passes per voice to be averaged
 	uint8_t calibOffset;							// offset octave of frequency found from expected octave (eg A0 vs A1)
-	static constexpr uint8_t calibPasses = 3;
-	float calibFrequencies[calibPasses];			// each octave tuning pass averages three measurements
-	uint32_t calibStart = 0;							// Used to debounce calibration button
+	float calibFrequencies[3];						// each octave tuning pass averages three measurements
+	uint32_t calibStart = 0;						// Used to debounce calibration button
 	uint32_t calibErrors = 0;
 
 	// Phase Adjusted FFT settings

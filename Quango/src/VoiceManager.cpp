@@ -132,7 +132,7 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
 
 	GPIOA->ODR &= ~GPIO_ODR_OD15;		// NSS low
 
-	static uint8_t& spi8Bit = (uint8_t&)(SPI1->DR);		// Pitch DAC cast to 8 bit value
+	static volatile uint8_t& spi8Bit = (uint8_t&)(SPI1->DR);		// Pitch DAC cast to 8 bit value
 
 
 	// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send

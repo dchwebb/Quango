@@ -16,7 +16,7 @@ void Envelope::SetEnvelope(const uint32_t value) {
 		// 24 bit message Structure: AAAAA CC X XXXX DDDDDDDDDDDD
 
 		// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send
-		uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
+		volatile uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
 
 		*spi8Bit = uint8_t{0};
 		*spi8Bit = (uint8_t)(value >> 8);

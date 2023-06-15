@@ -2,6 +2,7 @@
 
 #include "stm32g4xx.h"
 #include <algorithm>
+#include <Array>
 
 extern volatile uint32_t SysTickVal;
 
