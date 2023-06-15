@@ -1,8 +1,8 @@
 #include "MidiHandler.h"
 #include "VoiceManager.h"
 #include "Calib.h"
+#include "USB.h"
 
-/*
 void MidiHandler::DataIn()
 {
 
@@ -12,7 +12,7 @@ void MidiHandler::DataOut()
 {
 	// Handle incoming midi command here
 	const uint8_t* outBuffBytes = reinterpret_cast<const uint8_t*>(outBuff);
-
+/*
 	if (!partialSysEx && outBuffCount == 4) {
 		midiEvent(*outBuff);
 
@@ -43,6 +43,7 @@ void MidiHandler::DataOut()
 			ProcessSysex();
 		}
 	}
+	*/
 }
 
 
@@ -54,7 +55,7 @@ void MidiHandler::ActivateEP()
 	EndPointTransfer(Direction::out, USB::Midi_Out, USB::ep_maxPacket);
 }
 
-*/
+
 
 
 
@@ -159,7 +160,7 @@ CIN		MIDI_x Size Description
 0xF		1			Single Byte
 */
 
-/*
+
 void MidiHandler::ClassSetup(usbRequest& req)
 {
 }
@@ -275,4 +276,4 @@ uint32_t MidiHandler::GetInterfaceDescriptor(const uint8_t** buffer) {
 	*buffer = Descriptor;
 	return sizeof(Descriptor);
 }
-*/
+

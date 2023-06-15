@@ -6,7 +6,7 @@
 
 class SerialHandler {
 public:
-	SerialHandler(USBHandler& usb);
+	SerialHandler(USB& usb);
 	bool Command();
 	void Handler(uint8_t* data, uint32_t length);
 
@@ -20,7 +20,7 @@ private:
 
 	bool CmdPending = false;
 	std::string ComCmd;
-	USBHandler* usb;
+	USB* usb;
 
 	char buf[1024];
 };

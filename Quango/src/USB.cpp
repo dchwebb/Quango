@@ -6,7 +6,7 @@ extern "C" {
 // To enable USB for printf commands (To print floats enable 'Use float with printf from newlib-nano' MCU Build Settings)
 size_t _write(int handle, const unsigned char* buf, size_t bufSize)
 {
-	if (usb.devState == USBHandler::DeviceState::Configured) {
+	if (usb.devState == USB::DeviceState::Configured) {
 		return usb.SendString(buf, bufSize);
 	} else {
 		return 0;
@@ -41,7 +41,7 @@ inline void SetRxStatus(uint8_t ep, uint16_t status)		// Set endpoint receive st
 }
 
 
-void USBHandler::ReadPMA(uint16_t pma, uint16_t bytes)
+void USB::ReadPMA(uint16_t pma, uint16_t bytes)
 {
 	volatile uint16_t* pmaBuff = reinterpret_cast<volatile uint16_t*>(USB_PMAADDR + pma);		// Eg 0x40006018
 
@@ -57,7 +57,7 @@ void USBHandler::ReadPMA(uint16_t pma, uint16_t bytes)
 }
 
 
-void USBHandler::WritePMA(uint16_t pma, uint16_t bytes)
+void USB::WritePMA(uint16_t pma, uint16_t bytes)
 {
 	volatile uint16_t* pmaBuff = reinterpret_cast<volatile uint16_t*>(USB_PMAADDR + pma);
 
@@ -67,7 +67,7 @@ void USBHandler::WritePMA(uint16_t pma, uint16_t bytes)
 }
 
 
-void USBHandler::ProcessSetupPacket()
+void USB::ProcessSetupPacket()
 {
 	req.loadData(rxBuff);		// Parse the setup request into the req object
 
@@ -134,13 +134,13 @@ void USBHandler::ProcessSetupPacket()
 
 
 // EPStartXfer setup and starts a transfer over an EP
-void USBHandler::EPStartXfer(Direction direction, uint8_t endpoint, uint32_t len)
+void USB::EPStartXfer(Direction direction, uint8_t endpoint, uint32_t len)
 {
 	uint8_t epIndex = (endpoint & 0xF);
 
 	if (direction == Direction::in) {						// IN endpoint
-		if (len > maxPacket) {
-			len = maxPacket;
+		if (len > ep_maxPacket) {
+			len = ep_maxPacket;
 		}
 
 		WritePMA(USB_PMA[epIndex].ADDR_TX, len);
@@ -161,32 +161,32 @@ void USBHandler::EPStartXfer(Direction direction, uint8_t endpoint, uint32_t len
 }
 
 
-void USBHandler::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pcd.c
+void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pcd.c
 {
 	// Handle spurious interrupt
-	USB->ISTR &= ~(USB_ISTR_SOF | USB_ISTR_ESOF);
-	if ((USB->ISTR) == 0) {
+	USBP->ISTR &= ~(USB_ISTR_SOF | USB_ISTR_ESOF);
+	if ((USBP->ISTR) == 0) {
 		return;
 	}
 
 
 	/////////// 	8000 		USB_ISTR_CTR: Correct Transfer
 	while (ReadInterrupts(USB_ISTR_CTR)) {					// Originally PCD_EP_ISR_Handler
-		uint8_t epIndex = USB->ISTR & USB_ISTR_EP_ID;		// Extract highest priority endpoint number
+		uint8_t epIndex = USBP->ISTR & USB_ISTR_EP_ID;		// Extract highest priority endpoint number
 
 #if (USB_DEBUG)
 		usbDebug[usbDebugNo].endpoint = epIndex;
 #endif
 
 		if (epIndex == 0) {
-			if ((USB->ISTR & USB_ISTR_DIR) == 0) {			// DIR = 0: Direction IN
+			if ((USBP->ISTR & USB_ISTR_DIR) == 0) {			// DIR = 0: Direction IN
 				ClearTxInterrupt(0);
 
 				uint16_t txBytes = USB_PMA->COUNT_TX & USB_COUNT0_TX_COUNT0_TX_Msk;
 				txBuff += txBytes;
 
-				if (txRemaining > maxPacket) {
-					txRemaining -= maxPacket;
+				if (txRemaining > ep_maxPacket) {
+					txRemaining -= ep_maxPacket;
 					EPStartXfer(Direction::in, 0, txRemaining);
 					EPStartXfer(Direction::out, 0, 0);
 				} else {
@@ -196,13 +196,13 @@ void USBHandler::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_H
 				}
 
 				if (devAddress > 0 && txBytes == 0) {
-					USB->DADDR = (devAddress | USB_DADDR_EF);
+					USBP->DADDR = (devAddress | USB_DADDR_EF);
 					devAddress = 0;
 				}
 
 			} else {										// DIR = 1: Setup or OUT interrupt
 
-				if ((USB->EP0R & USB_EP_SETUP) != 0) {
+				if ((USBP->EP0R & USB_EP_SETUP) != 0) {
 					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX_Msk;
 					ReadPMA(0x18, rxCount);					// Read setup data into rxBuff
 					ClearRxInterrupt(0);					// clears 8000 interrupt
@@ -260,42 +260,42 @@ void USBHandler::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_H
 
 	/////////// 	1000 		USB_ISTR_WKUP: Wake Up
 	if (ReadInterrupts(USB_ISTR_WKUP)) {
-		USB->CNTR &= ~USB_CNTR_FSUSP;
-		USB->CNTR &= ~USB_CNTR_LPMODE;
-		USB->ISTR &= ~USB_ISTR_WKUP;
+		USBP->CNTR &= ~USB_CNTR_FSUSP;
+		USBP->CNTR &= ~USB_CNTR_LPMODE;
+		USBP->ISTR &= ~USB_ISTR_WKUP;
 	}
 
 	/////////// 	800 		SUSP: Suspend Interrupt
 	if (ReadInterrupts(USB_ISTR_SUSP)) {
-		USB->CNTR |= USB_CNTR_FSUSP;
-		USB->ISTR &= ~USB_ISTR_SUSP;
-		USB->CNTR |= USB_CNTR_LPMODE;
+		USBP->CNTR |= USB_CNTR_FSUSP;
+		USBP->ISTR &= ~USB_ISTR_SUSP;
+		USBP->CNTR |= USB_CNTR_LPMODE;
 		devState = DeviceState::Suspended;
 	}
 
 	/////////// 	400 		RESET: Reset Interrupt
 	if (ReadInterrupts(USB_ISTR_RESET))	{
-		USB->ISTR &= ~USB_ISTR_RESET;
+		USBP->ISTR &= ~USB_ISTR_RESET;
 
 		ActivateEndpoint(0, Direction::out, Control, 0x18);
 		ActivateEndpoint(0, Direction::in,  Control, 0x58);
 
-		USB->DADDR = USB_DADDR_EF;						// Enable endpoint and set address to 0
+		USBP->DADDR = USB_DADDR_EF;						// Enable endpoint and set address to 0
 	}
 
 	/////////// 	100 		USB_ISTR_ESOF: Expected Start of frame
 	if (ReadInterrupts(USB_ISTR_ESOF)) {
-		USB->ISTR &= ~USB_ISTR_ESOF;
+		USBP->ISTR &= ~USB_ISTR_ESOF;
 	}
 
 	/////////// 	2000 		ERR: Error Interrupt
 	if (ReadInterrupts(USB_ISTR_ERR)) {
-		USB->ISTR &= ~USB_ISTR_ERR;
+		USBP->ISTR &= ~USB_ISTR_ERR;
 	}
 }
 
 
-void USBHandler::InitUSB()
+void USB::InitUSB()
 {
 	RCC->CRRCR |= RCC_CRRCR_HSI48ON;					// Enable Internal High Speed oscillator for USB
 	while ((RCC->CRRCR & RCC_CRRCR_HSI48RDY) == 0);		// Wait till internal USB oscillator is ready
@@ -304,15 +304,15 @@ void USBHandler::InitUSB()
 	NVIC_SetPriority(USB_LP_IRQn, 3);
 	NVIC_EnableIRQ(USB_LP_IRQn);
 
-	USB->CNTR = USB_CNTR_FRES;							// Force USB Reset
-	USB->BTABLE = 0;									// Set Buffer table Address BTABLE_ADDRESS
-	USB->ISTR = 0;										// Clear pending interrupts
-	USB->CNTR = USB_CNTR_CTRM  | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_ERRM | USB_CNTR_RESETM;
-	USB->BCDR |= USB_BCDR_DPPU;							// Connect internal PU resistor on USB DP line
+	USBP->CNTR = USB_CNTR_FRES;							// Force USB Reset
+	USBP->BTABLE = 0;									// Set Buffer table Address BTABLE_ADDRESS
+	USBP->ISTR = 0;										// Clear pending interrupts
+	USBP->CNTR = USB_CNTR_CTRM  | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_ERRM | USB_CNTR_RESETM;
+	USBP->BCDR |= USB_BCDR_DPPU;							// Connect internal PU resistor on USB DP line
 }
 
 
-void USBHandler::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress)
+void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress)
 {
 	endpoint = endpoint & 0xF;
 	uint16_t ep_type;
@@ -353,7 +353,7 @@ void USBHandler::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPoin
 }
 
 
-void USBHandler::GetDescriptor()
+void USB::GetDescriptor()
 {
 	switch (static_cast<Descriptor>(req.wValue >> 8))	{
 	case DeviceDescriptor:
@@ -374,20 +374,20 @@ void USBHandler::GetDescriptor()
 	case StringDescriptor:
 
 		switch ((uint8_t)(req.wValue)) {
-		case LangIDStrIndex:				// 300
+		case LangId:				// 300
 			txBuff = USBD_LangIDDesc;
 			txBuffSize = sizeof(USBD_LangIDDesc);
 			break;
 
-		case MfcStrIndex:					// 301
+		case Manufacturer:					// 301
 			StringToTxBuff(manufacturerString);
 			break;
 
-		case ProductStrIndex:				// 302
+		case Product:				// 302
 			StringToTxBuff(productString);
 			break;
 
-		case SerialStrIndex:				// 303
+		case Serial:				// 303
 			{
 				// STM32 unique device ID (96 bit number starting at UID_BASE)
 				uint32_t deviceserial0 = *(uint32_t*) UID_BASE;
@@ -409,7 +409,7 @@ void USBHandler::GetDescriptor()
 			txBuff = USBD_StrDesc;
 	      break;
 */
-	    case CDCStrIndex:					// 304
+	    case CommunicationClass:					// 304
 	    	StringToTxBuff(cdcString);
 
 	      break;
@@ -436,7 +436,7 @@ void USBHandler::GetDescriptor()
 	}
 }
 
-void USBHandler::StringToTxBuff(const char* desc)
+void USB::StringToTxBuff(const char* desc)
 {
 	uint32_t idx = 2;
 
@@ -452,7 +452,7 @@ void USBHandler::StringToTxBuff(const char* desc)
 }
 
 
-void USBHandler::IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len)
+void USB::IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len)
 {
 	for (uint8_t idx = 0; idx < len; idx++) {
 		if ((value >> 28) < 0xA) {
@@ -467,22 +467,22 @@ void USBHandler::IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len)
 }
 
 
-bool USBHandler::ReadInterrupts(uint32_t interrupt)
+bool USB::ReadInterrupts(uint32_t interrupt)
 {
 #if (USB_DEBUG)
-	if ((USB->ISTR & interrupt) == interrupt && usbDebugEvent < USB_DEBUG_COUNT) {
+	if ((USBP->ISTR & interrupt) == interrupt && usbDebugEvent < USB_DEBUG_COUNT) {
 		usbDebugNo = usbDebugEvent % USB_DEBUG_COUNT;
 		usbDebug[usbDebugNo].eventNo = usbDebugEvent;
-		usbDebug[usbDebugNo].Interrupt = USB->ISTR;
+		usbDebug[usbDebugNo].Interrupt = USBP->ISTR;
 		usbDebugEvent++;
 	}
 #endif
 
-	return (USB->ISTR & interrupt) == interrupt;
+	return (USBP->ISTR & interrupt) == interrupt;
 }
 
 
-size_t USBHandler::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
+size_t USB::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
 {
 	if (devState == DeviceState::Configured && !transmitting) {
 		transmitting = true;
@@ -496,7 +496,7 @@ size_t USBHandler::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
 }
 
 
-void USBHandler::SendString(const char* s)
+void USB::SendString(const char* s)
 {
 	uint16_t counter = 0;
 	while (transmitting && counter < 10000) {
@@ -506,13 +506,13 @@ void USBHandler::SendString(const char* s)
 }
 
 
-void USBHandler::SendString(std::string s)
+void USB::SendString(std::string s)
 {
 	SendString(s.c_str());
 }
 
 
-size_t USBHandler::SendString(const unsigned char* s, size_t len)
+size_t USB::SendString(const unsigned char* s, size_t len)
 {
 	uint16_t counter = 0;
 	while (transmitting && counter < 10000) {
@@ -523,7 +523,7 @@ size_t USBHandler::SendString(const unsigned char* s, size_t len)
 
 #if (USB_DEBUG)
 
-void USBHandler::OutputDebug()
+void USB::OutputDebug()
 {
 	USBDebug = false;
 

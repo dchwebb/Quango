@@ -11,44 +11,38 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 
 	if (on) {
 		// Locate next available note in each channel
+		uint8_t chnVoice = 255;
+		for (auto& v: channel[channelA].voice) {
+			if (v.envelope.gateState == Envelope::gateStates::off) {
+				chnVoice = v.index;
+				break;
+			}
+		}
+
+		// Voice stealing: overwrite oldest note playing
+		if (chnVoice == 255) {
+			uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
+			for (auto& v: channel[channelA].voice) {
+				if (v.startTime < oldestStart) {
+					oldestStart = v.startTime;
+					chnVoice = v.index;
+				}
+			}
+		}
+
 		for (auto& chn: channel) {
-			Channel::Voice* chnVoice = nullptr;
-			for (auto& v: chn.voice) {
-				if (v.envelope.gateState == Envelope::gateStates::off) {
-					chnVoice = &v;
-					break;
-				}
-			}
-
-			// Voice stealing: overwrite oldest note playing
-			if (chnVoice == nullptr) {
-				uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
-				for (auto& v: chn.voice) {
-					if (v.startTime < oldestStart) {
-						oldestStart = v.startTime;
-						chnVoice = &v;
-					}
-				}
-			}
-
-			chnVoice->midiNote = midiNote;
-			chnVoice->startTime = ++chn.counter;
-			chnVoice->envelope.gateState = Envelope::gateStates::attack;
-			chnVoice->SetPitch(chn.index);
+			chn.voice[chnVoice].midiNote = midiNote;
+			chn.voice[chnVoice].startTime = ++chn.counter;
+			chn.voice[chnVoice].envelope.gateState = Envelope::gateStates::attack;
+			chn.voice[chnVoice].SetPitch(chn.index);
 		}
 
 		// Check if gate status has changed
-		for (auto& gate : gates) {
-			auto& voiceA = channel[channelA].voice[gate.index].envelope.gateState;
-			auto& voiceB = channel[channelB].voice[gate.index].envelope.gateState;
-			if (voiceA == Envelope::gateStates::attack || voiceB == Envelope::gateStates::attack) {
-				if (!gate.gateOn) {
-					gate.GateOn();
-				} else {
-					gate.gateRetrigger = 5;			// trigger a countdown before resetting gate
-					gate.GateOff();
-				}
-			}
+		if (!gates[chnVoice].gateOn) {
+			gates[chnVoice].GateOn();
+		} else {
+			gates[chnVoice].gateRetrigger = 5;			// trigger a countdown before resetting gate
+			gates[chnVoice].GateOff();
 		}
 
 	} else {

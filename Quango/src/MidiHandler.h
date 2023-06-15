@@ -1,14 +1,12 @@
 #pragma once
 
 #include "initialisation.h"
-//#include "USBHandler.h"
+#include "USBHandler.h"
 
-//class USB;
+class USB;
 
-//class MidiHandler : public USBHandler {
-class MidiHandler{
+class MidiHandler : public USBHandler {
 public:
-	/*
 	MidiHandler(USB* usb, uint8_t inEP, uint8_t outEP, int8_t interface) : USBHandler(usb, inEP, outEP, interface) {
 		outBuff = xfer_buff;
 	}
@@ -19,7 +17,7 @@ public:
 	void ClassSetup(usbRequest& req) override;
 	void ClassSetupData(usbRequest& req, const uint8_t* data) override;
 	uint32_t GetInterfaceDescriptor(const uint8_t** buffer) override;
-*/
+
 	void serialHandler(uint32_t data);
 
 	enum MIDIType {Unknown = 0, NoteOn = 0x9, NoteOff = 0x8, PolyPressure = 0xA, ControlChange = 0xB,

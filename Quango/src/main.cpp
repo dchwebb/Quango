@@ -8,9 +8,9 @@
 volatile uint32_t SysTickVal;
 
 volatile ADCValues adc;
-USBHandler usb;
+USB usb;
 SerialHandler serial(usb);
-MidiHandler midi;
+
 
 int16_t vCalibOffset = 2047;
 float vCalibScale = 1.0f;

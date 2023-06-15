@@ -27,7 +27,7 @@ void UART4_IRQHandler(void)
 {
 	// MIDI Decoder
 	if (UART4->ISR & USART_ISR_RXNE_RXFNE) {
-		midi.serialHandler(UART4->RDR);
+		usb.midi.serialHandler(UART4->RDR);
 	} else {
 		// Overrun
 		UART4->ICR |= USART_ICR_ORECF;			// The ORE bit is reset by setting the ORECF bit in the USART_ICR register

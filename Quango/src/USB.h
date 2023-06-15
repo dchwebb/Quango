@@ -1,6 +1,7 @@
 #pragma once
 
 #include "initialisation.h"
+#include "MidiHandler.h"
 #include <functional>
 #include <cstring>
 #include <string>
@@ -29,7 +30,7 @@ typedef struct {
 } USB_EPR_TypeDef;
 
 #define  USB_PMA  ((USB_PMA_TypeDef*) USB_PMAADDR)
-#define  USB_EPR  ((USB_EPR_TypeDef*)(&USB->EP0R))
+#define  USB_EPR  ((USB_EPR_TypeDef*)(&USBP->EP0R))
 
 #define USB_REQ_RECIPIENT_MASK			0x03
 #define USB_REQ_DIRECTION_MASK			0x80
@@ -43,9 +44,23 @@ typedef struct {
 #define LOBYTE(x)  (static_cast<uint8_t>(x & 0x00FFU))
 #define HIBYTE(x)  (static_cast<uint8_t>((x & 0xFF00U) >> 8))
 
-class USBHandler {
+class USB {
 public:
+	enum Interface {NoInterface = -1, AudioInterface = 0, MidiInterface = 1, MSCInterface = 2, CDCCmdInterface = 3, CDCDataInterface = 4, interfaceCount = 5};
 	enum class DeviceState {Suspended, Addressed, Configured} devState;
+	enum EndPoint {Midi_In = 0x81, Midi_Out = 0x1, CDC_In = 0x82, CDC_Out = 0x2, CDC_Cmd = 0x83};
+	enum EndPointType {Control = 0, Isochronous = 1, Bulk = 2, Interrupt = 3};
+//	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF};
+	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF, ClassSpecificInterfaceDescriptor = 0x24};
+	enum RequestRecipient {RequestRecipientDevice = 0x0, RequestRecipientInterface = 0x1, RequestRecipientEndpoint = 0x2};
+	enum RequestType {RequestTypeStandard = 0x0, RequestTypeClass = 0x20, RequestTypeVendor = 0x40};
+	enum class Request {GetStatus = 0x0, SetAddress = 0x5, GetDescriptor = 0x6, SetConfiguration = 0x9};
+	enum class Direction {in, out};
+//	enum StrDescIndex {LangIDStrIndex = 0, MfcStrIndex = 1, ProductStrIndex = 2, SerialStrIndex = 3, CDCStrIndex = 4};
+	enum StringIndex {LangId = 0, Manufacturer = 1, Product = 2, Serial = 3, Configuration = 4, MassStorageClass = 5,
+		CommunicationClass = 6, AudioClass = 7};
+
+	static constexpr uint8_t ep_maxPacket = 0x40;
 
 	void USBInterruptHandler();
 	void InitUSB();
@@ -55,6 +70,7 @@ public:
 	size_t SendString(const unsigned char* s, size_t len);
 
 	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
+	MidiHandler midi = MidiHandler(this, USB::Midi_In, USB::Midi_Out, MidiInterface);
 
 	bool transmitting;
 
@@ -63,14 +79,7 @@ private:
 	static constexpr const char* productString      = "Mountjoy Quango";
 	static constexpr const char* cdcString          = "Mountjoy Quango CDC";
 
-	enum EndPoint {CDC_In = 0x81, CDC_Out = 0x1, CDC_Cmd = 0x82};
-	enum EndPointType {Control = 0, Isochronous = 1, Bulk = 2, Interrupt = 3};
-	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF};
-	enum RequestRecipient {RequestRecipientDevice = 0x0, RequestRecipientInterface = 0x1, RequestRecipientEndpoint = 0x2};
-	enum RequestType {RequestTypeStandard = 0x0, RequestTypeClass = 0x20, RequestTypeVendor = 0x40};
-	enum StrDescIndex {LangIDStrIndex = 0, MfcStrIndex = 1, ProductStrIndex = 2, SerialStrIndex = 3, CDCStrIndex = 4};
-	enum class Request {GetStatus = 0x0, SetAddress = 0x5, GetDescriptor = 0x6, SetConfiguration = 0x9};
-	enum class Direction {in, out};
+
 
 	void ProcessSetupPacket();
 	void ReadPMA(uint16_t wPMABufAddr, uint16_t wNBytes);
@@ -83,8 +92,8 @@ private:
 	uint32_t GetString(const char* desc);
 	void StringToTxBuff(const char* desc);
 
-	static const uint8_t maxPacket = 0x40;
-	uint8_t rxBuff[maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
+
+	uint8_t rxBuff[ep_maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 	uint32_t rxCount;				// Amount of data to receive
 	const uint8_t* txBuff;			// Pointer to transmit buffer (for transferring data to IN endpoint)
 	uint32_t txBuffSize;			// Size of transmit buffer
@@ -124,16 +133,16 @@ private:
 			0xEF,								// bDeviceClass: (Miscellaneous)
 			0x02,								// bDeviceSubClass (Interface Association Descriptor- with below)
 			0x01,								// bDeviceProtocol (Interface Association Descriptor)
-			maxPacket,  						// bMaxPacketSize
+			ep_maxPacket,  						// bMaxPacketSize
 			LOBYTE(USBD_VID),					// idVendor
 			HIBYTE(USBD_VID),					// idVendor
 			LOBYTE(USBD_PID),					// idProduct
 			HIBYTE(USBD_PID),					// idProduct
 			0x00,								// bcdDevice rel. 2.00
 			0x02,
-			MfcStrIndex,						// Index of manufacturer  string
-			ProductStrIndex,					// Index of product string
-			SerialStrIndex,						// Index of serial number string
+			Manufacturer,						// Index of manufacturer  string
+			Product,							// Index of product string
+			Serial,								// Index of serial number string
 			0x01								// bNumConfigurations
 	};
 
@@ -160,7 +169,7 @@ private:
 			0x02,								// bFunctionClass (Communications and CDC Control)
 			0x02,								// bFunctionSubClass
 			0x01,								// bFunctionProtocol
-			CDCStrIndex,						// iFunction (String Descriptor 6)
+			CommunicationClass,					// iFunction (String Descriptor 6)
 
 			// Interface Descriptor
 			0x09,								// bLength: Interface Descriptor size
@@ -171,7 +180,7 @@ private:
 			0x02,								// bInterfaceClass: Communication Interface Class
 			0x02,								// bInterfaceSubClass: Abstract Control Model
 			0x01,								// bInterfaceProtocol: Common AT commands
-			CDCStrIndex,						// iInterface
+			CommunicationClass,					// iInterface
 
 			// Header Functional Descriptor
 			0x05,								// bLength: Endpoint Descriptor size
@@ -227,8 +236,8 @@ private:
 			EndpointDescriptor,					// bDescriptorType: Endpoint
 			CDC_Out,							// bEndpointAddress
 			Bulk,								// bmAttributes: Bulk
-			LOBYTE(maxPacket),					// wMaxPacketSize:
-			HIBYTE(maxPacket),
+			LOBYTE(ep_maxPacket),					// wMaxPacketSize:
+			HIBYTE(ep_maxPacket),
 			0x00,								// bInterval: ignore for Bulk transfer
 
 			// Endpoint IN Descriptor
@@ -236,8 +245,8 @@ private:
 			EndpointDescriptor,					// bDescriptorType: Endpoint
 			CDC_In,								// bEndpointAddress
 			Bulk,								// bmAttributes: Bulk
-			LOBYTE(maxPacket),					// wMaxPacketSize:
-			HIBYTE(maxPacket),
+			LOBYTE(ep_maxPacket),					// wMaxPacketSize:
+			HIBYTE(ep_maxPacket),
 			0x00								// bInterval: ignore for Bulk transfer
 	};
 
@@ -293,4 +302,4 @@ public:
 };
 
 
-extern USBHandler usb;
+extern USB usb;

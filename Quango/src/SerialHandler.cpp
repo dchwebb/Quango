@@ -30,7 +30,7 @@ float SerialHandler::ParseFloat(const std::string cmd, const char precedingChar,
 	return val;
 }
 
-SerialHandler::SerialHandler(USBHandler& usbObj)
+SerialHandler::SerialHandler(USB& usbObj)
 {
 	usb = &usbObj;
 

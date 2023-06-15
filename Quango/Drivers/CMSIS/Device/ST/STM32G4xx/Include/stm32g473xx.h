@@ -1229,7 +1229,7 @@ typedef struct
 #define UART5               ((USART_TypeDef *) UART5_BASE)
 #define I2C1                ((I2C_TypeDef *) I2C1_BASE)
 #define I2C2                ((I2C_TypeDef *) I2C2_BASE)
-#define USB                 ((USB_TypeDef *) USB_BASE)
+#define USBP                 ((USB_TypeDef *) USB_BASE)
 #define FDCAN1              ((FDCAN_GlobalTypeDef *) FDCAN1_BASE)
 #define FDCAN_CONFIG        ((FDCAN_Config_TypeDef *) FDCAN_CONFIG_BASE)
 #define FDCAN2              ((FDCAN_GlobalTypeDef *) FDCAN2_BASE)
