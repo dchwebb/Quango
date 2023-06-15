@@ -2,6 +2,7 @@
 
 #include "initialisation.h"
 #include "MidiHandler.h"
+#include "CDCHandler.h"
 #include <functional>
 #include <cstring>
 #include <string>
@@ -45,18 +46,16 @@ typedef struct {
 #define HIBYTE(x)  (static_cast<uint8_t>((x & 0xFF00U) >> 8))
 
 class USB {
+	friend class USBHandler;
 public:
 	enum Interface {NoInterface = -1, AudioInterface = 0, MidiInterface = 1, MSCInterface = 2, CDCCmdInterface = 3, CDCDataInterface = 4, interfaceCount = 5};
 	enum class DeviceState {Suspended, Addressed, Configured} devState;
 	enum EndPoint {Midi_In = 0x81, Midi_Out = 0x1, CDC_In = 0x82, CDC_Out = 0x2, CDC_Cmd = 0x83};
 	enum EndPointType {Control = 0, Isochronous = 1, Bulk = 2, Interrupt = 3};
-//	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF};
 	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF, ClassSpecificInterfaceDescriptor = 0x24};
 	enum RequestRecipient {RequestRecipientDevice = 0x0, RequestRecipientInterface = 0x1, RequestRecipientEndpoint = 0x2};
 	enum RequestType {RequestTypeStandard = 0x0, RequestTypeClass = 0x20, RequestTypeVendor = 0x40};
 	enum class Request {GetStatus = 0x0, SetAddress = 0x5, GetDescriptor = 0x6, SetConfiguration = 0x9};
-	enum class Direction {in, out};
-//	enum StrDescIndex {LangIDStrIndex = 0, MfcStrIndex = 1, ProductStrIndex = 2, SerialStrIndex = 3, CDCStrIndex = 4};
 	enum StringIndex {LangId = 0, Manufacturer = 1, Product = 2, Serial = 3, Configuration = 4, MassStorageClass = 5,
 		CommunicationClass = 6, AudioClass = 7};
 
@@ -70,7 +69,11 @@ public:
 	size_t SendString(const unsigned char* s, size_t len);
 
 	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
+
+	EP0Handler  ep0  = EP0Handler(this, 0, 0, NoInterface);
 	MidiHandler midi = MidiHandler(this, USB::Midi_In, USB::Midi_Out, MidiInterface);
+	CDCHandler  cdc  = CDCHandler(this,  USB::CDC_In,  USB::CDC_Out,  CDCCmdInterface);
+	bool classPendingData = false;			// Set when class setup command received and data pending
 
 	bool transmitting;
 
@@ -86,12 +89,16 @@ private:
 	void WritePMA(uint16_t wPMABufAddr, uint16_t wNBytes);
 	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress);
 	void GetDescriptor();
-	void EPStartXfer(Direction direction, uint8_t endpoint, uint32_t xfer_len);
+	void EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t xfer_len);
+	void EP0In(const uint8_t* buff, uint32_t size);
 	bool ReadInterrupts(uint32_t interrupt);
 	void IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len);
 	uint32_t GetString(const char* desc);
+	uint32_t MakeConfigDescriptor();
 	void StringToTxBuff(const char* desc);
 
+	std::array<USBHandler*, 4>classesByInterface;		// Lookup tables to get appropriate class handlers (set in handler constructor)
+	std::array<USBHandler*, 4>classByEP;
 
 	uint8_t rxBuff[ep_maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 	uint32_t rxCount;				// Amount of data to receive
@@ -100,6 +107,8 @@ private:
 	uint32_t txRemaining;			// If transfer is larger than maximum packet size store remaining byte count
 	uint8_t cmdOpCode;				// stores class specific operation codes (eg CDC set line config)
 	uint8_t devAddress = 0;			// Temporarily hold the device address as it cannot stored in the register until the 0 address response has been handled
+
+	uint8_t configDescriptor[255];
 
 	struct usbRequest {
 		uint8_t bmRequest;

@@ -134,7 +134,7 @@ void USB::ProcessSetupPacket()
 
 
 // EPStartXfer setup and starts a transfer over an EP
-void USB::EPStartXfer(Direction direction, uint8_t endpoint, uint32_t len)
+void USB::EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t len)
 {
 	uint8_t epIndex = (endpoint & 0xF);
 
@@ -352,13 +352,28 @@ void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType e
 
 }
 
+// procedure to allow classes to pass configuration data back via endpoint 0 (eg CDC line setup, MSC MaxLUN etc)
+void USB::EP0In(const uint8_t* buff, const uint32_t size)
+{
+//	ep0.inBuffSize = size;
+//	ep0.inBuff = buff;
+//	ep0State = EP0State::DataIn;
+
+//	USBUpdateDbg({}, {}, {}, ep0.inBuffSize, {}, (uint32_t*)ep0.inBuff);
+
+	txBuff = buff;
+	txBuffSize = size;
+
+	EPStartXfer(Direction::in, 0, size);		// sends blank request back
+}
+
+
 
 void USB::GetDescriptor()
 {
 	switch (static_cast<Descriptor>(req.wValue >> 8))	{
 	case DeviceDescriptor:
-		txBuff = USBD_FS_DeviceDesc;
-		txBuffSize = sizeof(USBD_FS_DeviceDesc);
+		return EP0In(USBD_FS_DeviceDesc, sizeof(USBD_FS_DeviceDesc));
 		break;
 
 	case ConfigurationDescriptor:
@@ -435,6 +450,39 @@ void USB::GetDescriptor()
 		EPStartXfer(Direction::in, 0, 0);
 	}
 }
+
+
+uint32_t USB::MakeConfigDescriptor()
+{
+	// Construct the configuration descriptor from the various class descriptors with header
+	static constexpr uint8_t descrHeaderSize = 9;
+	uint32_t descPos = descrHeaderSize;
+	for (auto c : classByEP) {
+		if (c != nullptr) {
+			const uint8_t* descBuff = nullptr;
+			uint32_t descSize = c-> GetInterfaceDescriptor(&descBuff);
+			memcpy(&configDescriptor[descPos], descBuff, descSize);
+			descPos += descSize;
+		}
+	}
+
+	// Insert config descriptor header
+	const uint8_t descriptorHeader[] = {
+		0x09,								// bLength: Configuration Descriptor size
+		ConfigurationDescriptor,			// bDescriptorType: Configuration
+		LOBYTE(descPos),					// wTotalLength
+		HIBYTE(descPos),
+		interfaceCount,						// bNumInterfaces: 5 [1 MSC, 2 CDC, 2 MIDI]
+		0x01,								// bConfigurationValue: Configuration value
+		0x04,								// iConfiguration: Index of string descriptor describing the configuration
+		0xC0,								// bmAttributes: self powered
+		0x32,								// MaxPower 0 mA
+	};
+	memcpy(&configDescriptor[0], descriptorHeader, descrHeaderSize);
+
+	return descPos;
+}
+
 
 void USB::StringToTxBuff(const char* desc)
 {

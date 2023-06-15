@@ -3,15 +3,15 @@
 
 USBHandler::USBHandler(USB* usb, const uint8_t inEP, const uint8_t outEP, int8_t interface) : usb(usb), inEP(inEP), outEP(outEP), interface(interface) {
 	if (interface >= 0) {
-	//	usb->classesByInterface[interface] = this;
+		usb->classesByInterface[interface] = this;
 	}
-	//usb->classByEP[outEP] = this;
+	usb->classByEP[outEP] = this;
 }
 
 
 void USBHandler::EndPointTransfer(const Direction d, const uint8_t ep, const uint32_t len)
 {
-	//usb->EPStartXfer(d, ep, len);
+	usb->EPStartXfer(d, ep, len);
 }
 
 
