@@ -362,72 +362,61 @@ void USB::EP0In(const uint8_t* buff, const uint32_t size)
 //	USBUpdateDbg({}, {}, {}, ep0.inBuffSize, {}, (uint32_t*)ep0.inBuff);
 
 	txBuff = buff;
-	txBuffSize = size;
-
-	EPStartXfer(Direction::in, 0, size);		// sends blank request back
+	txRemaining = size;
+	txBuffSize = std::min(size, static_cast<uint32_t>(req.wLength));
+	EPStartXfer(Direction::in, 0, txBuffSize);		// sends blank request back
 }
 
 
 
 void USB::GetDescriptor()
 {
+	uint32_t strSize;
+
 	switch (static_cast<Descriptor>(req.wValue >> 8))	{
 	case DeviceDescriptor:
 		return EP0In(USBD_FS_DeviceDesc, sizeof(USBD_FS_DeviceDesc));
 		break;
 
 	case ConfigurationDescriptor:
-		txBuff = USBD_CDC_CfgFSDesc;
-		txBuffSize = sizeof(USBD_CDC_CfgFSDesc);
+		return EP0In(USBD_CDC_CfgFSDesc, sizeof(USBD_CDC_CfgFSDesc));
 		break;
 
 	case BosDescriptor:
-		txBuff = USBD_FS_BOSDesc;
-		txBuffSize = sizeof(USBD_FS_BOSDesc);
+		return EP0In(USBD_FS_BOSDesc, sizeof(USBD_FS_BOSDesc));
 		break;
 
 	case StringDescriptor:
 
 		switch ((uint8_t)(req.wValue)) {
-		case LangId:				// 300
-			txBuff = USBD_LangIDDesc;
-			txBuffSize = sizeof(USBD_LangIDDesc);
+		case StringIndex::LangId:				// 300
+			return EP0In(USBD_LangIDDesc, sizeof(USBD_LangIDDesc));
 			break;
 
-		case Manufacturer:					// 301
-			StringToTxBuff(manufacturerString);
+		case StringIndex::Manufacturer:			// 301
+			strSize = StringToUnicode(manufacturerString, stringDescr);
+			return EP0In(stringDescr, strSize);
 			break;
 
-		case Product:				// 302
-			StringToTxBuff(productString);
+		case StringIndex::Product:				// 302
+			strSize = StringToUnicode(productString, stringDescr);
+			return EP0In(stringDescr, strSize);
 			break;
 
-		case Serial:				// 303
-			{
-				// STM32 unique device ID (96 bit number starting at UID_BASE)
-				uint32_t deviceserial0 = *(uint32_t*) UID_BASE;
-				uint32_t deviceserial1 = *(uint32_t*) UID_BASE + 4;
-				uint32_t deviceserial2 = *(uint32_t*) UID_BASE + 8;
-				deviceserial0 += deviceserial2;
-
-				if (deviceserial0 != 0) {
-					IntToUnicode(deviceserial0, &USBD_StringSerial[2], 8);
-					IntToUnicode(deviceserial1, &USBD_StringSerial[18], 4);
-				}
-				txBuff = USBD_StringSerial;
-				txBuffSize = sizeof(USBD_StringSerial);
-			}
+		case StringIndex::Serial:				// 303
+			SerialToUnicode();
+			return EP0In(stringDescr, stringDescr[0]);				// length is 24 bytes (x2 for unicode padding) + 2 for header
 			break;
-/*
-		case USBD_IDX_MIDI_STR:				// 304
-			txBuffSize = USBD_GetString((uint8_t*)USBD_MIDI_STRING, USBD_StrDesc);
-			txBuff = USBD_StrDesc;
-	      break;
-*/
-	    case CommunicationClass:					// 304
-	    	StringToTxBuff(cdcString);
 
-	      break;
+		case StringIndex::AudioClass:			// 307
+			strSize = StringToUnicode(midiString, stringDescr);
+			return EP0In(stringDescr, strSize);
+			break;
+
+	    case StringIndex::CommunicationClass:	// 306
+	    	strSize = StringToUnicode(cdcString, stringDescr);
+	    	return EP0In(stringDescr, strSize);
+	    	break;
 
 		default:
 			SetTxStatus(0, USB_EP_TX_STALL);
@@ -440,15 +429,15 @@ void USB::GetDescriptor()
 		return;
 	}
 
-	if ((txBuffSize != 0) && (req.wLength != 0)) {
-		txRemaining = txBuffSize;
-		txBuffSize = std::min(txBuffSize, static_cast<uint32_t>(req.wLength));
-		EPStartXfer(Direction::in, 0, txBuffSize);
-	}
-
-	if (req.wLength == 0) {
-		EPStartXfer(Direction::in, 0, 0);
-	}
+//	if ((txBuffSize != 0) && (req.wLength != 0)) {
+//		txRemaining = txBuffSize;
+//		txBuffSize = std::min(txBuffSize, static_cast<uint32_t>(req.wLength));
+//		EPStartXfer(Direction::in, 0, txBuffSize);
+//	}
+//
+//	if (req.wLength == 0) {
+//		EPStartXfer(Direction::in, 0, 0);
+//	}
 }
 
 
@@ -484,35 +473,36 @@ uint32_t USB::MakeConfigDescriptor()
 }
 
 
-void USB::StringToTxBuff(const char* desc)
+uint32_t USB::StringToUnicode(const std::string_view desc, uint8_t *unicode)
 {
 	uint32_t idx = 2;
-
-	while (*desc != '\0') {
-		unicodeString[idx++] = *desc++;
-		unicodeString[idx++] = 0;
+	for (auto c: desc) {
+		unicode[idx++] = c;
+		unicode[idx++] = 0;
 	}
-	unicodeString[0] = idx;
-	unicodeString[1] = StringDescriptor;
+	unicode[0] = idx;
+	unicode[1] = StringDescriptor;
 
-	txBuff = unicodeString;
-	txBuffSize = idx;
+	return idx;
 }
 
 
-void USB::IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len)
+
+void USB::SerialToUnicode()
 {
-	for (uint8_t idx = 0; idx < len; idx++) {
-		if ((value >> 28) < 0xA) {
-			pbuf[2 * idx] = (value >> 28) + '0';
-		} else {
-			pbuf[2 * idx] = (value >> 28) + 'A' - 10;
-		}
+	const uint32_t* uidAddr = (uint32_t*)UID_BASE;			// Location in memory that holds 96 bit Unique device ID register
 
-		value = value << 4;
-		pbuf[2 * idx + 1] = 0;
+	char uidBuff[usbSerialNoSize + 1];
+	snprintf(uidBuff, usbSerialNoSize + 1, "%08lx%08lx%08lx", uidAddr[0], uidAddr[1], uidAddr[2]);
+
+	stringDescr[0] = usbSerialNoSize * 2 + 2;				// length is 24 bytes (x2 for unicode padding) + 2 for header
+	stringDescr[1] = StringDescriptor;
+	for (uint8_t i = 0; i < usbSerialNoSize; ++i) {
+		stringDescr[i * 2 + 2] = uidBuff[i];
 	}
 }
+
+
 
 
 bool USB::ReadInterrupts(uint32_t interrupt)
@@ -571,11 +561,38 @@ size_t USB::SendString(const unsigned char* s, size_t len)
 
 #if (USB_DEBUG)
 
+std::string IntToString(const int32_t& v) {
+	return std::to_string(v);
+}
+
+std::string HexToString(const uint32_t& v, const bool& spaces) {
+	char buf[20];
+	if (spaces) {
+		if (v != 0) {
+			uint8_t* bytes = (uint8_t*)&v;
+			sprintf(buf, "%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
+		} else {
+			sprintf(buf, " ");
+		}
+	} else {
+		sprintf(buf, "%X", (unsigned int)v);
+	}
+	return std::string(buf);
+
+}
+
+std::string HexByte(const uint16_t& v) {
+	char buf[50];
+	sprintf(buf, "%X", v);
+	return std::string(buf);
+
+}
+
 void USB::OutputDebug()
 {
 	USBDebug = false;
 
-	uartSendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
+//	uartSendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
 	uint16_t evNo = usbDebugEvent % USB_DEBUG_COUNT;
 	std::string interrupt, subtype;
 
@@ -598,19 +615,19 @@ void USB::OutputDebug()
 					case StringDescriptor:
 
 						switch ((uint8_t)(usbDebug[evNo].Request.wValue & 0xFF)) {
-						case LangIDStrIndex:				// 300
+						case StringIndex::LangId:				// 300
 							subtype = "Get Lang Str Descriptor";
 							break;
-						case MfcStrIndex:					// 301
+						case StringIndex::Manufacturer:					// 301
 							subtype = "Get Manufacturor Str Descriptor";
 							break;
-						case ProductStrIndex:				// 302
+						case StringIndex::Product:				// 302
 							subtype = "Get Product Str Descriptor";
 							break;
-						case SerialStrIndex:				// 303
+						case StringIndex::Serial:				// 303
 							subtype = "Get Serial Str Descriptor";
 							break;
-					    case CDCStrIndex:					// 304
+					    case StringIndex::CommunicationClass:					// 304
 							subtype = "Get CDC Str Descriptor";
 							break;
 						}
@@ -657,6 +674,7 @@ void USB::OutputDebug()
 
 
 		if (usbDebug[evNo].Interrupt != 0) {
+			/*
 			uartSendString(std::to_string(usbDebug[evNo].eventNo) + ","
 					+ HexToString(usbDebug[evNo].Interrupt, false) + ","
 					+ interrupt + "," + subtype + ","
@@ -669,6 +687,7 @@ void USB::OutputDebug()
 					+ HexByte(usbDebug[evNo].PacketSize) + ","
 					+ HexToString(usbDebug[evNo].xferBuff0, true) + " "
 					+ HexToString(usbDebug[evNo].xferBuff1, true) + "\n");
+					*/
 		}
 		evNo = (evNo + 1) % USB_DEBUG_COUNT;
 	}

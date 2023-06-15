@@ -8,9 +8,9 @@
 #include <string>
 
 // Enables capturing of debug data for output over STLink UART on dev boards
-#define USB_DEBUG false
+#define USB_DEBUG true
 #if (USB_DEBUG)
-#include "uartHandler.h"
+//#include "uartHandler.h"
 extern bool USBDebug;
 #define USB_DEBUG_COUNT 400
 #endif
@@ -67,6 +67,7 @@ public:
 	void SendString(const char* s);
 	void SendString(std::string s);
 	size_t SendString(const unsigned char* s, size_t len);
+	uint32_t StringToUnicode(const std::string_view desc, uint8_t* unicode);
 
 	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
 
@@ -78,11 +79,11 @@ public:
 	bool transmitting;
 
 private:
-	static constexpr const char* manufacturerString = "Mountjoy Modular";
-	static constexpr const char* productString      = "Mountjoy Quango";
-	static constexpr const char* cdcString          = "Mountjoy Quango CDC";
-
-
+	static constexpr std::string_view manufacturerString = "Mountjoy Modular";
+	static constexpr std::string_view productString      = "Mountjoy Quango";
+	static constexpr std::string_view cdcString          = "Mountjoy Quango CDC";
+	static constexpr std::string_view midiString          = "Mountjoy Quango MIDI";
+	static constexpr uint8_t usbSerialNoSize = 24;
 
 	void ProcessSetupPacket();
 	void ReadPMA(uint16_t wPMABufAddr, uint16_t wNBytes);
@@ -95,7 +96,7 @@ private:
 	void IntToUnicode(uint32_t value, uint8_t* pbuf, uint8_t len);
 	uint32_t GetString(const char* desc);
 	uint32_t MakeConfigDescriptor();
-	void StringToTxBuff(const char* desc);
+	void SerialToUnicode();
 
 	std::array<USBHandler*, 4>classesByInterface;		// Lookup tables to get appropriate class handlers (set in handler constructor)
 	std::array<USBHandler*, 4>classByEP;
@@ -108,6 +109,7 @@ private:
 	uint8_t cmdOpCode;				// stores class specific operation codes (eg CDC set line config)
 	uint8_t devAddress = 0;			// Temporarily hold the device address as it cannot stored in the register until the 0 address response has been handled
 
+	uint8_t stringDescr[128];
 	uint8_t configDescriptor[255];
 
 	struct usbRequest {
