@@ -379,7 +379,8 @@ void USB::GetDescriptor()
 		break;
 
 	case ConfigurationDescriptor:
-		return EP0In(USBD_CDC_CfgFSDesc, sizeof(USBD_CDC_CfgFSDesc));
+		//return EP0In(USBD_CDC_CfgFSDesc, sizeof(USBD_CDC_CfgFSDesc));
+		return EP0In(configDescriptor, MakeConfigDescriptor());		// Construct config descriptor from individual classes
 		break;
 
 	case BosDescriptor:
@@ -449,7 +450,7 @@ uint32_t USB::MakeConfigDescriptor()
 	for (auto c : classByEP) {
 		if (c != nullptr) {
 			const uint8_t* descBuff = nullptr;
-			uint32_t descSize = c-> GetInterfaceDescriptor(&descBuff);
+			uint32_t descSize = c->GetInterfaceDescriptor(&descBuff);
 			memcpy(&configDescriptor[descPos], descBuff, descSize);
 			descPos += descSize;
 		}

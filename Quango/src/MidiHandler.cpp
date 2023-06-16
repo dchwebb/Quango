@@ -212,7 +212,7 @@ const uint8_t MidiHandler::Descriptor[] = {
 	USB::ClassSpecificInterfaceDescriptor,	// bDescriptorType: Class Specific Interface Descriptor
 	0x01,									// header functional descriptor
 	0x0, 0x01,								// bcdADC
-	MidiHandler::MidiClassDescSize, 0,					// wTotalLength
+	MidiHandler::MidiClassDescSize, 0,		// wTotalLength
 
 	// B.4.3 MIDI IN Jack Descriptor (Embedded)
 	0x06,									// bLength
