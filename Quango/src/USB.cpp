@@ -592,7 +592,7 @@ void USB::OutputDebug()
 {
 	USBDebug = false;
 
-//	uartSendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
+	uart.SendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
 	uint16_t evNo = usbDebugEvent % USB_DEBUG_COUNT;
 	std::string interrupt, subtype;
 
@@ -674,8 +674,7 @@ void USB::OutputDebug()
 
 
 		if (usbDebug[evNo].Interrupt != 0) {
-			/*
-			uartSendString(std::to_string(usbDebug[evNo].eventNo) + ","
+			uart.SendString(std::to_string(usbDebug[evNo].eventNo) + ","
 					+ HexToString(usbDebug[evNo].Interrupt, false) + ","
 					+ interrupt + "," + subtype + ","
 					+ std::to_string(usbDebug[evNo].endpoint) + ","
@@ -687,7 +686,7 @@ void USB::OutputDebug()
 					+ HexByte(usbDebug[evNo].PacketSize) + ","
 					+ HexToString(usbDebug[evNo].xferBuff0, true) + " "
 					+ HexToString(usbDebug[evNo].xferBuff1, true) + "\n");
-					*/
+
 		}
 		evNo = (evNo + 1) % USB_DEBUG_COUNT;
 	}

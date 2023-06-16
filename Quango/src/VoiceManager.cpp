@@ -7,7 +7,7 @@ VoiceManager voiceManager;
 
 void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
-	GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
+	//GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
 
 	if (on) {
 		// Locate next available note in each channel
@@ -71,7 +71,7 @@ void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 
 
 
-	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
+	//GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
 }
 
 
@@ -142,7 +142,7 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
 
 void VoiceManager::Pitchbend(uint16_t pitch)
 {
-	GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
+	//GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
 
 	// Raw pitchbend data is 0-16384 centered at 8192
 	pitchbend = (static_cast<float>(pitch - 8192) / 8192.0f) * pitchbendSemitones;
@@ -154,6 +154,6 @@ void VoiceManager::Pitchbend(uint16_t pitch)
 		}
 	}
 
-	GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
+	//GPIOC->ODR &= ~GPIO_ODR_OD12;		// Toggle test pin 2
 }
 

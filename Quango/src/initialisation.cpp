@@ -129,8 +129,9 @@ void InitIO()
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPD11_0;			// Activate pull-up
 
 	// Debug pins PD0, PC12
-	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD5: Test pin 1
-	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
+	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD0: Test pin 1
+//	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
+
 }
 
 
