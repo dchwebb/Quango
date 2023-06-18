@@ -49,8 +49,8 @@ void MidiHandler::DataOut()
 
 void MidiHandler::ActivateEP()
 {
-	EndPointActivate(USB::Midi_In,   Direction::in,  EndPointType::Bulk);
-	EndPointActivate(USB::Midi_Out,  Direction::out, EndPointType::Bulk);
+	EndPointActivate(USB::Midi_In,   Direction::in,  EndPointType::Bulk, 0);
+	EndPointActivate(USB::Midi_Out,  Direction::out, EndPointType::Bulk, 0);
 
 	EndPointTransfer(Direction::out, USB::Midi_Out, USB::ep_maxPacket);
 }

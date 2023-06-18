@@ -24,6 +24,8 @@ typedef struct {
   volatile uint16_t COUNT_RX;
 } USB_PMA_TypeDef;
 
+// 1KB USB PMA at 0x4000 6000 - 0x4000 63FF
+
 // Create struct for easy access to endpoint registers
 typedef struct {
 	volatile uint16_t EPR;
