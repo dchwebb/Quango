@@ -85,11 +85,12 @@ void CDCHandler::ProcessCommand()
 
 	std::string_view cmd {comCmd};
 
-	if (cmd.compare("info\n") == 0) {		// Print diagnostic information
+	if (cmd.compare("info") == 0) {		// Print diagnostic information
 
+		//usb->SendString("test");
 		usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
 
-	} else if (cmd.compare("help\n") == 0) {
+	} else if (cmd.compare("help") == 0) {
 
 		usb->SendString("Mountjoy Quango\r\n"
 				"\r\nSupported commands:\r\n"
@@ -104,12 +105,12 @@ void CDCHandler::ProcessCommand()
 		);
 
 #if (USB_DEBUG)
-	} else if (cmd.compare("usbdebug\n") == 0) {				// Configure gate LED
+	} else if (cmd.compare("usbdebug") == 0) {				// Configure gate LED
 		USBDebug = true;
 		usb->SendString("Press link button to dump output\r\n");
 #endif
 
-	} else if (cmd.compare("calib\n") == 0) {				// Print calibration settings
+	} else if (cmd.compare("calib") == 0) {				// Print calibration settings
 		auto buffPos = buf;
 		buffPos += sprintf(buffPos, "\r\nCalibration Settings: ");
 		for (uint8_t chn = 0; chn < 2; ++chn) {
@@ -124,12 +125,6 @@ void CDCHandler::ProcessCommand()
 		sprintf(buffPos, "\r\n\0");
 		usb->SendString(buf);
 
-
-	} else if (cmd.compare("l\n") == 0) {				// Long envelope times
-		//envelope.longTimes = true;
-
-	} else if (cmd.compare("s\n") == 0) {				// Short envelope times
-		//envelope.longTimes = false;
 
 
 	} else {

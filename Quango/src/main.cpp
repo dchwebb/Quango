@@ -29,21 +29,21 @@ extern uint32_t SystemCoreClock;
 int main(void)
 {
 	SystemInit();						// Activates floating point coprocessor and resets clock
-//	InitSystemClock();					// Configure the clock and PLL
+	InitSystemClock();					// Configure the clock and PLL
 	SystemCoreClockUpdate();			// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
-//	InitDAC();							// FIXME - calibrate
-//	InitIO();
-//	InitPWMTimer();
-//	InitADC1(&adc.PitchDetect, 2);
-//	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA.attack), 4);
-//	InitADC4(&adc.EnvB.level, 5);
-//	InitMidiUART();
-//	InitSPI2();
-//	InitSPI1();
-//	InitEnvTimer();
-//	InitTunerTimer();
-//	InitCordic();
+	InitDAC();							// FIXME - calibrate
+	InitIO();
+	InitPWMTimer();
+	InitADC1(&adc.PitchDetect, 2);
+	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA.attack), 4);
+	InitADC4(&adc.EnvB.level, 5);
+	InitMidiUART();
+	InitSPI2();
+	InitSPI1();
+	InitEnvTimer();
+	InitTunerTimer();
+	InitCordic();
 	usb.InitUSB();
 
 	calibZeroPos = CalcZeroSize();
