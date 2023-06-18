@@ -9,7 +9,7 @@ volatile uint32_t SysTickVal;
 
 volatile ADCValues adc;
 USB usb;
-SerialHandler serial(usb);
+//SerialHandler serial(usb);
 
 
 int16_t vCalibOffset = 2047;
@@ -48,7 +48,8 @@ int main(void)
 
 	calibZeroPos = CalcZeroSize();
 	while (1) {
-		serial.Command();				// Check for incoming CDC commands
+		//serial.Command();				// Check for incoming CDC commands
+		usb.cdc.ProcessCommand();	// Check for incoming USB serial commands
 
 #if (USB_DEBUG)
 		if (outputUSBDebug) {

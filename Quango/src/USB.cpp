@@ -270,6 +270,7 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 			if ((USB_EPR[epIndex].EPR & USB_EP_CTR_RX) != 0) {
 				ClearRxInterrupt(epIndex);
 				
+				/*
 				rxCount = USB_PMA[epIndex].COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
 				if (rxCount != 0) {
 					ReadPMA(USB_PMA[epIndex].ADDR_RX, rxCount);
@@ -277,6 +278,15 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 				SetRxStatus(epIndex, USB_EP_RX_VALID);
 
 				cdcDataHandler(rxBuff, rxCount);
+	*/
+				classByEP[epIndex]->outBuffCount = USB_PMA[epIndex].COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
+				if (classByEP[epIndex]->outBuffCount != 0) {
+					ReadPMA(USB_PMA[epIndex].ADDR_RX, classByEP[epIndex]);
+				}
+				SetRxStatus(epIndex, USB_EP_RX_VALID);
+
+
+				classByEP[epIndex]->DataOut();
 			}
 
 			if ((USB_EPR[epIndex].EPR & USB_EP_CTR_TX) != 0) {

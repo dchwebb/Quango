@@ -69,7 +69,7 @@ public:
 	size_t SendString(const unsigned char* s, size_t len);
 	uint32_t StringToUnicode(const std::string_view desc, uint8_t* unicode);
 
-	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
+//	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
 
 	EP0Handler  ep0  = EP0Handler(this, 0, 0, NoInterface);
 	MidiHandler midi = MidiHandler(this, USB::Midi_In, USB::Midi_Out, MidiInterface);
