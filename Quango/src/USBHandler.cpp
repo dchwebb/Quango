@@ -22,7 +22,7 @@ void USBHandler::EndPointActivate(const uint8_t ep, const Direction d, const End
 
 void USBHandler::SetupIn(const uint32_t size, const uint8_t* buff)
 {
-	//usb->EP0In(buff, size);
+	usb->EP0In(buff, size);
 }
 
 

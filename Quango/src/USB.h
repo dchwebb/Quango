@@ -86,7 +86,8 @@ private:
 	static constexpr uint8_t usbSerialNoSize = 24;
 
 	void ProcessSetupPacket();
-	void ReadPMA(uint16_t wPMABufAddr, uint16_t wNBytes);
+	void ReadPMA(uint16_t pma, uint16_t bytes);
+	void ReadPMA(uint16_t pma, USBHandler* handler);
 	void WritePMA(uint16_t wPMABufAddr, uint16_t wNBytes);
 	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress);
 	void GetDescriptor();
@@ -112,21 +113,22 @@ private:
 	uint8_t stringDescr[128];
 	uint8_t configDescriptor[255];
 
-	struct usbRequest {
-		uint8_t bmRequest;
-		uint8_t bRequest;
-		uint16_t wValue;
-		uint16_t wIndex;
-		uint16_t wLength;
-
-		void loadData(const uint8_t* data) {
-			bmRequest = data[0];
-			bRequest = data[1];
-			wValue = static_cast<uint16_t>(data[2]) + (data[3] << 8);
-			wIndex = static_cast<uint16_t>(data[4]) + (data[5] << 8);
-			wLength = static_cast<uint16_t>(data[6]) + (data[7] << 8);
-		}
-	} req;
+	usbRequest req;
+//	struct usbRequest {
+//		uint8_t bmRequest;
+//		uint8_t bRequest;
+//		uint16_t wValue;
+//		uint16_t wIndex;
+//		uint16_t wLength;
+//
+//		void loadData(const uint8_t* data) {
+//			bmRequest = data[0];
+//			bRequest = data[1];
+//			wValue = static_cast<uint16_t>(data[2]) + (data[3] << 8);
+//			wIndex = static_cast<uint16_t>(data[4]) + (data[5] << 8);
+//			wLength = static_cast<uint16_t>(data[6]) + (data[7] << 8);
+//		}
+//	} req;
 
 	struct USBD_CDC_LineCodingTypeDef {
 		uint32_t bitrate;    					// Data terminal rate in bits per sec.
