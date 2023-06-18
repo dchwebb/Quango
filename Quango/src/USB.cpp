@@ -124,7 +124,7 @@ void USB::ProcessSetupPacket()
 
 	// Previously USBD_StdItfReq
 	} else if ((req.RequestType & USB_REQ_RECIPIENT_MASK) == RequestRecipientInterface && (req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
-
+/*
 		if (req.Length != 0) {
 			if ((req.RequestType & USB_REQ_DIRECTION_MASK) != 0)	{		// Device to host
 				// CDC request 0xA1, 0x21, 0x0, 0x0, 0x7		GetLineCoding 0xA1 0x21 0 Interface 7; Data: Line Coding Data Structure
@@ -143,6 +143,18 @@ void USB::ProcessSetupPacket()
 			// 0x21, 0x20, 0x0, 0x0, 0x0	SetLineCoding       0x21 | 0x20 | 0 | Interface | 0 | Line Coding Data Structure
 			EPStartXfer(Direction::in, 0, 0);
 		}
+		*/
+
+
+		// req.Index holds interface - locate which handler this relates to
+		if (req.Length > 0) {
+			classesByInterface[req.Index]->ClassSetup(req);
+		} else {
+			EPStartXfer(Direction::in, 0, 0);
+		}
+
+
+
 	} else {
 		SetTxStatus(0, USB_EP_TX_STALL);
 	}
@@ -229,7 +241,7 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
 					if (rxCount != 0) {
 						ReadPMA(0x18, rxCount);
-
+/*
 						// In CDC mode after 0x21 0x20 packets (line coding commands)
 						if (devState == DeviceState::Configured && cmdOpCode != 0) {
 							if (cmdOpCode == 0x20) {			// SET_LINE_CODING - capture the data passed to return when queried with GET_LINE_CODING
@@ -237,6 +249,16 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 							}
 							EPStartXfer(Direction::in, 0, 0);
 							cmdOpCode = 0;
+						}
+						*/
+						if (devState == DeviceState::Configured && classPendingData) {
+							if ((req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
+								// Previous OUT interrupt contains instruction (eg host sending CDC LineCoding); next command sends data (Eg LineCoding data)
+								//classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)ep0.outBuff);
+								classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)rxBuff);
+							}
+							classPendingData = false;
+							EPStartXfer(Direction::in, 0, 0);
 						}
 					}
 					SetRxStatus(0, USB_EP_RX_VALID);
@@ -246,8 +268,8 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 		} else {
 			// Non zero endpoint
 			if ((USB_EPR[epIndex].EPR & USB_EP_CTR_RX) != 0) {
-
 				ClearRxInterrupt(epIndex);
+				
 				rxCount = USB_PMA[epIndex].COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
 				if (rxCount != 0) {
 					ReadPMA(USB_PMA[epIndex].ADDR_RX, rxCount);
