@@ -267,11 +267,92 @@
                </fields>
             </register>
 				
+				<register>
+               <name>ADDR3_TX</name>
+               <displayName>ADDR3_TX</displayName>
+               <description>See p.2013</description>
+               <addressOffset>0x18</addressOffset>
+               <size>0x10</size>
+               <access>read-write</access>
+               <resetValue>0x00000000</resetValue>
+               <fields>
+                  <field>
+                     <name>ADDR3_TX</name>
+                     <description>ADDR3_TX</description>
+                     <bitOffset>0</bitOffset>
+                     <bitWidth>16</bitWidth>
+                  </field>
+                </fields>
+            </register>
+            <register>
+               <name>COUNT3_TX</name>
+               <displayName>COUNT3_TX</displayName>
+               <description>USB endpoint n register</description>
+               <addressOffset>0x1a</addressOffset>
+               <size>0x10</size>
+               <access>read-write</access>
+               <resetValue>0x00000000</resetValue>
+               <fields>
+                  <field>
+                     <name>COUNT3_TX</name>
+                     <description>COUNT3_TX</description>
+                     <bitOffset>0</bitOffset>
+                     <bitWidth>10</bitWidth>
+                  </field>
+               </fields>
+            </register>
+            <register>
+               <name>ADDR3_RX</name>
+               <displayName>ADDR3_RX</displayName>
+               <description>USB endpoint n register</description>
+               <addressOffset>0x1c</addressOffset>
+               <size>0x10</size>
+               <access>read-write</access>
+               <resetValue>0x00000000</resetValue>
+               <fields>
+                  <field>
+                     <name>ADDR3_RX</name>
+                     <description>ADDR3_RX</description>
+                     <bitOffset>0</bitOffset>
+                     <bitWidth>16</bitWidth>
+                  </field>
+               </fields>
+            </register>
+             <register>
+               <name>COUNT3_RX</name>
+               <displayName>COUNT3_RX</displayName>
+               <description>USB endpoint n register</description>
+               <addressOffset>0x1e</addressOffset>
+               <size>0x10</size>
+               <access>read-write</access>
+               <resetValue>0x00000000</resetValue>
+               <fields>
+                  <field>
+                     <name>COUNT3_RX</name>
+                     <description>COUNT2_RX</description>
+                     <bitOffset>0</bitOffset>
+                     <bitWidth>10</bitWidth>
+                  </field>
+                  <field>
+                     <name>NUM_BLOCK</name>
+                     <description>For 32 byte blocks, 0 = 32 bytes, 1 = 64 bytes; 2 = 96 bytes etc</description>
+                     <bitOffset>10</bitOffset>
+                     <bitWidth>5</bitWidth>
+                  </field>
+						                  <field>
+                     <name>BLSIZE</name>
+                     <description>0: 2 byte block size; 1: 32 byte block size</description>
+                     <bitOffset>15</bitOffset>
+                     <bitWidth>1</bitWidth>
+                  </field>
+               </fields>
+            </register>
+				
             <register>
                <name>EP0_RX_BUFFER</name>
                <displayName>EP0_BUFFER</displayName>
                <description>USB endpoint n register</description>
-               <addressOffset>0x18</addressOffset>
+               <addressOffset>0x20</addressOffset>
                <size>0x10</size>
                <access>read-write</access>
                <resetValue>0x00000000</resetValue>
@@ -288,7 +369,7 @@
                <name>EP0_RX_BUFFER2</name>
                <displayName>EP0_BUFFER</displayName>
                <description>USB endpoint n register</description>
-               <addressOffset>0x1A</addressOffset>
+               <addressOffset>0x22</addressOffset>
                <size>0x10</size>
                <access>read-write</access>
                <resetValue>0x00000000</resetValue>

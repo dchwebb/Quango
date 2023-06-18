@@ -102,7 +102,7 @@ private:
 	void SerialToUnicode();
 
 	std::array<USBHandler*, 4>classesByInterface;		// Lookup tables to get appropriate class handlers (set in handler constructor)
-	std::array<USBHandler*, 4>classByEP;
+	std::array<USBHandler*, 3>classByEP;
 
 	uint8_t rxBuff[ep_maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 	uint32_t rxCount;				// Amount of data to receive

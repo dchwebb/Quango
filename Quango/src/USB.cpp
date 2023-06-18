@@ -106,18 +106,18 @@ void USB::ProcessSetupPacket()
 		case Request::SetConfiguration:
 			if (devState == DeviceState::Addressed) {
 				devState = DeviceState::Configured;
-				/*
+
 				for (auto c : classByEP) {
 					c->ActivateEP();
 				}
 
-*/
-				ActivateEndpoint(CDC_In,  Direction::in,  Bulk,      0xC0);			// Activate CDC in endpoint
-				ActivateEndpoint(CDC_Out, Direction::out, Bulk,      0x110);		// Activate CDC out endpoint
-				ActivateEndpoint(CDC_Cmd, Direction::in,  Interrupt, 0x100);		// Activate Command IN EP
+				/*
+				ActivateEndpoint(CDC_In,  Direction::in,  Bulk,      0x120);			// Activate CDC in endpoint
+				ActivateEndpoint(CDC_Out, Direction::out, Bulk,      0x160);		// Activate CDC out endpoint
+				ActivateEndpoint(CDC_Cmd, Direction::in,  Interrupt, 0x1A0);		// Activate Command IN EP
 				//USB_ActivateEndpoint(MIDI_In,  Direction::in,  Bulk);			// Activate MIDI in endpoint
 				//USB_ActivateEndpoint(MIDI_Out, Direction::out, Bulk);			// Activate MIDI out endpoint
-
+*/
 				EPStartXfer(Direction::in, 0, 0);
 			}
 			break;
