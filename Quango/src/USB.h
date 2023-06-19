@@ -90,7 +90,7 @@ private:
 	void ReadPMA(uint16_t pma, uint16_t bytes);
 	void ReadPMA(uint16_t pma, USBHandler* handler);
 	void WritePMA(uint16_t wPMABufAddr, uint16_t wNBytes);
-	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress);
+	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype);
 	void GetDescriptor();
 	void EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t xfer_len);
 	void EP0In(const uint8_t* buff, uint32_t size);
@@ -103,12 +103,13 @@ private:
 	std::array<USBHandler*, 4>classesByInterface;		// Lookup tables to get appropriate class handlers (set in handler constructor)
 	std::array<USBHandler*, 3>classByEP;
 
+	static constexpr uint32_t pmaStartAddr = 0x20;	// PMA memory will be assigned sequentially to each endpoint from this address in 64 byte chunks (allowing space for PMA header)
+	uint32_t pmaAddress;
 	uint8_t rxBuff[ep_maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 	uint32_t rxCount;				// Amount of data to receive
 	const uint8_t* txBuff;			// Pointer to transmit buffer (for transferring data to IN endpoint)
 	uint32_t txBuffSize;			// Size of transmit buffer
 	uint32_t txRemaining;			// If transfer is larger than maximum packet size store remaining byte count
-	uint8_t cmdOpCode;				// stores class specific operation codes (eg CDC set line config)
 	uint8_t devAddress = 0;			// Temporarily hold the device address as it cannot stored in the register until the 0 address response has been handled
 
 	uint8_t stringDescr[128];

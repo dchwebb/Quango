@@ -111,13 +111,6 @@ void USB::ProcessSetupPacket()
 					c->ActivateEP();
 				}
 
-				/*
-				ActivateEndpoint(CDC_In,  Direction::in,  Bulk,      0x120);			// Activate CDC in endpoint
-				ActivateEndpoint(CDC_Out, Direction::out, Bulk,      0x160);		// Activate CDC out endpoint
-				ActivateEndpoint(CDC_Cmd, Direction::in,  Interrupt, 0x1A0);		// Activate Command IN EP
-				//USB_ActivateEndpoint(MIDI_In,  Direction::in,  Bulk);			// Activate MIDI in endpoint
-				//USB_ActivateEndpoint(MIDI_Out, Direction::out, Bulk);			// Activate MIDI out endpoint
-*/
 				EPStartXfer(Direction::in, 0, 0);
 			}
 			break;
@@ -129,27 +122,6 @@ void USB::ProcessSetupPacket()
 
 	// Previously USBD_StdItfReq
 	} else if ((req.RequestType & USB_REQ_RECIPIENT_MASK) == RequestRecipientInterface && (req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
-/*
-		if (req.Length != 0) {
-			if ((req.RequestType & USB_REQ_DIRECTION_MASK) != 0)	{		// Device to host
-				// CDC request 0xA1, 0x21, 0x0, 0x0, 0x7		GetLineCoding 0xA1 0x21 0 Interface 7; Data: Line Coding Data Structure
-				// 0xA1 [1|01|00001] Device to host | Class | Interface
-				txBuffSize = req.Length;
-				txBuff = (uint8_t*)&USBD_CDC_LineCoding;
-
-				EPStartXfer(Direction::in, 0, req.Length);
-			} else {
-				//CDC request 0x21, 0x20, 0x0, 0x0, 0x7			 0x21 = [0|01|00001] Host to device | Class | Interface
-				cmdOpCode = req.Request;
-				EPStartXfer(Direction::out, 0, req.Length);
-			}
-		} else {
-			// 0x21, 0x22, 0x0, 0x0, 0x0	SetControlLineState 0x21 | 0x22 | 2 | Interface | 0 | None
-			// 0x21, 0x20, 0x0, 0x0, 0x0	SetLineCoding       0x21 | 0x20 | 0 | Interface | 0 | Line Coding Data Structure
-			EPStartXfer(Direction::in, 0, 0);
-		}
-		*/
-
 
 		// req.Index holds interface - locate which handler this relates to
 		if (req.Length > 0) {
@@ -157,8 +129,6 @@ void USB::ProcessSetupPacket()
 		} else {
 			EPStartXfer(Direction::in, 0, 0);
 		}
-
-
 
 	} else {
 		SetTxStatus(0, USB_EP_TX_STALL);
@@ -237,7 +207,7 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 
 				if ((USBP->EP0R & USB_EP_SETUP) != 0) {
 					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX_Msk;
-					ReadPMA(USB_PMA[0].ADDR_RX, rxCount);					// Read setup data into rxBuff
+					ReadPMA(USB_PMA[0].ADDR_RX, rxCount);	// Read setup data into rxBuff
 					ClearRxInterrupt(0);					// clears 8000 interrupt
 					ProcessSetupPacket();					// Parse setup packet into request, locate data (eg descriptor) and populate TX buffer
 
@@ -321,8 +291,9 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 	if (ReadInterrupts(USB_ISTR_RESET))	{
 		USBP->ISTR &= ~USB_ISTR_RESET;
 
-		ActivateEndpoint(0, Direction::out, Control, 0x20);
-		ActivateEndpoint(0, Direction::in,  Control, 0x60);
+		pmaAddress = pmaStartAddr;						// Reset PMA allocation start address
+		ActivateEndpoint(0, Direction::out, Control);
+		ActivateEndpoint(0, Direction::in,  Control);
 
 		USBP->DADDR = USB_DADDR_EF;						// Enable endpoint and set address to 0
 	}
@@ -356,7 +327,7 @@ void USB::InitUSB()
 }
 
 
-void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype, uint16_t pmaAddress)
+void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype)
 {
 	endpoint = endpoint & 0xF;
 	uint16_t ep_type;
@@ -394,6 +365,8 @@ void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType e
 		SetRxStatus(endpoint, USB_EP_RX_VALID);
 	}
 
+	// Increment PMA address in 64 byte chunks
+	pmaAddress += 0x40;
 }
 
 // procedure to allow classes to pass configuration data back via endpoint 0 (eg CDC line setup, MSC MaxLUN etc)
@@ -499,7 +472,7 @@ uint32_t USB::MakeConfigDescriptor()
 		ConfigurationDescriptor,			// bDescriptorType: Configuration
 		LOBYTE(descPos),					// wTotalLength
 		HIBYTE(descPos),
-		interfaceCount,						// bNumInterfaces: 5 [1 MSC, 2 CDC, 2 MIDI]
+		interfaceCount,						// bNumInterfaces: 4 [2 CDC, 2 MIDI]
 		0x01,								// bConfigurationValue: Configuration value
 		0x04,								// iConfiguration: Index of string descriptor describing the configuration
 		0xC0,								// bmAttributes: self powered

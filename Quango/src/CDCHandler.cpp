@@ -32,14 +32,9 @@ void CDCHandler::DataOut()
 
 void CDCHandler::ActivateEP()
 {
-	EndPointActivate(USB::CDC_In,   Direction::in,  EndPointType::Bulk,      0x120);		// Activate CDC in endpoint
-	EndPointActivate(USB::CDC_Out,  Direction::out, EndPointType::Bulk,      0x160);		// Activate CDC out endpoint
-	EndPointActivate(USB::CDC_Cmd,  Direction::in,  EndPointType::Interrupt, 0x1A0);		// Activate Command IN EP
-
-
-//	EndPointActivate(USB::CDC_In,   Direction::in,  EndPointType::Bulk);			// Activate CDC in endpoint
-//	EndPointActivate(USB::CDC_Out,  Direction::out, EndPointType::Bulk);			// Activate CDC out endpoint
-//	EndPointActivate(USB::CDC_Cmd,  Direction::in,  EndPointType::Interrupt);		// Activate Command IN EP
+	EndPointActivate(USB::CDC_In,   Direction::in,  EndPointType::Bulk);			// Activate CDC in endpoint
+	EndPointActivate(USB::CDC_Out,  Direction::out, EndPointType::Bulk);			// Activate CDC out endpoint
+	EndPointActivate(USB::CDC_Cmd,  Direction::in,  EndPointType::Interrupt);		// Activate Command IN EP
 
 	EndPointTransfer(Direction::out, USB::CDC_Out, USB::ep_maxPacket);
 }

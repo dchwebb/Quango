@@ -12,7 +12,8 @@ void MidiHandler::DataOut()
 {
 	// Handle incoming midi command here
 	const uint8_t* outBuffBytes = reinterpret_cast<const uint8_t*>(outBuff);
-/*
+	midiEvent(*outBuff);
+	/*
 	if (!partialSysEx && outBuffCount == 4) {
 		midiEvent(*outBuff);
 
@@ -49,8 +50,8 @@ void MidiHandler::DataOut()
 
 void MidiHandler::ActivateEP()
 {
-	EndPointActivate(USB::Midi_In,   Direction::in,  EndPointType::Bulk, 0xA0);
-	EndPointActivate(USB::Midi_Out,  Direction::out, EndPointType::Bulk, 0xE0);
+	EndPointActivate(USB::Midi_In,   Direction::in,  EndPointType::Bulk);
+	EndPointActivate(USB::Midi_Out,  Direction::out, EndPointType::Bulk);
 
 	EndPointTransfer(Direction::out, USB::Midi_Out, USB::ep_maxPacket);
 }
