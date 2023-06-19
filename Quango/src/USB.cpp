@@ -90,7 +90,7 @@ void USB::ProcessSetupPacket()
 	usbDebug[usbDebugNo].Request = req;
 #endif
 	// Previously USBD_StdDevReq
-	if ((req.RequestType & USB_REQ_RECIPIENT_MASK) == RequestRecipientDevice && (req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeStandard) {
+	if ((req.RequestType & recipientMask) == RequestRecipientDevice && (req.RequestType & requestTypeMask) == RequestTypeStandard) {
 		switch (static_cast<Request>(req.Request)) {
 		case Request::GetDescriptor:
 			GetDescriptor();
@@ -121,7 +121,7 @@ void USB::ProcessSetupPacket()
 		}
 
 	// Previously USBD_StdItfReq
-	} else if ((req.RequestType & USB_REQ_RECIPIENT_MASK) == RequestRecipientInterface && (req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
+	} else if ((req.RequestType & recipientMask) == RequestRecipientInterface && (req.RequestType & requestTypeMask) == RequestTypeClass) {
 
 		// req.Index holds interface - locate which handler this relates to
 		if (req.Length > 0) {
@@ -139,7 +139,7 @@ void USB::ProcessSetupPacket()
 // EPStartXfer setup and starts a transfer over an EP
 void USB::EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t len)
 {
-	uint8_t epIndex = (endpoint & 0xF);
+	uint8_t epIndex = (endpoint & epAddrMask);
 
 	if (direction == Direction::in) {						// IN endpoint
 		if (len > ep_maxPacket) {
@@ -218,7 +218,7 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 						ReadPMA(USB_PMA[0].ADDR_RX, rxCount);
 
 						if (devState == DeviceState::Configured && classPendingData) {
-							if ((req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
+							if ((req.RequestType & requestTypeMask) == RequestTypeClass) {
 								// Previous OUT interrupt contains instruction (eg host sending CDC LineCoding); next command sends data (Eg LineCoding data)
 								//classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)ep0.outBuff);
 								classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)rxBuff);
@@ -236,15 +236,6 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 			if ((USB_EPR[epIndex].EPR & USB_EP_CTR_RX) != 0) {
 				ClearRxInterrupt(epIndex);
 				
-				/*
-				rxCount = USB_PMA[epIndex].COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
-				if (rxCount != 0) {
-					ReadPMA(USB_PMA[epIndex].ADDR_RX, rxCount);
-				}
-				SetRxStatus(epIndex, USB_EP_RX_VALID);
-
-				cdcDataHandler(rxBuff, rxCount);
-	*/
 				classByEP[epIndex]->outBuffCount = USB_PMA[epIndex].COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
 				if (classByEP[epIndex]->outBuffCount != 0) {
 					ReadPMA(USB_PMA[epIndex].ADDR_RX, classByEP[epIndex]);
@@ -366,7 +357,7 @@ void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType e
 	}
 
 	// Increment PMA address in 64 byte chunks
-	pmaAddress += 0x40;
+	pmaAddress += ep_maxPacket;
 }
 
 // procedure to allow classes to pass configuration data back via endpoint 0 (eg CDC line setup, MSC MaxLUN etc)
@@ -648,7 +639,7 @@ void USB::OutputDebug()
 					subtype = "Set Address to " + std::to_string(usbDebug[evNo].Request.Value);
 				} else if (usbDebug[evNo].Request.Request == 9) {
 					subtype = "SET_CONFIGURATION";
-				} else if ((usbDebug[evNo].Request.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
+				} else if ((usbDebug[evNo].Request.RequestType & requestTypeMask) == RequestTypeClass) {
 					switch (usbDebug[evNo].Request.Request) {
 					case 0x20:
 						subtype = "CDC: Set Line Coding";

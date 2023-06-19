@@ -24,7 +24,7 @@ typedef struct {
   volatile uint16_t COUNT_RX;
 } USB_PMA_TypeDef;
 
-// 1KB USB PMA at 0x4000 6000 - 0x4000 63FF
+
 
 // Create struct for easy access to endpoint registers
 typedef struct {
@@ -35,10 +35,6 @@ typedef struct {
 #define  USB_PMA  ((USB_PMA_TypeDef*) USB_PMAADDR)
 #define  USB_EPR  ((USB_EPR_TypeDef*)(&USBP->EP0R))
 
-#define USB_REQ_RECIPIENT_MASK			0x03
-#define USB_REQ_DIRECTION_MASK			0x80
-#define USB_REQ_TYPE_MASK				0x60
-#define EP_ADDR_MASK					0x0F
 
 #define USBD_VID						0x483		// Vendor ID - use STMicro
 #define USBD_LANGID						1033		// Language - en-US
@@ -86,6 +82,11 @@ private:
 	static constexpr std::string_view midiString         = "Mountjoy Quango MIDI";
 	static constexpr uint8_t usbSerialNoSize = 24;
 
+	static constexpr uint32_t recipientMask = 0x03;
+	static constexpr uint32_t requestTypeMask = 0x60;
+	static constexpr uint32_t epAddrMask = 0x0F;
+
+
 	void ProcessSetupPacket();
 	void ReadPMA(uint16_t pma, uint16_t bytes);
 	void ReadPMA(uint16_t pma, USBHandler* handler);
@@ -116,13 +117,6 @@ private:
 	uint8_t configDescriptor[255];
 
 	usbRequest req;
-
-	struct USBD_CDC_LineCodingTypeDef {
-		uint32_t bitrate;    					// Data terminal rate in bits per sec.
-		uint8_t format;      					// Stop Bits: 0-1 Stop Bit; 1-1.5 Stop Bits; 2-2 Stop Bits
-		uint8_t paritytype;  					// Parity: 0 = None; 1 = Odd; 2 = Even; 3 = Mark; 4 = Space; 6 bDataBits 1 Data bits
-		uint8_t datatype;    					// Data bits (5, 6, 7,	8 or 16)
-	} USBD_CDC_LineCoding;
 
 	// USB standard device descriptor - in usbd_desc.c
 	const uint8_t USBD_FS_DeviceDesc[0x12] = {
