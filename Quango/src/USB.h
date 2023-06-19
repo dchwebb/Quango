@@ -88,7 +88,6 @@ private:
 
 
 	void ProcessSetupPacket();
-	void ReadPMA(uint16_t pma, uint16_t bytes);
 	void ReadPMA(uint16_t pma, USBHandler* handler);
 	void WritePMA(uint16_t wPMABufAddr, uint16_t wNBytes);
 	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype);
@@ -106,8 +105,6 @@ private:
 
 	static constexpr uint32_t pmaStartAddr = 0x20;	// PMA memory will be assigned sequentially to each endpoint from this address in 64 byte chunks (allowing space for PMA header)
 	uint32_t pmaAddress;
-	uint8_t rxBuff[ep_maxPacket] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
-	uint32_t rxCount;				// Amount of data to receive
 	const uint8_t* txBuff;			// Pointer to transmit buffer (for transferring data to IN endpoint)
 	uint32_t txBuffSize;			// Size of transmit buffer
 	uint32_t txRemaining;			// If transfer is larger than maximum packet size store remaining byte count

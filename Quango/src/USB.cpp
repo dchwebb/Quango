@@ -40,22 +40,6 @@ inline void SetRxStatus(uint8_t ep, uint16_t status)		// Set endpoint receive st
 	USB_EPR[ep].EPR = wRegVal | USB_EP_CTR_RX | USB_EP_CTR_TX;
 }
 
-// FIXME - replace this with one below that uses handler specific out buffers
-void USB::ReadPMA(uint16_t pma, uint16_t bytes)
-{
-	volatile uint16_t* pmaBuff = reinterpret_cast<volatile uint16_t*>(USB_PMAADDR + pma);		// Eg 0x40006018
-
-	for (int i = 0; i < (bytes + 1) / 2; i++) {
-		reinterpret_cast<volatile uint16_t*>(rxBuff)[i] = *pmaBuff++;				// pma buffer can only be read in 16 bit words
-	}
-
-#if (USB_DEBUG)
-	usbDebug[usbDebugNo].PacketSize = bytes;
-	usbDebug[usbDebugNo].xferBuff0 = ((uint32_t*)rxBuff)[0];
-	usbDebug[usbDebugNo].xferBuff1 = ((uint32_t*)rxBuff)[1];
-#endif
-}
-
 
 void USB::ReadPMA(uint16_t pma, USBHandler* handler)
 {
@@ -72,6 +56,7 @@ void USB::ReadPMA(uint16_t pma, USBHandler* handler)
 #endif
 }
 
+
 void USB::WritePMA(uint16_t pma, uint16_t bytes)
 {
 	volatile uint16_t* pmaBuff = reinterpret_cast<volatile uint16_t*>(USB_PMAADDR + pma);
@@ -84,7 +69,7 @@ void USB::WritePMA(uint16_t pma, uint16_t bytes)
 
 void USB::ProcessSetupPacket()
 {
-	req.loadData(rxBuff);		// Parse the setup request into the req object
+	req.loadData((uint8_t*)classByEP[0]->outBuff);		// Parse the setup request into the req object
 
 #if (USB_DEBUG)
 	usbDebug[usbDebugNo].Request = req;
@@ -206,22 +191,21 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 			} else {										// DIR = 1: Setup or OUT interrupt
 
 				if ((USBP->EP0R & USB_EP_SETUP) != 0) {
-					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX_Msk;
-					ReadPMA(USB_PMA[0].ADDR_RX, rxCount);	// Read setup data into rxBuff
-					ClearRxInterrupt(0);					// clears 8000 interrupt
-					ProcessSetupPacket();					// Parse setup packet into request, locate data (eg descriptor) and populate TX buffer
+					classByEP[0]->outBuffCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX_Msk;
+					ReadPMA(USB_PMA[0].ADDR_RX, classByEP[0]);	// Read setup data into  receive buffer
+					ClearRxInterrupt(0);						// clears 8000 interrupt
+					ProcessSetupPacket();						// Parse setup packet into request, locate data (eg descriptor) and populate TX buffer
 
 				} else {
 					ClearRxInterrupt(0);
-					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
-					if (rxCount != 0) {
-						ReadPMA(USB_PMA[0].ADDR_RX, rxCount);
+					classByEP[0]->outBuffCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
+					if (classByEP[0]->outBuffCount != 0) {
+						ReadPMA(USB_PMA[0].ADDR_RX, classByEP[0]);
 
 						if (devState == DeviceState::Configured && classPendingData) {
 							if ((req.RequestType & requestTypeMask) == RequestTypeClass) {
 								// Previous OUT interrupt contains instruction (eg host sending CDC LineCoding); next command sends data (Eg LineCoding data)
-								//classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)ep0.outBuff);
-								classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)rxBuff);
+								classesByInterface[req.Index]->ClassSetupData(req, (uint8_t*)ep0.outBuff);
 							}
 							classPendingData = false;
 							EPStartXfer(Direction::in, 0, 0);

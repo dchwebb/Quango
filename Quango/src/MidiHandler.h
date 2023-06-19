@@ -41,7 +41,7 @@ private:
 	void midiEvent(const uint32_t data);
 	void QueueInc();
 
-	uint32_t xfer_buff[64];									// OUT Data filled in RxLevel Interrupt
+	uint32_t xfer_buff[64] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 
 	// Struct for holding incoming USB MIDI data
 	union MidiData {

@@ -71,5 +71,5 @@ public:
 	uint32_t GetInterfaceDescriptor(const uint8_t** buffer) override {return 0;};
 
 private:
-	uint32_t ep0OutBuff[64];		// EP0 OUT Data filled in RxLevel Interrupt
+	uint32_t ep0OutBuff[64] __attribute__ ((aligned (4)));		// Receive data buffer - must be aligned to allow copying to other structures
 };
