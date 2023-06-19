@@ -54,7 +54,8 @@ public:
 	enum class DeviceState {Suspended, Addressed, Configured} devState;
 	enum EndPoint {Midi_In = 0x81, Midi_Out = 0x1, CDC_In = 0x82, CDC_Out = 0x2, CDC_Cmd = 0x83};
 	enum EndPointType {Control = 0, Isochronous = 1, Bulk = 2, Interrupt = 3};
-	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4, EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF, ClassSpecificInterfaceDescriptor = 0x24};
+	enum Descriptor {DeviceDescriptor = 0x1, ConfigurationDescriptor = 0x2, StringDescriptor = 0x3, InterfaceDescriptor = 0x4,
+		EndpointDescriptor = 0x5, DeviceQualifierDescriptor = 0x6, IadDescriptor = 0xb, BosDescriptor = 0xF, ClassSpecificInterfaceDescriptor = 0x24};
 	enum RequestRecipient {RequestRecipientDevice = 0x0, RequestRecipientInterface = 0x1, RequestRecipientEndpoint = 0x2};
 	enum RequestType {RequestTypeStandard = 0x0, RequestTypeClass = 0x20, RequestTypeVendor = 0x40};
 	enum class Request {GetStatus = 0x0, SetAddress = 0x5, GetDescriptor = 0x6, SetConfiguration = 0x9};
@@ -71,13 +72,11 @@ public:
 	size_t SendString(const unsigned char* s, size_t len);
 	uint32_t StringToUnicode(const std::string_view desc, uint8_t* unicode);
 
-//	std::function<void(uint8_t*,uint32_t)> cdcDataHandler;			// Declare data handler to store incoming CDC data
-
 	EP0Handler  ep0  = EP0Handler(this, 0, 0, NoInterface);
 	MidiHandler midi = MidiHandler(this, USB::Midi_In, USB::Midi_Out, MidiInterface);
 	CDCHandler  cdc  = CDCHandler(this,  USB::CDC_In,  USB::CDC_Out,  CDCCmdInterface);
-	bool classPendingData = false;			// Set when class setup command received and data pending
 
+	bool classPendingData = false;			// Set when class setup command received and data pending
 	bool transmitting;
 
 private:
@@ -116,21 +115,6 @@ private:
 	uint8_t configDescriptor[255];
 
 	usbRequest req;
-//	struct usbRequest {
-//		uint8_t bmRequest;
-//		uint8_t bRequest;
-//		uint16_t wValue;
-//		uint16_t wIndex;
-//		uint16_t wLength;
-//
-//		void loadData(const uint8_t* data) {
-//			bmRequest = data[0];
-//			bRequest = data[1];
-//			wValue = static_cast<uint16_t>(data[2]) + (data[3] << 8);
-//			wIndex = static_cast<uint16_t>(data[4]) + (data[5] << 8);
-//			wLength = static_cast<uint16_t>(data[6]) + (data[7] << 8);
-//		}
-//	} req;
 
 	struct USBD_CDC_LineCodingTypeDef {
 		uint32_t bitrate;    					// Data terminal rate in bits per sec.
@@ -161,112 +145,6 @@ private:
 			0x01								// bNumConfigurations
 	};
 
-	static const uint8_t cdcDescSize = 75;
-
-	const uint8_t USBD_CDC_CfgFSDesc[cdcDescSize] = {
-			// Configuration Descriptor
-			0x09,								// bLength: Configuration Descriptor size
-			ConfigurationDescriptor,			// bDescriptorType: Configuration
-			LOBYTE(cdcDescSize),				// wTotalLength
-			HIBYTE(cdcDescSize),
-			0x02,								// bNumInterfaces: 2 interfaces
-			0x01,								// bConfigurationValue: Configuration value
-			0x00,								// iConfiguration: Index of string descriptor describing the configuration
-			0xC0,								// bmAttributes: self powered
-			0x32,								// MaxPower 0 mA
-
-			//---------------------------------------------------------------------------
-	        // IAD Descriptor - Interface association descriptor for CDC class
-			0x08,								// bLength (8 bytes)
-			IadDescriptor,						// bDescriptorType
-			0x00,								// bFirstInterface
-			0x02,								// bInterfaceCount
-			0x02,								// bFunctionClass (Communications and CDC Control)
-			0x02,								// bFunctionSubClass
-			0x01,								// bFunctionProtocol
-			CommunicationClass,					// iFunction (String Descriptor 6)
-
-			// Interface Descriptor
-			0x09,								// bLength: Interface Descriptor size
-			InterfaceDescriptor,				// bDescriptorType: Interface
-			0x00,								// bInterfaceNumber: Number of Interface
-			0x00,								// bAlternateSetting: Alternate setting
-			0x01,								// bNumEndpoints: One endpoints used
-			0x02,								// bInterfaceClass: Communication Interface Class
-			0x02,								// bInterfaceSubClass: Abstract Control Model
-			0x01,								// bInterfaceProtocol: Common AT commands
-			CommunicationClass,					// iInterface
-
-			// Header Functional Descriptor
-			0x05,								// bLength: Endpoint Descriptor size
-			0x24,								// bDescriptorType: CS_INTERFACE
-			0x00,								// bDescriptorSubtype: Header Func Desc
-			0x10,								// bcdCDC: spec release number
-			0x01,
-
-			// Call Management Functional Descriptor
-			0x05,								// bFunctionLength
-			0x24,								// bDescriptorType: CS_INTERFACE
-			0x01,								// bDescriptorSubtype: Call Management Func Desc
-			0x00,								// bmCapabilities: D0+D1
-			0x01,								// bDataInterface: 1
-
-			// ACM Functional Descriptor
-			0x04,								// bFunctionLength
-			0x24,								// bDescriptorType: CS_INTERFACE
-			0x02,								// bDescriptorSubtype: Abstract Control Management desc
-			0x02,								// bmCapabilities
-
-			// Union Functional Descriptor
-			0x05,								// bFunctionLength
-			0x24,								// bDescriptorType: CS_INTERFACE
-			0x06,								// bDescriptorSubtype: Union func desc
-			0x00,								// bMasterInterface: Communication class interface
-			0x01,								// bSlaveInterface0: Data Class Interface
-
-			// Endpoint 2 Descriptor
-			0x07,								// bLength: Endpoint Descriptor size
-			EndpointDescriptor,					// bDescriptorType: Endpoint
-			CDC_Cmd,							// bEndpointAddress
-			Interrupt,							// bmAttributes: Interrupt
-			0x08,								// wMaxPacketSize
-			0x00,
-			0x10,								// bInterval
-
-			//---------------------------------------------------------------------------
-
-			// Data class interface descriptor
-			0x09,								// bLength: Endpoint Descriptor size
-			InterfaceDescriptor,				// bDescriptorType:
-			0x01,								// bInterfaceNumber: Number of Interface
-			0x00,								// bAlternateSetting: Alternate setting
-			0x02,								// bNumEndpoints: Two endpoints used
-			0x0A,								// bInterfaceClass: CDC
-			0x00,								// bInterfaceSubClass:
-			0x00,								// bInterfaceProtocol:
-			0x00,								// iInterface:
-
-			// Endpoint OUT Descriptor
-			0x07,								// bLength: Endpoint Descriptor size
-			EndpointDescriptor,					// bDescriptorType: Endpoint
-			CDC_Out,							// bEndpointAddress
-			Bulk,								// bmAttributes: Bulk
-			LOBYTE(ep_maxPacket),					// wMaxPacketSize:
-			HIBYTE(ep_maxPacket),
-			0x00,								// bInterval: ignore for Bulk transfer
-
-			// Endpoint IN Descriptor
-			0x07,								// bLength: Endpoint Descriptor size
-			EndpointDescriptor,					// bDescriptorType: Endpoint
-			CDC_In,								// bEndpointAddress
-			Bulk,								// bmAttributes: Bulk
-			LOBYTE(ep_maxPacket),					// wMaxPacketSize:
-			HIBYTE(ep_maxPacket),
-			0x00								// bInterval: ignore for Bulk transfer
-	};
-
-
-
 	// Binary Object Store (BOS) Descriptor
 	const uint8_t USBD_FS_BOSDesc[12] = {
 			0x05,								// Length
@@ -282,10 +160,10 @@ private:
 	};
 
 
-	uint8_t USBD_StringSerial[0x1A] = {
-			0x1A,								// Length
-			StringDescriptor, 					// DescriptorType
-	};
+//	uint8_t USBD_StringSerial[0x1A] = {
+//			0x1A,								// Length
+//			StringDescriptor, 					// DescriptorType
+//	};
 
 	// USB lang indentifier descriptor
 	const uint8_t USBD_LangIDDesc[4] = {

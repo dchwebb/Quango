@@ -237,7 +237,7 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 
 				if ((USBP->EP0R & USB_EP_SETUP) != 0) {
 					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX_Msk;
-					ReadPMA(0x18, rxCount);					// Read setup data into rxBuff
+					ReadPMA(USB_PMA[0].ADDR_RX, rxCount);					// Read setup data into rxBuff
 					ClearRxInterrupt(0);					// clears 8000 interrupt
 					ProcessSetupPacket();					// Parse setup packet into request, locate data (eg descriptor) and populate TX buffer
 
@@ -245,17 +245,8 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 					ClearRxInterrupt(0);
 					rxCount = USB_PMA->COUNT_RX & USB_COUNT0_RX_COUNT0_RX;
 					if (rxCount != 0) {
-						ReadPMA(0x18, rxCount);
-/*
-						// In CDC mode after 0x21 0x20 packets (line coding commands)
-						if (devState == DeviceState::Configured && cmdOpCode != 0) {
-							if (cmdOpCode == 0x20) {			// SET_LINE_CODING - capture the data passed to return when queried with GET_LINE_CODING
-								USBD_CDC_LineCoding = *(reinterpret_cast<USBD_CDC_LineCodingTypeDef*>(rxBuff));
-							}
-							EPStartXfer(Direction::in, 0, 0);
-							cmdOpCode = 0;
-						}
-						*/
+						ReadPMA(USB_PMA[0].ADDR_RX, rxCount);
+
 						if (devState == DeviceState::Configured && classPendingData) {
 							if ((req.RequestType & USB_REQ_TYPE_MASK) == RequestTypeClass) {
 								// Previous OUT interrupt contains instruction (eg host sending CDC LineCoding); next command sends data (Eg LineCoding data)
@@ -330,8 +321,8 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 	if (ReadInterrupts(USB_ISTR_RESET))	{
 		USBP->ISTR &= ~USB_ISTR_RESET;
 
-		ActivateEndpoint(0, Direction::out, Control, 0x18);
-		ActivateEndpoint(0, Direction::in,  Control, 0x58);
+		ActivateEndpoint(0, Direction::out, Control, 0x20);
+		ActivateEndpoint(0, Direction::in,  Control, 0x60);
 
 		USBP->DADDR = USB_DADDR_EF;						// Enable endpoint and set address to 0
 	}
@@ -361,7 +352,7 @@ void USB::InitUSB()
 	USBP->BTABLE = 0;									// Set Buffer table Address BTABLE_ADDRESS
 	USBP->ISTR = 0;										// Clear pending interrupts
 	USBP->CNTR = USB_CNTR_CTRM  | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_ERRM | USB_CNTR_RESETM;
-	USBP->BCDR |= USB_BCDR_DPPU;							// Connect internal PU resistor on USB DP line
+	USBP->BCDR |= USB_BCDR_DPPU;						// Connect internal PU resistor on USB DP line
 }
 
 
@@ -432,7 +423,6 @@ void USB::GetDescriptor()
 		break;
 
 	case ConfigurationDescriptor:
-		//return EP0In(USBD_CDC_CfgFSDesc, sizeof(USBD_CDC_CfgFSDesc));
 		return EP0In(configDescriptor, MakeConfigDescriptor());		// Construct config descriptor from individual classes
 		break;
 
@@ -483,15 +473,9 @@ void USB::GetDescriptor()
 		return;
 	}
 
-//	if ((txBuffSize != 0) && (req.Length != 0)) {
-//		txRemaining = txBuffSize;
-//		txBuffSize = std::min(txBuffSize, static_cast<uint32_t>(req.Length));
-//		EPStartXfer(Direction::in, 0, txBuffSize);
-//	}
-//
-//	if (req.Length == 0) {
-//		EPStartXfer(Direction::in, 0, 0);
-//	}
+	if (req.Length == 0) {
+		EPStartXfer(Direction::in, 0, 0);
+	}
 }
 
 
@@ -555,8 +539,6 @@ void USB::SerialToUnicode()
 		stringDescr[i * 2 + 2] = uidBuff[i];
 	}
 }
-
-
 
 
 bool USB::ReadInterrupts(uint32_t interrupt)
