@@ -8,7 +8,7 @@
 #include <string>
 
 // Enables capturing of debug data for output over STLink UART on dev boards
-#define USB_DEBUG true
+#define USB_DEBUG false
 #if (USB_DEBUG)
 #include "uartHandler.h"
 extern bool USBDebug;
@@ -151,11 +151,6 @@ private:
 			0x02, 0x00, 0x00, 0x00				// Link Power Management protocol is supported
 	};
 
-
-//	uint8_t USBD_StringSerial[0x1A] = {
-//			0x1A,								// Length
-//			StringDescriptor, 					// DescriptorType
-//	};
 
 	// USB lang indentifier descriptor
 	const uint8_t USBD_LangIDDesc[4] = {

@@ -8,7 +8,7 @@
 volatile uint32_t SysTickVal;
 
 volatile ADCValues adc;
-USB usb;
+
 
 
 int16_t vCalibOffset = 2047;

@@ -1,6 +1,7 @@
 #include "USB.h"
 
 bool USBDebug = true;		// Used if outputting debug over USB
+USB usb;
 
 extern "C" {
 // To enable USB for printf commands (To print floats enable 'Use float with printf from newlib-nano' MCU Build Settings)
@@ -240,7 +241,6 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 					txBuff += txBytes;
 					EPStartXfer(Direction::in, epIndex, txBuffSize);
 				}
-
 			}
 
 		}
@@ -343,6 +343,7 @@ void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType e
 	// Increment PMA address in 64 byte chunks
 	pmaAddress += ep_maxPacket;
 }
+
 
 // procedure to allow classes to pass configuration data back via endpoint 0 (eg CDC line setup, MSC MaxLUN etc)
 void USB::EP0In(const uint8_t* buff, const uint32_t size)

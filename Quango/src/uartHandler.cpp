@@ -67,12 +67,10 @@ void UART::ProcessCommand()
 		extern volatile bool debugStart;
 		debugStart = true;
 		SendString("Debug activated\r\n");
-#endif
-
 	} else {
 		SendString("Unrecognised command\r\n");
 	}
-
+#endif
 	commandReady = false;
 }
 
@@ -81,6 +79,7 @@ extern "C" {
 
 // USART Decoder
 void UART5_IRQHandler() {
+#if (USB_DEBUG)
 	if (!uart.commandReady) {
 		const uint32_t recData = UART5->RDR;					// Note that 32 bits must be read to clear the receive flag
 		uart.command[uart.cmdPos] = (char)recData; 				// accessing RDR automatically resets the receive flag
@@ -91,5 +90,6 @@ void UART5_IRQHandler() {
 			uart.cmdPos++;
 		}
 	}
+#endif
 }
 }

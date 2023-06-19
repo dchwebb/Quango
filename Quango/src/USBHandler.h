@@ -31,7 +31,6 @@ public:
 	uint8_t inEP;
 	uint8_t outEP;
 	int8_t interface;
-	//const uint8_t Descriptor[];
 
 	uint32_t* outBuff;			// Pointer to end point's OUT (receive from host) buffer [Previously xfer_buff]
 	uint32_t outBuffCount;		// Number of bytes received in OUT packet [Previously xfer_count]
