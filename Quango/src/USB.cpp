@@ -58,12 +58,12 @@ void USB::ReadPMA(uint16_t pma, USBHandler* handler)
 }
 
 
-void USB::WritePMA(uint16_t pma, uint16_t bytes)
+void USB::WritePMA(uint16_t pma, uint16_t bytes, USBHandler* handler)
 {
 	volatile uint16_t* pmaBuff = reinterpret_cast<volatile uint16_t*>(USB_PMAADDR + pma);
 
 	for (int i = 0; i < (bytes + 1) / 2; i++) {
-		pmaBuff[i] = reinterpret_cast<const uint16_t*>(txBuff)[i];
+		pmaBuff[i] = reinterpret_cast<const uint16_t*>(handler->inBuff)[i];
 	}
 }
 
@@ -109,7 +109,7 @@ void USB::ProcessSetupPacket()
 	// Previously USBD_StdItfReq
 	} else if ((req.RequestType & recipientMask) == RequestRecipientInterface && (req.RequestType & requestTypeMask) == RequestTypeClass) {
 
-		// req.Index holds interface - locate which handler this relates to
+		// req.Index holds interface - call the appropriate handler's setup
 		if (req.Length > 0) {
 			classesByInterface[req.Index]->ClassSetup(req);
 		} else {
@@ -132,14 +132,14 @@ void USB::EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t len)
 			len = ep_maxPacket;
 		}
 
-		WritePMA(USB_PMA[epIndex].ADDR_TX, len);
+		WritePMA(USB_PMA[epIndex].ADDR_TX, len, classByEP[epIndex]);
 		USB_PMA[epIndex].COUNT_TX = len;
 
 #if (USB_DEBUG)
 				usbDebug[usbDebugNo].PacketSize = len;
 				if (len > 0) {
-					usbDebug[usbDebugNo].xferBuff0 = ((uint32_t*)txBuff)[0];
-					usbDebug[usbDebugNo].xferBuff1 = ((uint32_t*)txBuff)[1];
+					usbDebug[usbDebugNo].xferBuff0 = ((uint32_t*)classByEP[epIndex]->inBuff)[0];
+					usbDebug[usbDebugNo].xferBuff1 = ((uint32_t*)classByEP[epIndex]->inBuff)[1];
 				}
 #endif
 
@@ -172,11 +172,11 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 				ClearTxInterrupt(0);
 
 				uint16_t txBytes = USB_PMA->COUNT_TX & USB_COUNT0_TX_COUNT0_TX_Msk;
-				txBuff += txBytes;
+				classByEP[epIndex]->inBuff += txBytes;
 
-				if (txRemaining > ep_maxPacket) {
-					txRemaining -= ep_maxPacket;
-					EPStartXfer(Direction::in, 0, txRemaining);
+				if (classByEP[epIndex]->inBuffRem > ep_maxPacket) {
+					classByEP[epIndex]->inBuffRem -= ep_maxPacket;
+					EPStartXfer(Direction::in, 0, classByEP[epIndex]->inBuffRem);
 					EPStartXfer(Direction::out, 0, 0);
 				} else {
 					// FIXME if (rem_length ==  maxpacket) etc - where non zero size packet and last packet is a multiple of max packet size
@@ -236,10 +236,10 @@ void USB::USBInterruptHandler()						// Originally in Drivers\STM32F4xx_HAL_Driv
 				ClearTxInterrupt(epIndex);
 
 				uint16_t txBytes = USB_PMA[epIndex].COUNT_TX & USB_COUNT0_TX_COUNT0_TX;
-				if (txBuffSize >= txBytes) {					// Transmitting data larger than buffer size
-					txBuffSize -= txBytes;
-					txBuff += txBytes;
-					EPStartXfer(Direction::in, epIndex, txBuffSize);
+				if (classByEP[epIndex]->inBuffSize >= txBytes) {					// Transmitting data larger than buffer size
+					classByEP[epIndex]->inBuffSize -= txBytes;
+					classByEP[epIndex]->inBuff += txBytes;
+					EPStartXfer(Direction::in, epIndex, classByEP[epIndex]->inBuffSize);
 				}
 			}
 
@@ -348,18 +348,15 @@ void USB::ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType e
 // procedure to allow classes to pass configuration data back via endpoint 0 (eg CDC line setup, MSC MaxLUN etc)
 void USB::EP0In(const uint8_t* buff, const uint32_t size)
 {
-//	ep0.inBuffSize = size;
-//	ep0.inBuff = buff;
-//	ep0State = EP0State::DataIn;
+	ep0.inBuff = buff;
+	ep0.inBuffRem = size;
+	ep0.inBuffSize = std::min(size, static_cast<uint32_t>(req.Length));
+	EPStartXfer(Direction::in, 0, ep0.inBuffSize);		// sends blank request back
 
-//	USBUpdateDbg({}, {}, {}, ep0.inBuffSize, {}, (uint32_t*)ep0.inBuff);
-
-	txBuff = buff;
-	txRemaining = size;
-	txBuffSize = std::min(size, static_cast<uint32_t>(req.Length));
-	EPStartXfer(Direction::in, 0, txBuffSize);		// sends blank request back
+#if (USB_DEBUG)
+	USBUpdateDbg({}, {}, {}, ep0.inBuffSize, {}, (uint32_t*)ep0.inBuff);
+#endif
 }
-
 
 
 void USB::GetDescriptor()
@@ -509,8 +506,8 @@ size_t USB::SendData(const uint8_t* data, uint16_t len, uint8_t endpoint)
 {
 	if (devState == DeviceState::Configured && !transmitting) {
 		transmitting = true;
-		txBuff = (uint8_t*)data;
-		txBuffSize = len;
+		classByEP[endpoint & epAddrMask]->inBuff = (uint8_t*)data;
+		classByEP[endpoint & epAddrMask]->inBuffSize = len;
 		EPStartXfer(Direction::in, endpoint, len);
 		return len;
 	} else {

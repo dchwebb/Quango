@@ -25,7 +25,6 @@ typedef struct {
 } USB_PMA_TypeDef;
 
 
-
 // Create struct for easy access to endpoint registers
 typedef struct {
 	volatile uint16_t EPR;
@@ -36,9 +35,6 @@ typedef struct {
 #define  USB_EPR  ((USB_EPR_TypeDef*)(&USBP->EP0R))
 
 
-#define USBD_VID						0x483		// Vendor ID - use STMicro
-#define USBD_LANGID						1033		// Language - en-US
-#define USBD_PID						22352		// Product ID
 
 #define LOBYTE(x)  (static_cast<uint8_t>(x & 0x00FFU))
 #define HIBYTE(x)  (static_cast<uint8_t>((x & 0xFF00U) >> 8))
@@ -89,7 +85,7 @@ private:
 
 	void ProcessSetupPacket();
 	void ReadPMA(uint16_t pma, USBHandler* handler);
-	void WritePMA(uint16_t wPMABufAddr, uint16_t wNBytes);
+	void WritePMA(uint16_t pma, uint16_t bytes, USBHandler* handler);
 	void ActivateEndpoint(uint8_t endpoint, Direction direction, EndPointType eptype);
 	void GetDescriptor();
 	void EPStartXfer(const Direction direction, uint8_t endpoint, uint32_t xfer_len);
@@ -102,18 +98,18 @@ private:
 
 	std::array<USBHandler*, 4>classesByInterface;		// Lookup tables to get appropriate class handlers (set in handler constructor)
 	std::array<USBHandler*, 3>classByEP;
+	usbRequest req;
 
 	static constexpr uint32_t pmaStartAddr = 0x20;	// PMA memory will be assigned sequentially to each endpoint from this address in 64 byte chunks (allowing space for PMA header)
 	uint32_t pmaAddress;
-	const uint8_t* txBuff;			// Pointer to transmit buffer (for transferring data to IN endpoint)
-	uint32_t txBuffSize;			// Size of transmit buffer
-	uint32_t txRemaining;			// If transfer is larger than maximum packet size store remaining byte count
 	uint8_t devAddress = 0;			// Temporarily hold the device address as it cannot stored in the register until the 0 address response has been handled
 
 	uint8_t stringDescr[128];
 	uint8_t configDescriptor[255];
 
-	usbRequest req;
+	// USB standard device descriptor
+	static constexpr uint16_t VendorID = 1155;	// STMicroelectronics
+	static constexpr uint16_t ProductId = 22352;
 
 	// USB standard device descriptor - in usbd_desc.c
 	const uint8_t USBD_FS_DeviceDesc[0x12] = {
@@ -125,10 +121,10 @@ private:
 			0x02,								// bDeviceSubClass (Interface Association Descriptor- with below)
 			0x01,								// bDeviceProtocol (Interface Association Descriptor)
 			ep_maxPacket,  						// bMaxPacketSize
-			LOBYTE(USBD_VID),					// idVendor
-			HIBYTE(USBD_VID),					// idVendor
-			LOBYTE(USBD_PID),					// idProduct
-			HIBYTE(USBD_PID),					// idProduct
+			LOBYTE(VendorID),					// idVendor
+			HIBYTE(VendorID),					// idVendor
+			LOBYTE(ProductId),					// idProduct
+			HIBYTE(ProductId),					// idProduct
 			0x00,								// bcdDevice rel. 2.00
 			0x02,
 			Manufacturer,						// Index of manufacturer  string
@@ -153,14 +149,14 @@ private:
 
 
 	// USB lang indentifier descriptor
+	static constexpr uint16_t languageIDString = 1033;
 	const uint8_t USBD_LangIDDesc[4] = {
 			0x04,
 			StringDescriptor,
-			LOBYTE(USBD_LANGID),
-			HIBYTE(USBD_LANGID)
+			LOBYTE(languageIDString),
+			HIBYTE(languageIDString)
 	};
 
-	uint8_t unicodeString[128];
 
 public:
 #if (USB_DEBUG)
