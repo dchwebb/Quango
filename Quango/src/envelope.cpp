@@ -2,6 +2,17 @@
 #include <cmath>
 #include <cstring>
 
+// Create LED brightness look up table as constexpr so will be stored in flash
+constexpr auto CreateLEDLUT()		// create exponential brightness curve to better reflect perceived loudness
+{
+	std::array<uint16_t, 4096> array {};
+	for (uint32_t i = 0; i < 4096; ++i){
+		array[i] = (uint16_t)(4096.0f * std::pow((float)i / 4096.0f, 3.0f));
+	}
+	return array;
+}
+constexpr std::array<uint16_t, 4096> ledBrightness = CreateLEDLUT();
+
 
 void Envelope::SetEnvelope(const uint32_t value) {
 
@@ -22,7 +33,7 @@ void Envelope::SetEnvelope(const uint32_t value) {
 		*spi8Bit = (uint8_t)(value >> 8);
 		*spi8Bit = (uint8_t)(value & 0xFF);
 	}
-	*envLED = value;
+	*envLED = ledBrightness[value];
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "initialisation.h"
+#include <cmath>
 
 struct Envelope {
 public:
@@ -26,6 +27,8 @@ private:
 	float           attack = 800.0f;				// Store the ADSR values based on the pot values (mainly for debugging)
 	float           sustain = 4095.0f;
 	float           currentLevel = 0.0f;			// The current level of the envelope (held as a float for accuracy of calulculation)
+
+public:
 
 };
 

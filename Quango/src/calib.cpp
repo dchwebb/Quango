@@ -5,7 +5,6 @@
 Calib calib;
 
 
-
 void Calib::Capture()
 {
 	GPIOD->ODR |= GPIO_ODR_OD0;			// Toggle test pin 1
@@ -93,10 +92,15 @@ bool Calib::CheckStart()
 		calibStart = SysTickVal;				// For debouncing
 
 		// set Envelopes to silent
-		for (auto c : voiceManager.channel) {
-			for (auto v : c.voice) {
+		for (auto& c : voiceManager.channel) {
+			for (auto& v : c.voice) {
 				v.envelope.SetEnvelope(0);
+				v.envelope.gateState = Envelope::gateStates::off;
 			}
+		}
+		// Ensure gates are off
+		for (auto& g : voiceManager.gates) {
+			g.GateOff();
 		}
 
 		// Initialise calibration state machine information
@@ -113,6 +117,8 @@ bool Calib::CheckStart()
 				calibOffsets[calibchannel][v][o] = 0.0f;
 			}
 		}
+
+
 
 		// start tuner
 		Activate(true);
