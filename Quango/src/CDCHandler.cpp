@@ -87,8 +87,15 @@ void CDCHandler::ProcessCommand()
 
 	if (cmd.compare("info") == 0) {		// Print diagnostic information
 
-		//usb->SendString("test");
-		usb->SendString("Mountjoy Quango v1.0 - Current Settings:\r\n\r\n");
+		auto buffPos = buf;
+
+		buffPos += sprintf(buffPos, "Mountjoy Quango v1.0 - Current Settings:\r\n\r\n"
+				"Calibration mode: %s\r\n"
+				"Calibration time (ms): %ld\r\n"
+				"Calibration errors: %ld\r\n"
+				"\r\n", (calib.mode == Calib::FFT ? "FFT" : "Zero Crossing"), calib.calibTime, calib.calibErrors);
+
+		usb->SendString(buf);
 
 	} else if (cmd.compare("help") == 0) {
 
@@ -96,7 +103,8 @@ void CDCHandler::ProcessCommand()
 				"\r\nSupported commands:\r\n"
 				"info        -  Show diagnostic information\r\n"
 				"calib       -  Show calibration settings\r\n"
-				"lfo         -  Tremolo LFO on/off\r\n"
+				"fft         -  Use FFT for calibration tuner\r\n"
+				"zc          -  Use zero crossing count for calibration tuner\r\n"
 				"\r\n"
 #if (USB_DEBUG)
 				"usbdebug    -  Start USB debugging\r\n"
@@ -125,6 +133,13 @@ void CDCHandler::ProcessCommand()
 		sprintf(buffPos, "\r\n\0");
 		usb->SendString(buf);
 
+	} else if (cmd.compare("fft") == 0) {			// Calibration mode: FFT
+		calib.mode = Calib::FFT;
+		printf("Calibration mode: FFT\r\n");
+
+	} else if (cmd.compare("zc") == 0) {				// Calibration mode: Zero Crossing
+		calib.mode = Calib::ZeroCrossing;
+		printf("Calibration mode: Zero Crossing\r\n");
 
 
 	} else {

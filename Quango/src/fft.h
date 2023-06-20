@@ -15,10 +15,12 @@ public:
 	void Activate();
 
 	static constexpr uint32_t fftSamples = 1024;
-	static constexpr uint32_t sinLUTSize = 1024;
-	static constexpr uint32_t timerDefault = 10000;		// Default speed of sample capture (start fairly slow) sample rate is 85Mhz / clockDivider
+	static constexpr uint32_t sinLUTSize = fftSamples;
 
-	// FFT working variables
+	// Sample capture rate (85Mhz / clockDivider) - chosen to give a reasonably close integer number of cycles for A=440Hz
+	static constexpr uint32_t timerDefault = 6033;
+
+
 	float fftBuffer[2][fftSamples];						// holds raw samples captured in interrupt for FFT analysis
 
 private:

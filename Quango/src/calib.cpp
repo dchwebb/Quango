@@ -4,7 +4,7 @@
 
 Calib calib;
 
-uint32_t calibDebugTime;			// debuf: store time in ms for calibration to happen
+
 
 void Calib::Capture()
 {
@@ -195,8 +195,10 @@ void Calib::CalcFreq()
 		// Phase adjusted FFT: FFT on two overlapping buffers; where the 2nd half of buffer 1 is the 1st part of buffer 2
 		// Calculate the fundamental bin looking for a magnitude over a threshold, then adjust by the phase difference of the two FFTs
 
+		static constexpr uint32_t fftBinCount = FFT::fftSamples / 2;
+
 		// As we do two FFTs on samples 0 - 1023 then 512 - 1535, copy samples 512 - 1023 to position 1024
-		memcpy(&(fft.fftBuffer[1]), &(fft.fftBuffer[0][512]), 512 * 4);
+		memcpy(&(fft.fftBuffer[1]), &(fft.fftBuffer[0][fftBinCount]), (fftBinCount) * 4);
 
 		fft.CalcFFT(fft.fftBuffer[0], FFT::fftSamples);			// Carry out FFT on first buffer
 
@@ -207,7 +209,7 @@ void Calib::CalcFreq()
 		bool localMax = false;			// True once magnitude of bin is large enough to count as fundamental
 
 		// Locate maximum hypoteneuse
-		for (uint32_t i = 1; i < FFT::fftSamples / 2; ++i) {
+		for (uint32_t i = 1; i < fftBinCount; ++i) {
 			const float hypotenuse = std::hypot(fft.fftBuffer[0][i], fft.cosBuffer[i]);
 			if (hypotenuse > maxMag) {
 				maxMag = hypotenuse;
@@ -215,7 +217,7 @@ void Calib::CalcFreq()
 		}
 
 		// Locate first hypoteuse that is large enough relative to the maximum to count as fundamental
-		for (uint32_t i = 1; i < FFT::fftSamples / 2; ++i) {
+		for (uint32_t i = 1; i < fftBinCount; ++i) {
 			const float hypotenuse = std::hypot(fft.fftBuffer[0][i], fft.cosBuffer[i]);
 			if (localMax) {
 				if (hypotenuse > fundMag) {
@@ -270,7 +272,7 @@ void Calib::CalcFreq()
 
 	} else {
 		// Zero crossing mode
-		if (bufferPos == zeroCrossings.size()) {						// Check that a signal was found
+		if (bufferPos == zeroCrossings.size()) {					// Check that a signal was found
 
 			float diff = zeroCrossings[1] - zeroCrossings[0];		// Get first time difference between zero crossings
 			uint32_t stride = 1;									// Allow pitch detection where multiple zero crossings in cycle
@@ -296,7 +298,7 @@ void Calib::CalcFreq()
 				}
 			}
 
-			if (matchCount > 10) {
+			if (matchCount > 2) {
 				frequency = FreqFromPos(diff);
 			}
 		}
@@ -354,13 +356,13 @@ void Calib::CalcFreq()
 
 		lastValid = SysTickVal;
 
-	} else if (SysTickVal - lastValid > 4000) {
+	} else {
 		++calibErrors;
 	}
 
 	// Check if calibration complete
 	if (calibVoice == 4) {
-		calibDebugTime = SysTickVal - calibStart;
+		calibTime = SysTickVal - calibStart;
 		End();
 	} else {
 		Activate(true);

@@ -47,7 +47,7 @@ int main(void)
 
 	calibZeroPos = CalcZeroSize();
 	while (1) {
-		usb.cdc.ProcessCommand();	// Check for incoming USB serial commands
+		usb.cdc.ProcessCommand();		// Check for incoming USB serial commands
 
 #if (USB_DEBUG)
 		if (outputUSBDebug) {

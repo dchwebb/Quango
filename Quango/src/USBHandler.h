@@ -20,7 +20,7 @@ struct usbRequest {
 		Index = (uint16_t)(data[4]) + (data[5] << 8);
 		Length = (uint16_t)(data[6]) + (data[7] << 8);
 	}
-} ;
+};
 
 // interface for USB class handlers
 class USBHandler {
