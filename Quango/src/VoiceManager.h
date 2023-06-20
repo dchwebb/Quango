@@ -16,6 +16,7 @@ public:
 
 	float pitchbend = 0.0f;
 	static constexpr float pitchbendSemitones = 12.0f;
+	uint8_t monoVoice = 0;			// Can be set in config to output just one voice (eg foir calibrating)
 
 	struct Channel {
 		channelNo index;
@@ -27,7 +28,6 @@ public:
 
 			uint8_t index = 0;
 			Envelope envelope;
-			//volatile uint32_t* pitchDAC;
 			uint8_t midiNote = 0;
 			uint32_t startTime = 0;		// time that note was started (for note stealing)
 

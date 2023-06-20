@@ -8,24 +8,29 @@ VoiceManager voiceManager;
 void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
 	//GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2
+	uint8_t chnVoice = 255;
 
 	if (on) {
-		// Locate next available note in each channel
-		uint8_t chnVoice = 255;
-		for (auto& v: channel[channelA].voice) {
-			if (v.envelope.gateState == Envelope::gateStates::off) {
-				chnVoice = v.index;
-				break;
-			}
-		}
+		if (monoVoice) {
+			chnVoice = monoVoice - 1;			// Output only on one voice eg for calibrating
 
-		// Voice stealing: overwrite oldest note playing
-		if (chnVoice == 255) {
-			uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
+		} else {
+			// Locate next available note in each channel
 			for (auto& v: channel[channelA].voice) {
-				if (v.startTime < oldestStart) {
-					oldestStart = v.startTime;
+				if (v.envelope.gateState == Envelope::gateStates::off) {
 					chnVoice = v.index;
+					break;
+				}
+			}
+
+			// Voice stealing: overwrite oldest note playing
+			if (chnVoice == 255) {
+				uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
+				for (auto& v: channel[channelA].voice) {
+					if (v.startTime < oldestStart) {
+						oldestStart = v.startTime;
+						chnVoice = v.index;
+					}
 				}
 			}
 		}

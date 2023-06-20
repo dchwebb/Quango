@@ -105,6 +105,8 @@ void CDCHandler::ProcessCommand()
 				"calib       -  Show calibration settings\r\n"
 				"fft         -  Use FFT for calibration tuner\r\n"
 				"zc          -  Use zero crossing count for calibration tuner\r\n"
+				"v1 - v4     -  Monophonic voice selection\r\n"
+				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
 				"\r\n"
 #if (USB_DEBUG)
 				"usbdebug    -  Start USB debugging\r\n"
@@ -133,7 +135,7 @@ void CDCHandler::ProcessCommand()
 		sprintf(buffPos, "\r\n\0");
 		usb->SendString(buf);
 
-	} else if (cmd.compare("fft") == 0) {			// Calibration mode: FFT
+	} else if (cmd.compare("fft") == 0) {				// Calibration mode: FFT
 		calib.mode = Calib::FFT;
 		printf("Calibration mode: FFT\r\n");
 
@@ -141,6 +143,16 @@ void CDCHandler::ProcessCommand()
 		calib.mode = Calib::ZeroCrossing;
 		printf("Calibration mode: Zero Crossing\r\n");
 
+	} else if (cmd.compare("poly") == 0) {				// Polyphonic mode
+		voiceManager.monoVoice = 0;
+		printf("Polyphonic mode selected\r\n");
+
+	} else if (cmd.compare(0, 1, "v") == 0) {			// Activate monophonic mode on selected voice
+		const int32_t voice = ParseInt(cmd, 'v', 1, 4);
+		if (voice) {
+			voiceManager.monoVoice = voice;
+			printf("Voice %ld selected\r\n", voice);
+		}
 
 	} else {
 		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());

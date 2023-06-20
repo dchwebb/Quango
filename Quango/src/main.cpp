@@ -9,7 +9,11 @@ volatile uint32_t SysTickVal;
 
 volatile ADCValues adc;
 
-
+/* TODO:
+- 7 volt CV range
+- config saving
+- Low frequency calibration
+*/
 
 int16_t vCalibOffset = 2047;
 float vCalibScale = 1.0f;
