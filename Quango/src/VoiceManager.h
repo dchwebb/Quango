@@ -8,6 +8,10 @@
 class VoiceManager
 {
 public:
+	static constexpr uint32_t octaves = 7;
+	static constexpr uint32_t lowestNote = 24;
+	static constexpr uint32_t highestNote = lowestNote + (12 * octaves);
+
 	enum channelNo {channelA = 0, channelB = 1};
 	void NoteOnOff(uint8_t midiNote, bool on);
 	void CalcEnvelopes();

@@ -113,7 +113,7 @@ bool Calib::CheckStart()
 
 		// Clear offsets
 		for (uint8_t v = 0; v < 4; ++v) {
-			for (uint8_t o = 0; o < 6; ++o) {
+			for (uint8_t o = 0; o < VoiceManager::octaves; ++o) {
 				calibOffsets[calibchannel][v][o] = 0.0f;
 			}
 		}
@@ -334,7 +334,7 @@ void Calib::CalcFreq()
 				// If first note establish nearest A so that offset can be applied to other notes
 				if (calibVoice == 0 && calibNote == calibNoteStart) {
 					calibOffset = 0;
-					while (currNote + calibOffset < calibNoteStart - 6 && calibOffset < 72) {
+					while (currNote + calibOffset < calibNoteStart - VoiceManager::octaves && calibOffset < 72) {
 						calibOffset += 12;
 					}
 				}
@@ -347,7 +347,7 @@ void Calib::CalcFreq()
 				calibCount = 0;
 				currFreq *= 2;					// Set the next frequency so the timer rate can be optimised
 
-				if (calibNote > 96) {
+				if (calibNote > VoiceManager::highestNote) {
 					if (++calibVoice < 4) {
 						calibNote = calibNoteStart;
 						calibOctave = 0;

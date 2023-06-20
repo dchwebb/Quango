@@ -15,7 +15,7 @@ public:
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
 
-	float calibOffsets[2][4][6];					// Calibration offsets for channel | voice | octave
+	float calibOffsets[2][4][7];					// Calibration offsets for channel | voice | octave
 	bool running = false;
 	tunerMode mode = FFT;
 
