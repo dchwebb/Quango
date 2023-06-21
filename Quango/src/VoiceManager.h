@@ -8,11 +8,13 @@
 class VoiceManager
 {
 public:
-	static constexpr uint32_t octaves = 7;
-	static constexpr uint32_t lowestNote = 24;
+	static constexpr uint32_t octaves = 7;										// Highest midi note available (DAC outputs 7.13v)
+	static constexpr uint32_t lowestNote = 24;									// Lowest midi note available (DAC outputs 0v)
 	static constexpr uint32_t highestNote = lowestNote + (12 * octaves);
 
 	enum channelNo {channelA = 0, channelB = 1};
+
+	void Init();
 	void NoteOnOff(uint8_t midiNote, bool on);
 	void CalcEnvelopes();
 	void RetriggerGates();

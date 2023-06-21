@@ -1,18 +1,18 @@
 #include "calib.h"
 #include "initialisation.h"
 #include "usb.h"
-#include "SerialHandler.h"
 #include "MidiHandler.h"
 #include "VoiceManager.h"
+#include "configManager.h"
 
 volatile uint32_t SysTickVal;
 
 volatile ADCValues adc;
 
 /* TODO:
-- 7 volt CV range
-- config saving
 - Low frequency calibration
+- Option to blank calibration
+- Internal DAC calibration
 */
 
 int16_t vCalibOffset = 2047;
@@ -47,9 +47,13 @@ int main(void)
 	InitEnvTimer();
 	InitTunerTimer();
 	InitCordic();
+	voiceManager.Init();
+
 	usb.InitUSB();
 
+	configManager.RestoreConfig();
 	calibZeroPos = CalcZeroSize();
+
 	while (1) {
 		usb.cdc.ProcessCommand();		// Check for incoming USB serial commands
 

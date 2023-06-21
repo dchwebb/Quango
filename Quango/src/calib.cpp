@@ -1,4 +1,5 @@
 #include "calib.h"
+#include "configManager.h"
 
 #include <cstring>
 
@@ -340,23 +341,21 @@ void Calib::CalcFreq()
 				}
 				float noteDiff = (calibNote - calibOffset) - currNote;
 				calibOffsets[calibchannel][calibVoice][calibOctave] = noteDiff;
-
-				// Move to next octave
-				calibNote += 12;
-				++calibOctave;
-				calibCount = 0;
-				currFreq *= 2;					// Set the next frequency so the timer rate can be optimised
-
-				if (calibNote > VoiceManager::highestNote) {
-					if (++calibVoice < 4) {
-						calibNote = calibNoteStart;
-						calibOctave = 0;
-						currFreq /= 32;			// reset predicted frequency dividing by 2^5
-					}
-				}
-
 			}
 
+			// Move to next octave
+			calibNote += 12;
+			++calibOctave;
+			calibCount = 0;
+			currFreq *= 2;					// Set the next frequency so the timer rate can be optimised
+
+			if (calibNote > VoiceManager::highestNote) {
+				if (++calibVoice < 4) {
+					calibNote = calibNoteStart;
+					calibOctave = 0;
+					currFreq /= 32;			// reset predicted frequency dividing by 2^5
+				}
+			}
 		}
 
 
@@ -369,6 +368,7 @@ void Calib::CalcFreq()
 	// Check if calibration complete
 	if (calibVoice == 4) {
 		calibTime = SysTickVal - calibStart;
+		configManager.SaveConfig();
 		End();
 	} else {
 		Activate(true);
@@ -383,7 +383,27 @@ float Calib::FreqFromPos(const uint16_t pos)
 	return static_cast<float>(SystemCoreClock) / (pos * (TIM5->PSC + 1) * (TIM5->ARR + 1));
 }
 
+
+uint32_t Calib::SerialiseConfig(uint8_t** buff)
+{
+	*buff = reinterpret_cast<uint8_t*>(&calibOffsets);
+	return sizeof(calibOffsets);
+}
+
+
+uint32_t Calib::StoreConfig(uint8_t* buff)
+{
+	if (buff != nullptr) {
+		memcpy(&calibOffsets, buff, sizeof(calibOffsets));
+	}
+
+	return sizeof(calibOffsets);
+}
+
 //float Tuner::FreqFromMidiNote(const uint8_t note)
 //{
 //	return 16.35160 * std::pow(2.0f, note / 12.0f);
 //}
+
+uint32_t SerialiseConfig(uint8_t** buff);
+uint32_t StoreConfig(uint8_t* buff);

@@ -5,6 +5,13 @@
 
 VoiceManager voiceManager;
 
+void VoiceManager::Init()
+{
+	// Mute vhannel b voice 4 external DAC which starts on
+	channel[channelB].voice[3].envelope.SetEnvelope(0);
+}
+
+
 void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
 	//GPIOC->ODR |= GPIO_ODR_OD12;		// Toggle test pin 2

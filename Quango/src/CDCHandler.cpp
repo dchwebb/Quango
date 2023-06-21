@@ -1,5 +1,6 @@
 #include "USB.h"
 #include "CDCHandler.h"
+#include "configManager.h"
 #include "Calib.h"
 
 
@@ -107,6 +108,7 @@ void CDCHandler::ProcessCommand()
 				"zc          -  Use zero crossing count for calibration tuner\r\n"
 				"v1 - v4     -  Monophonic voice selection\r\n"
 				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
+				"savecfg     -  Save config\r\n"
 				"\r\n"
 #if (USB_DEBUG)
 				"usbdebug    -  Start USB debugging\r\n"
@@ -153,6 +155,14 @@ void CDCHandler::ProcessCommand()
 			voiceManager.monoVoice = voice;
 			printf("Voice %ld selected\r\n", voice);
 		}
+
+	} else if (cmd.compare("savecfg") == 0) {			// Save configuration
+		if (configManager.SaveConfig()) {
+			printf("Config saved\r\n");
+		} else {
+			printf("Error saving config\r\n");
+		}
+
 
 	} else {
 		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());
