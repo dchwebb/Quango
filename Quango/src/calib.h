@@ -16,6 +16,7 @@ public:
 	bool CheckStart();								// check if calibration button is pressed
 	uint32_t SerialiseConfig(uint8_t** buff);
 	uint32_t StoreConfig(uint8_t* buff);
+	void ClearOffsets(VoiceManager::channelNo chn, bool animate = false);
 
 	float calibOffsets[2][4][7];					// Calibration offsets for channel | voice | octave
 	bool running = false;
@@ -41,10 +42,23 @@ private:
 	uint8_t calibCount;								// number of calibration passes per voice to be averaged
 	uint8_t calibOffset;							// offset octave of frequency found from expected octave (eg A0 vs A1)
 	float calibFrequencies[3];						// each octave tuning pass averages three measurements
-	uint32_t calibStart = 0;						// Used to debounce calibration button
 
+	uint32_t calibStart = 0;						// For timing calibratrion
 	uint32_t calibTime;								// store calibration time in ms
 	uint32_t calibErrors = 0;
+
+	// Calibration button handling
+	struct {
+		uint32_t channel;
+		volatile uint32_t* btnIDR;					// Address of calibration button GPIO IDR register
+		uint32_t btnPin;					// Value to test for button down
+		uint32_t upCount = 0;						// Used to debounce calibration button and check for long presses
+		uint32_t downCount = 0;
+		bool longPress = false;						// Calibration button long press mode
+	} calibBtn[2]  = {
+			{0, &GPIOB->IDR, GPIO_IDR_ID10},
+			{1, &GPIOB->IDR, GPIO_IDR_ID11}
+	};
 
 	// Phase Adjusted FFT settings
 	int8_t sampleRateAdj = 0;						// Used to make small adjustments to fft sample rate to avoid phase errors

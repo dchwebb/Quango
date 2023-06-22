@@ -55,7 +55,10 @@ void Calib::Capture()
 
 void Calib::End()
 {
-	calibStart = SysTickVal;				// For debouncing
+	for (auto& btn : calibBtn) {
+		btn.downCount = 0;
+		btn.upCount = 0;
+	}
 	TIM5->CR1 &= ~TIM_CR1_CEN;				// Disable the sample acquisiton timer
 	running = false;
 
@@ -68,29 +71,47 @@ bool Calib::CheckStart()
 {
 	// check if calibration button is pressed (PB10 - channel A, PB11 - channel B)
 	bool started = false;
-	if (SysTickVal > calibStart + 500) { 						// Check for button bounce
-		if ((GPIOB->IDR & GPIO_IDR_ID10) == 0) {				// PB10: channel A
-			if (!running) {
-				started = true;
-				calibchannel = VoiceManager::channelA;
-			} else {											// Cancel calibration
-				End();
+	for (auto& btn : calibBtn) {
+		if ((*btn.btnIDR & btn.btnPin) == 0) {					// Check for button down
+			if (++btn.downCount > 10000 && !btn.longPress) {	// Check for long press
+				// Switch on all LEDs to show user in long count mode
+				btn.longPress = true;
+				for (auto& voice : voiceManager.channel[btn.channel].voice) {
+					*voice.envelope.envLED = 0xFFF;
+				}
 			}
-		}
-
-		if ((GPIOB->IDR & GPIO_IDR_ID11) == 0 && !started) {	// PB11: channel B
-			if (!running) {
-				started = true;
-				calibchannel = VoiceManager::channelB;
-			} else {
-				End();
+			btn.upCount = 0;
+		} else {
+			if (btn.downCount) {								// Previously pressed down
+				++btn.upCount;									// Check button has been released long enough to ensure not a bounce
 			}
 		}
 	}
 
+	if (calibBtn[0].upCount > 5 || calibBtn[1].upCount > 5) {
+		if (running) {
+			End();
+		} else {
+			calibchannel = calibBtn[0].downCount ? VoiceManager::channelA : VoiceManager::channelB;		// Prioritise button one if both pressed
+
+			if (calibBtn[calibchannel].longPress) {
+				ClearOffsets(calibchannel, true);				// Blank previous calibration offsets and play animation
+			} else {
+				started = true;
+			}
+
+			for (auto& btn : calibBtn) {						// Clear button counters
+				btn.downCount = 0;
+				btn.upCount = 0;
+				btn.longPress = false;
+			}
+		}
+	}
+
+
 	if (started) {
 		running = true;
-		calibStart = SysTickVal;				// For debouncing
+		calibStart = SysTickVal;
 
 		// set Envelopes to silent
 		for (auto& c : voiceManager.channel) {
@@ -112,19 +133,35 @@ bool Calib::CheckStart()
 		currFreq = 27.5f;		// Guess the frequency
 		calibErrors = 0;
 
-		// Clear offsets
-		for (uint8_t v = 0; v < 4; ++v) {
-			for (uint8_t o = 0; o < VoiceManager::octaves; ++o) {
-				calibOffsets[calibchannel][v][o] = 0.0f;
-			}
-		}
-
-
-
-		// start tuner
-		Activate(true);
+		ClearOffsets(calibchannel);			// Blank previous calibration offsets
+		Activate(true);			// start tuner
 	}
 	return running;
+}
+
+
+void Calib::ClearOffsets(VoiceManager::channelNo chn, bool animate)
+{
+	for (uint8_t v = 0; v < 4; ++v) {
+		for (uint8_t o = 0; o < VoiceManager::octaves; ++o) {
+			calibOffsets[chn][v][o] = 0.0f;
+		}
+	}
+	configManager.SaveConfig();
+
+	// Clear LEDs
+	if (animate) {
+		int32_t dimTimer[4] = {10240, 8192, 6144, 4096};
+		while (dimTimer[0] > 1) {
+			for (auto& voice : voiceManager.channel[calibchannel].voice) {
+				*voice.envelope.envLED = std::max(std::min(--dimTimer[voice.index], 4095L), 0L);
+				volatile uint32_t delay = 0;
+				while (delay < 100) {
+					++delay;
+				}
+			}
+		}
+	}
 }
 
 
