@@ -12,7 +12,8 @@ volatile ADCValues adc;
 /* TODO:
 - Low frequency calibration
 - interpolation on calibration offsets
-- Performance optimisation - check usb midi pitchbend refresh rate
+- Change to MIDI interrupt priority could cause issues as midi note may fire setting envelope gate state which will then be overwritten in the envelope calculation.
+  Better solution would be to queue midi events and then process on envelope timer
 */
 
 int16_t vCalibOffset = 2047;

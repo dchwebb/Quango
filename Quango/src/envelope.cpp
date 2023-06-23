@@ -41,7 +41,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 {
 	float level = currentLevel;
 
-	sustain = adsr->sustain;
+	static constexpr float reciprocal4096 = 1.0f / 4096.0f;		// To avoid divisions
 
 	switch (gateState) {
 	case gateStates::off:
@@ -49,16 +49,16 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 
 	case gateStates::attack: {
 
-		attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
+		//attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
 
 		// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
-		const float fullRange = 5000.0f;
+		static constexpr float fullRange = 5000.0f;
 
 		// scales attack pot to allow more range at low end of pot, exponentially longer times at upper end
 		const float maxDurationMult = 0.9f * 0.578;			// 0.578 allows duration to be set in seconds
 
 		// RC value - attackScale represents R component; maxDurationMult represents capacitor size (Reduce rc for a steeper curve)
-		float rc = std::pow(attack / 4096.f, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
+		float rc = std::pow(adsr->attack * reciprocal4096, 3.0f) * maxDurationMult;		// Using a^3 for fast approximation for measured charging rate (^2.9)
 
 		if (rc != 0.0f) {
 			/*
@@ -95,9 +95,9 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 		const float maxDurationMult = 5.28f * 0.227f;		// to scale maximum delay time
 
 		// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-		float rc = std::pow(static_cast<float>(adsr->decay) / 4096.0f, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
+		float rc = std::pow(static_cast<float>(adsr->decay) * reciprocal4096, 2.0f) * maxDurationMult;		// Use x^2 as approximation for measured x^2.4
 
-		if (rc != 0.0f && level > sustain) {
+		if (rc != 0.0f && level > adsr->sustain) {
 			/*
 			 * Long hand calculations:
 			 * Capacitor discharge equation: Vc = Vo * e ^ -t/RC
@@ -112,14 +112,14 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 			 * currentLevel = (newYPos * yHeight) + sustain;
 			 */
 
-			level = sustain + (level - sustain) * CordicExp(-timeStep / rc);
+			level = adsr->sustain + (level - adsr->sustain) * CordicExp(-timeStep / rc);
 
 		} else {
 			level = 0.0f;
 		}
 
-		if (level <= sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
-			level = sustain;
+		if (level <= adsr->sustain + 1.5f) {				// add a little extra to avoid getting stuck in infinitely small decrease
+			level = adsr->sustain;
 			gateState = gateStates::sustain;
 		}
 
@@ -127,7 +127,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 	}
 
 	case gateStates::sustain:
-		level = sustain;
+		level = adsr->sustain;
 		break;
 
 	case gateStates::release:
@@ -135,7 +135,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 			const float maxDurationMult = 1.15f;		// to scale maximum delay time
 
 			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr->release) / 4096.0f, 2.0f) * maxDurationMult;
+			float rc = std::pow(static_cast<float>(adsr->release) * reciprocal4096, 2.0f) * maxDurationMult;
 
 			if (rc != 0.0f && level > 1.0f) {
 				/*

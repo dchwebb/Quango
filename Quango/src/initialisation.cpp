@@ -136,39 +136,6 @@ void InitIO()
 }
 
 
-void InitSPI2()
-{
-	// Controls MCP48CMB21 single channel DAC
-	// PA10: SPI2_MISO; PB13: SPI2_SCK; PB15: SPI2_MOSI; PD15: SPI2_NSS
-	RCC->APB1ENR1 |= RCC_APB1ENR1_SPI2EN;			// SPI2 clock enable
-	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN | RCC_AHB2ENR_GPIODEN;			// GPIO clocks
-
-	// PB13: SPI2_SCK
-	GPIOB->MODER  &= ~GPIO_MODER_MODE13_0;			// 10: Alternate function mode
-	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL13_Pos;	// Alternate Function 5 (SPI2)
-
-	// PB15: SPI2_MOSI
-	GPIOB->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
-	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI2)
-
-	// PD15: SPI2_NSS
-	GPIOD->MODER  &= ~GPIO_MODER_MODE15_1;			// 01: Output mode
-
-
-	// Configure SPI
-	SPI2->CR1 |= SPI_CR1_MSTR;						// Master mode
-	SPI2->CR1 |= SPI_CR1_SSI;						// Internal slave select
-	SPI2->CR1 |= SPI_CR1_BR_0 | SPI_CR1_BR_1;		// Baud rate (170Mhz/x): 000: /2; 001: /4; 010: /8; *011: /16; 100: /32; 101: /64
-	SPI2->CR1 |= SPI_CR1_SSM;						// Software NSS management
-	SPI2->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit; 0b111 = 8 bit
-
-	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
-
-	GPIOD->ODR &= ~GPIO_ODR_OD15;					// SPI2 NSS - this can be left low
-
-}
-
-
 void InitSPI1()
 {
 	// Controls AD5676 8 channel DAC
@@ -196,6 +163,37 @@ void InitSPI1()
 	SPI1->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b111 = 8 bit
 
 	SPI1->CR1 |= SPI_CR1_SPE;						// Enable SPI
+}
+
+
+void InitSPI2()
+{
+	// Controls MCP48CMB21 single channel DAC for channel B envelope 4
+	// PA10: SPI2_MISO; PB13: SPI2_SCK; PB15: SPI2_MOSI; PD15: SPI2_NSS
+	RCC->APB1ENR1 |= RCC_APB1ENR1_SPI2EN;			// SPI2 clock enable
+	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN | RCC_AHB2ENR_GPIODEN;			// GPIO clocks
+
+	// PB13: SPI2_SCK
+	GPIOB->MODER  &= ~GPIO_MODER_MODE13_0;			// 10: Alternate function mode
+	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL13_Pos;	// Alternate Function 5 (SPI2)
+
+	// PB15: SPI2_MOSI
+	GPIOB->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
+	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI2)
+
+	// PD15: SPI2_NSS
+	GPIOD->MODER  &= ~GPIO_MODER_MODE15_1;			// 01: Output mode
+
+	// Configure SPI
+	SPI2->CR1 |= SPI_CR1_MSTR;						// Master mode
+	SPI2->CR1 |= SPI_CR1_SSI;						// Internal slave select
+	SPI2->CR1 |= SPI_CR1_BR_1;						// Baud rate (170Mhz/x): 000: /2; 001: /4; *010: /8; 011: /16; 100: /32; 101: /64
+	SPI2->CR1 |= SPI_CR1_SSM;						// Software NSS management
+	SPI2->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit; 0b111 = 8 bit
+
+	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
+
+	GPIOD->ODR &= ~GPIO_ODR_OD15;					// SPI2 NSS - this can be left low
 }
 
 

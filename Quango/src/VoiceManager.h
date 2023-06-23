@@ -18,6 +18,7 @@ public:
 	void NoteOnOff(uint8_t midiNote, bool on);
 	void CalcEnvelopes();
 	void RetriggerGates();
+	void ProcessMidi();
 	void Pitchbend(uint16_t pitch);
 
 	float pitchbend = 0.0f;
@@ -83,6 +84,16 @@ public:
 		{2, &GPIOD->ODR, GPIO_ODR_OD4},
 		{3, &GPIOD->ODR, GPIO_ODR_OD5}
 	};
+
+	// Midi queue - as midi notes can interrupt envelope generation, queue them up here and process before envelope
+	static constexpr uint32_t midiQueueSize = 20;
+	bool pitchbendUpdated = false;
+	struct {
+		uint8_t noteVal;
+		bool on;
+	} midiQueue[midiQueueSize];
+	uint32_t midiQueueRead = 0;			// circular buffer read/write heads
+	uint32_t midiQueueWrite = 0;
 
 
 };

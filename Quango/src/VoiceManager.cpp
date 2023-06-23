@@ -12,76 +12,90 @@ void VoiceManager::Init()
 }
 
 
-
 void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
 {
-	DEBUG_ON2
-	uint8_t chnVoice = 255;
+	// Queue midi notes for playback on envelope trigger
+	midiQueue[midiQueueWrite].noteVal = midiNote;
+	midiQueue[midiQueueWrite].on = on;
+	if (++midiQueueWrite > midiQueueSize) {
+		midiQueueWrite -= midiQueueSize;
+	}
+}
 
-	if (on) {
-		if (monoVoice) {
-			chnVoice = monoVoice - 1;			// Output only on one voice eg for calibrating
 
-		} else {
-			// Locate next available note in each channel
-			for (auto& v: channel[channelA].voice) {
-				if (v.envelope.gateState == Envelope::gateStates::off) {
-					chnVoice = v.index;
-					break;
-				}
-			}
+void VoiceManager::ProcessMidi()
+{
+	while (midiQueueRead != midiQueueWrite)	{
+		auto& note = midiQueue[midiQueueRead];
+		if (++midiQueueRead > midiQueueSize) {
+			midiQueueRead -= midiQueueSize;
+		}
 
-			// Voice stealing: overwrite oldest note playing
-			if (chnVoice == 255) {
-				uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
+		uint8_t chnVoice = 255;
+
+		if (note.on) {
+			if (monoVoice) {
+				chnVoice = monoVoice - 1;			// Output only on one voice eg for calibrating
+
+			} else {
+				// Locate next available note in each channel
 				for (auto& v: channel[channelA].voice) {
-					if (v.startTime < oldestStart) {
-						oldestStart = v.startTime;
+					if (v.envelope.gateState == Envelope::gateStates::off) {
 						chnVoice = v.index;
+						break;
+					}
+				}
+
+				// Voice stealing: overwrite oldest note playing
+				if (chnVoice == 255) {
+					uint32_t oldestStart = std::numeric_limits<uint32_t>::max();
+					for (auto& v: channel[channelA].voice) {
+						if (v.startTime < oldestStart) {
+							oldestStart = v.startTime;
+							chnVoice = v.index;
+						}
 					}
 				}
 			}
-		}
 
-		for (auto& chn: channel) {
-			chn.voice[chnVoice].midiNote = midiNote;
-			chn.voice[chnVoice].startTime = ++chn.counter;
-			chn.voice[chnVoice].envelope.gateState = Envelope::gateStates::attack;
-			chn.voice[chnVoice].SetPitch(chn.index);
-		}
+			for (auto& chn: channel) {
+				chn.voice[chnVoice].midiNote = note.noteVal;
+				chn.voice[chnVoice].startTime = ++chn.counter;
+				chn.voice[chnVoice].envelope.gateState = Envelope::gateStates::attack;
+				chn.voice[chnVoice].SetPitch(chn.index);
+			}
 
-		// Check if gate status has changed
-		if (!gates[chnVoice].gateOn) {
-			gates[chnVoice].GateOn();
+			// Check if gate status has changed
+			if (!gates[chnVoice].gateOn) {
+				gates[chnVoice].GateOn();
+			} else {
+				gates[chnVoice].gateRetrigger = 5;			// trigger a countdown before resetting gate
+				gates[chnVoice].GateOff();
+			}
+
 		} else {
-			gates[chnVoice].gateRetrigger = 5;			// trigger a countdown before resetting gate
-			gates[chnVoice].GateOff();
-		}
 
-	} else {
+			// Note Off
+			for (auto& chn: channel) {
+				for (auto& v: chn.voice) {
+					if (v.midiNote == note.noteVal) {
+						v.startTime = 0;
+						v.envelope.gateState = Envelope::gateStates::release;
+					}
+				}
+			}
 
-		// Note Off
-		for (auto& chn: channel) {
-			for (auto& v: chn.voice) {
-				if (v.midiNote == midiNote) {
-					v.startTime = 0;
-					v.envelope.gateState = Envelope::gateStates::release;
+			// Check if gate status has changed
+			for (auto& gate : gates) {
+				auto& voiceA = channel[channelA].voice[gate.index].envelope.gateState;
+				auto& voiceB = channel[channelB].voice[gate.index].envelope.gateState;
+				if ((voiceA == Envelope::gateStates::release || voiceA == Envelope::gateStates::off) &&
+						(voiceB == Envelope::gateStates::release || voiceB == Envelope::gateStates::off)) {
+					gate.GateOff();
 				}
 			}
 		}
-
-		// Check if gate status has changed
-		for (auto& gate : gates) {
-			auto& voiceA = channel[channelA].voice[gate.index].envelope.gateState;
-			auto& voiceB = channel[channelB].voice[gate.index].envelope.gateState;
-			if ((voiceA == Envelope::gateStates::release || voiceA == Envelope::gateStates::off) &&
-					(voiceB == Envelope::gateStates::release || voiceB == Envelope::gateStates::off)) {
-				gate.GateOff();
-			}
-		}
 	}
-
-	DEBUG_OFF2
 }
 
 
@@ -89,6 +103,7 @@ void VoiceManager::CalcEnvelopes()
 {
 	DEBUG_ON1
 
+	ProcessMidi();
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
 			v.envelope.calcEnvelope(chn.adsr);
@@ -152,8 +167,6 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
 
 void VoiceManager::Pitchbend(uint16_t pitch)
 {
-	DEBUG_ON2
-
 	// Raw pitchbend data is 0-16384 centered at 8192
 	pitchbend = (static_cast<float>(pitch - 8192) / 8192.0f) * pitchbendSemitones;
 	for (auto& chn: channel) {
@@ -163,7 +176,5 @@ void VoiceManager::Pitchbend(uint16_t pitch)
 			}
 		}
 	}
-
-	DEBUG_OFF2
 }
 
