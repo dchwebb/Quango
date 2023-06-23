@@ -34,6 +34,7 @@ extern uint16_t calibZeroPos;
 
 
 void InitSystemClock();
+void InitHardware();
 void InitSysTick();
 void InitDAC();
 void InitIO();

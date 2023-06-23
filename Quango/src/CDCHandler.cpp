@@ -4,6 +4,89 @@
 #include "Calib.h"
 
 
+void CDCHandler::ProcessCommand()
+{
+	if (!cmdPending) {
+		return;
+	}
+
+	std::string_view cmd {comCmd};
+
+	if (cmd.compare("info") == 0) {		// Print diagnostic information
+
+		sprintf(buf, "Mountjoy Quango v1.0 - Current Settings:\r\n\r\n"
+				"Calibration mode: %s\r\n"
+				"Calibration time (ms): %ld\r\n"
+				"Calibration errors: %ld\r\n"
+				"\r\n", (calib.mode == Calib::FFT ? "FFT" : "Zero Crossing"), calib.calibTime, calib.calibErrors);
+
+		usb->SendString(buf);
+
+	} else if (cmd.compare("help") == 0) {
+
+		usb->SendString("Mountjoy Quango\r\n"
+				"\r\nSupported commands:\r\n"
+				"info        -  Show diagnostic information\r\n"
+				"calib       -  Show calibration settings\r\n"
+				"fft         -  Use FFT for calibration tuner\r\n"
+				"zc          -  Use zero crossing count for calibration tuner\r\n"
+				"v1 - v4     -  Monophonic voice selection\r\n"
+				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
+				"savecfg     -  Save config\r\n"
+				"\r\n"
+		);
+
+
+	} else if (cmd.compare("calib") == 0) {				// Print calibration settings
+		auto buffPos = buf;
+		buffPos += sprintf(buffPos, "\r\nCalibration Settings: ");
+		for (uint8_t chn = 0; chn < 2; ++chn) {
+			buffPos += sprintf(buffPos, "\r\nChannel %c", chn ? 'B' : 'A');
+			for (uint8_t v = 0; v < 4; ++v) {
+				buffPos += sprintf(buffPos, "\r\nVoice %d\r\n", v + 1);
+				for (uint8_t octave = 0; octave < 6; ++octave) {
+					buffPos += sprintf(buffPos, "%f  ", calib.calibOffsets[chn][v][octave]);
+				}
+			}
+		}
+		sprintf(buffPos, "\r\n\0");
+		usb->SendString(buf);
+
+	} else if (cmd.compare("fft") == 0) {				// Calibration mode: FFT
+		calib.mode = Calib::FFT;
+		printf("Calibration mode: FFT\r\n");
+
+	} else if (cmd.compare("zc") == 0) {				// Calibration mode: Zero Crossing
+		calib.mode = Calib::ZeroCrossing;
+		printf("Calibration mode: Zero Crossing\r\n");
+
+	} else if (cmd.compare("poly") == 0) {				// Polyphonic mode
+		voiceManager.monoVoice = 0;
+		printf("Polyphonic mode selected\r\n");
+
+	} else if (cmd.compare(0, 1, "v") == 0) {			// Activate monophonic mode on selected voice
+		const int32_t voice = ParseInt(cmd, 'v', 1, 4);
+		if (voice) {
+			voiceManager.monoVoice = voice;
+			printf("Voice %ld selected\r\n", voice);
+		}
+
+	} else if (cmd.compare("savecfg") == 0) {			// Save configuration
+		if (configManager.SaveConfig()) {
+			printf("Config saved\r\n");
+		} else {
+			printf("Error saving config\r\n");
+		}
+
+
+	} else {
+		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());
+	}
+
+	cmdPending = false;
+}
+
+
 void CDCHandler::DataIn()
 {
 	if (inBuffSize > 0 && inBuffSize % USB::ep_maxPacket == 0) {
@@ -76,103 +159,6 @@ int32_t CDCHandler::ParseInt(const std::string_view cmd, const char precedingCha
 	}
 	return val;
 }
-
-
-void CDCHandler::ProcessCommand()
-{
-	if (!cmdPending) {
-		return;
-	}
-
-	std::string_view cmd {comCmd};
-
-	if (cmd.compare("info") == 0) {		// Print diagnostic information
-
-		auto buffPos = buf;
-
-		buffPos += sprintf(buffPos, "Mountjoy Quango v1.0 - Current Settings:\r\n\r\n"
-				"Calibration mode: %s\r\n"
-				"Calibration time (ms): %ld\r\n"
-				"Calibration errors: %ld\r\n"
-				"\r\n", (calib.mode == Calib::FFT ? "FFT" : "Zero Crossing"), calib.calibTime, calib.calibErrors);
-
-		usb->SendString(buf);
-
-	} else if (cmd.compare("help") == 0) {
-
-		usb->SendString("Mountjoy Quango\r\n"
-				"\r\nSupported commands:\r\n"
-				"info        -  Show diagnostic information\r\n"
-				"calib       -  Show calibration settings\r\n"
-				"fft         -  Use FFT for calibration tuner\r\n"
-				"zc          -  Use zero crossing count for calibration tuner\r\n"
-				"v1 - v4     -  Monophonic voice selection\r\n"
-				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
-				"savecfg     -  Save config\r\n"
-				"\r\n"
-#if (USB_DEBUG)
-				"usbdebug    -  Start USB debugging\r\n"
-				"\r\n"
-#endif
-		);
-
-#if (USB_DEBUG)
-	} else if (cmd.compare("usbdebug") == 0) {				// Configure gate LED
-		USBDebug = true;
-		usb->SendString("Press link button to dump output\r\n");
-#endif
-
-	} else if (cmd.compare("calib") == 0) {				// Print calibration settings
-		auto buffPos = buf;
-		buffPos += sprintf(buffPos, "\r\nCalibration Settings: ");
-		for (uint8_t chn = 0; chn < 2; ++chn) {
-			buffPos += sprintf(buffPos, "\r\nChannel %c", chn ? 'B' : 'A');
-			for (uint8_t v = 0; v < 4; ++v) {
-				buffPos += sprintf(buffPos, "\r\nVoice %d\r\n", v + 1);
-				for (uint8_t octave = 0; octave < 6; ++octave) {
-					buffPos += sprintf(buffPos, "%f  ", calib.calibOffsets[chn][v][octave]);
-				}
-			}
-		}
-		sprintf(buffPos, "\r\n\0");
-		usb->SendString(buf);
-
-	} else if (cmd.compare("fft") == 0) {				// Calibration mode: FFT
-		calib.mode = Calib::FFT;
-		printf("Calibration mode: FFT\r\n");
-
-	} else if (cmd.compare("zc") == 0) {				// Calibration mode: Zero Crossing
-		calib.mode = Calib::ZeroCrossing;
-		printf("Calibration mode: Zero Crossing\r\n");
-
-	} else if (cmd.compare("poly") == 0) {				// Polyphonic mode
-		voiceManager.monoVoice = 0;
-		printf("Polyphonic mode selected\r\n");
-
-	} else if (cmd.compare(0, 1, "v") == 0) {			// Activate monophonic mode on selected voice
-		const int32_t voice = ParseInt(cmd, 'v', 1, 4);
-		if (voice) {
-			voiceManager.monoVoice = voice;
-			printf("Voice %ld selected\r\n", voice);
-		}
-
-	} else if (cmd.compare("savecfg") == 0) {			// Save configuration
-		if (configManager.SaveConfig()) {
-			printf("Config saved\r\n");
-		} else {
-			printf("Error saving config\r\n");
-		}
-
-
-	} else {
-		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());
-	}
-
-	cmdPending = false;
-
-}
-
-
 
 
 float CDCHandler::ParseFloat(const std::string_view cmd, const char precedingChar, const float low = 0.0f, const float high = 0.0f) {

@@ -1,6 +1,5 @@
 #include "calib.h"
 #include "configManager.h"
-
 #include <cstring>
 
 Calib calib;
@@ -27,10 +26,10 @@ void Calib::Capture()
 	} else {
 		++timer;
 
-		if (overZero && static_cast<int>(adc.PitchDetect) < calibZeroPos - 100) {
+		if (overZero && static_cast<int>(adc.PitchDetect) < 2047 - 100) {
 			overZero = false;
 		}
-		if (!overZero && adc.PitchDetect > calibZeroPos) {
+		if (!overZero && adc.PitchDetect > 2047) {
 			overZero = true;
 			zeroCrossings[bufferPos] = timer;
 			if (++bufferPos == zeroCrossings.size()) {
@@ -69,7 +68,7 @@ void Calib::End()
 
 bool Calib::CheckStart()
 {
-	// check if calibration button is pressed (PB10 - channel A, PB11 - channel B)
+	// Check for long/short calibration button press (PB10 - channel A, PB11 - channel B)
 	bool started = false;
 	for (auto& btn : calibBtn) {
 		if ((*btn.btnIDR & btn.btnPin) == 0) {					// Check for button down
@@ -130,11 +129,11 @@ bool Calib::CheckStart()
 		calibNote = calibNoteStart;
 		calibOctave = 0;
 		calibCount = 0;;
-		currFreq = 27.5f;		// Guess the frequency
+		currFreq = 27.5f;					// Guess the frequency
 		calibErrors = 0;
 
 		ClearOffsets(calibchannel);			// Blank previous calibration offsets
-		Activate(true);			// start tuner
+		Activate(true);						// start tuner
 	}
 	return running;
 }
@@ -187,22 +186,22 @@ void Calib::Multiplexer(VoiceManager::channelNo chn, uint8_t voice)
 
 void Calib::Activate(bool startTimer)
 {
-	// set pitch of oscillator
+	// Set pitch of oscillator
 	voiceManager.channel[calibchannel].voice[calibVoice].midiNote = calibNote;
 	voiceManager.channel[calibchannel].voice[calibVoice].SetPitch(calibchannel);
 
-	// FIXME - for debugging
+	// Make calibration audible
 	if (calibVoice > 0) {
-		voiceManager.channel[calibchannel].voice[calibVoice - 1].envelope.SetEnvelope(0);
+		voiceManager.channel[calibchannel].voice[calibVoice - 1].envelope.SetEnvelope(0);		// Silence previously calibrated voice
 	}
 	voiceManager.channel[calibchannel].voice[calibVoice].envelope.SetEnvelope(
-			calibchannel ==	VoiceManager::channelA ? adc.EnvA.level : adc.EnvB.level);
+			calibchannel ==	VoiceManager::channelA ? adc.EnvA.level : adc.EnvB.level);			// Set calibration volume from mixer slider
 
 	convBlink = !convBlink;
 	*(voiceManager.channel[calibchannel].voice[calibVoice].envelope.envLED) = convBlink ? 0xFFF : 0;
 
 
-	// Set multiplexer to correct channel and voice
+	// Set input audio multiplexer to correct channel and voice
 	Multiplexer(calibchannel, calibVoice);
 
 	if (mode == FFT) {
@@ -216,7 +215,7 @@ void Calib::Activate(bool startTimer)
 	} else {
 		// Get current value of ADC (assume channel A for now)
 		const uint32_t currVal = adc.PitchDetect;
-		overZero = currVal > calibZeroPos;
+		overZero = currVal > 2047;
 		timer = 0;
 		TIM5->ARR = zeroCrossRate;
 	}
@@ -442,5 +441,4 @@ uint32_t Calib::StoreConfig(uint8_t* buff)
 //	return 16.35160 * std::pow(2.0f, note / 12.0f);
 //}
 
-uint32_t SerialiseConfig(uint8_t** buff);
-uint32_t StoreConfig(uint8_t* buff);
+

@@ -41,16 +41,13 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 {
 	float level = currentLevel;
 
-	static constexpr float reciprocal4096 = 1.0f / 4096.0f;		// To avoid divisions
+	static constexpr float reciprocal4096 = 1.0f / 4096.0f;		// Store reciprocal to avoid divisions
 
 	switch (gateState) {
 	case gateStates::off:
 		break;
 
 	case gateStates::attack: {
-
-		//attack = std::round(((attack * 31.0f) + static_cast<float>(adsr->attack)) / 32.0f);		// FIXME - smoothing probably not necessary
-
 		// fullRange = value of fully charged capacitor; comparitor value is 4096 where cap is charged enough to trigger decay phase
 		static constexpr float fullRange = 5000.0f;
 
@@ -159,7 +156,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 
 	if (currentLevel != level) {
 		currentLevel = level;
-		SetEnvelope(static_cast<uint32_t>(currentLevel * (float)adsr->level / 4096.0f));			// FIXME - use reciprocal for performance
+		SetEnvelope(static_cast<uint32_t>(currentLevel * static_cast<float>(adsr->level) * reciprocal4096));
 	}
 }
 

@@ -23,12 +23,12 @@ public:
 
 	float pitchbend = 0.0f;
 	static constexpr float pitchbendSemitones = 12.0f;
-	uint8_t monoVoice = 0;			// Can be set in config to output just one voice (eg foir calibrating)
+	uint8_t monoVoice = 0;				// Can be set in config to output just one voice (eg for calibrating)
 
 	struct Channel {
 		channelNo index;
-		uint32_t counter = 0;		// Used to determine oldest note for note stealing
-		volatile ADSR* adsr;		// pointer to ADC values for ADSR pots
+		uint32_t counter = 0;			// Used to determine oldest note for note stealing
+		volatile ADSR* adsr;			// pointer to ADC values for ADSR pots
 
 		struct Voice {
 			Voice(uint8_t index, volatile uint32_t* dac, volatile uint32_t* led) : index(index), envelope{dac, led} {};
@@ -94,7 +94,6 @@ public:
 	} midiQueue[midiQueueSize];
 	uint32_t midiQueueRead = 0;			// circular buffer read/write heads
 	uint32_t midiQueueWrite = 0;
-
 
 };
 

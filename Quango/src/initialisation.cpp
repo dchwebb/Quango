@@ -40,6 +40,24 @@ void InitSystemClock(void) {
 }
 
 
+void InitHardware()
+{
+	InitSysTick();
+	InitDAC();
+	InitIO();
+	InitPWMTimer();
+	InitADC1(&adc.PitchDetect, 2);
+	InitADC3(reinterpret_cast<volatile uint16_t*>(&adc.EnvA.attack), 4);
+	InitADC4(&adc.EnvB.level, 5);
+	InitMidiUART();
+	InitSPI2();
+	InitSPI1();
+	InitEnvTimer();
+	InitTunerTimer();
+	InitCordic();
+}
+
+
 void InitSysTick()
 {
 	SysTick_Config(SystemCoreClock / SYSTICK);		// gives 1ms

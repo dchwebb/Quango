@@ -8,7 +8,7 @@ void TIM2_IRQHandler()
 {
 	TIM2->SR &= ~TIM_SR_UIF;
 	if (!calib.CheckStart()) {					// Check if calibration buttons are pressed to activate tuning
-		voiceManager.CalcEnvelopes();
+		voiceManager.CalcEnvelopes();			// Handle queue of midi notes and output envelopes levels
 		voiceManager.RetriggerGates();			// Check if any gates paused during note stealing need to be reactivated
 	}
 }

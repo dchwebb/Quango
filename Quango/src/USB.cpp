@@ -1,6 +1,5 @@
 #include "USB.h"
 
-bool USBDebug = true;		// Used if outputting debug over USB
 USB usb;
 
 extern "C" {
@@ -15,11 +14,13 @@ size_t _write(int handle, const unsigned char* buf, size_t bufSize)
 }
 }
 
+
 inline void ClearRxInterrupt(uint8_t ep)
 {
 	uint16_t wRegVal = (USB_EPR[ep].EPR & USB_EPREG_MASK) & ~USB_EP_CTR_RX;
 	USB_EPR[ep].EPR = wRegVal | USB_EP_CTR_TX;
 }
+
 
 inline void ClearTxInterrupt(uint8_t ep)
 {
@@ -572,8 +573,6 @@ std::string HexByte(const uint16_t& v) {
 
 void USB::OutputDebug()
 {
-	USBDebug = false;
-
 	uart.SendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
 	uint16_t evNo = usbDebugEvent % USB_DEBUG_COUNT;
 	std::string interrupt, subtype;
