@@ -7,20 +7,22 @@ Calib calib;
 
 void Calib::Capture()
 {
-	GPIOD->ODR |= GPIO_ODR_OD0;			// Toggle test pin 1
-
 	bool samplesReady = false;
 	if (mode == FFT) {
 
-		float* floatBuffer = (float*)&(fft.fftBuffer);
-		floatBuffer[bufferPos] = 2047.0f - static_cast<float>(adc.PitchDetect);
 
-		// Capture 1.5 buffers - if capturing last third add it to the 2nd half of buffer 2
-		// 1st half of buffer 2 will be populated later from 2nd half of buffer 1
-		if (++bufferPos == FFT::fftSamples) {
-			bufferPos += FFT::fftSamples / 2;
+		auto floatBuffer = (float* const)&(fft.fftBuffer);
+		static constexpr uint32_t halfNumSamples = FFT::fftSamples / 2;
+
+		// Check whether to add sample to buffer 1, both or buffer 2 to create two buffers of 1024 samples with 512 samples overlapping
+		if (bufferPos < FFT::fftSamples) {
+			floatBuffer[bufferPos] = 2047.0f - static_cast<float>(adc.PitchDetect);
 		}
-		if (bufferPos > FFT::fftSamples * 2) {
+		if (bufferPos >= halfNumSamples) {
+			floatBuffer[bufferPos + halfNumSamples] = 2047.0f - static_cast<float>(adc.PitchDetect);
+		}
+
+		if (++bufferPos == FFT::fftSamples + halfNumSamples) {
 			samplesReady = true;
 		}
 	} else {
@@ -42,8 +44,6 @@ void Calib::Capture()
 			samplesReady = true;
 		}
 	}
-
-	GPIOD->ODR &= ~GPIO_ODR_OD0;			// Toggle test pin 1
 
 	if (samplesReady) {
 		TIM5->CR1 &= ~TIM_CR1_CEN;			// Disable the sample acquisiton timer
@@ -240,16 +240,13 @@ void Calib::CalcFreq()
 
 		static constexpr uint32_t fftBinCount = FFT::fftSamples / 2;
 
-		// As we do two FFTs on samples 0 - 1023 then 512 - 1535, copy samples 512 - 1023 to position 1024
-		memcpy(&(fft.fftBuffer[1]), &(fft.fftBuffer[0][fftBinCount]), (fftBinCount) * 4);
-
 		fft.CalcFFT(fft.fftBuffer[0], FFT::fftSamples);			// Carry out FFT on first buffer
 
 		// Find first significant harmonic
 		volatile uint32_t fundMag = 0;
 		volatile uint32_t maxMag = 0;
 		volatile uint32_t maxBin = 0;
-		bool localMax = false;			// True once magnitude of bin is large enough to count as fundamental
+		bool localMax = false;				// True once magnitude of bin is large enough to count as fundamental
 
 		// Locate maximum hypoteneuse
 		for (uint32_t i = 1; i < fftBinCount; ++i) {
@@ -310,7 +307,6 @@ void Calib::CalcFreq()
 					frequency = 0.0f;
 				}
 			}
-
 		}
 
 	} else {
@@ -347,7 +343,7 @@ void Calib::CalcFreq()
 		}
 	}
 
-	if (frequency > 16.35f) {
+	if (frequency > 0.0f) {		// A below C0 will be 13.75Hz
 
 		calibFrequencies[calibCount++] = frequency;
 
