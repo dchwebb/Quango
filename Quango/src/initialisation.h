@@ -27,8 +27,11 @@ extern uint16_t calibZeroPos;
 #define SYSTICK 1000						// 1ms
 #define SAMPLERATE 48000.0f
 
-#define DEBUG_ON  GPIOB->ODR |= GPIO_ODR_OD9;
-#define DEBUG_OFF GPIOB->ODR &= ~GPIO_ODR_OD9;
+#define DEBUG_ON1  GPIOD->ODR |= GPIO_ODR_OD0;		// Test pin 1 on
+#define DEBUG_OFF1 GPIOD->ODR &= ~GPIO_ODR_OD0;		// Test pin 1 off
+#define DEBUG_ON2  GPIOC->ODR |= GPIO_ODR_OD12;		// Test pin 2 on
+#define DEBUG_OFF2 GPIOC->ODR &= ~GPIO_ODR_OD12;	// Test pin 2 off
+
 
 void InitSystemClock();
 void InitSysTick();

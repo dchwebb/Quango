@@ -59,13 +59,10 @@ private:
 		};
 	};
 
-	static constexpr uint8_t SerialQueueSize = 50;
+	static constexpr uint16_t SerialQueueSize = 256;
 	uint8_t Queue[SerialQueueSize];			// hold incoming serial MIDI bytes
 	uint8_t QueueRead = 0;
 	uint8_t QueueWrite = 0;
 	uint8_t QueueSize = 0;
-
-	//MidiData tx;
-
 
 };

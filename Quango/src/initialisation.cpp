@@ -46,6 +46,7 @@ void InitSysTick()
 	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
+
 void InitDAC()
 {
 	// Configure 4 DAC outputs PA4 and PA5 are regular DAC1 buffered outputs; PA2 and PB1 are DAC3 via OpAmp1 and OpAmp3 (Manual p.782)
@@ -130,7 +131,7 @@ void InitIO()
 
 	// Debug pins PD0, PC12
 	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD0: Test pin 1
-//	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
+	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
 
 }
 
@@ -151,22 +152,15 @@ void InitSPI2()
 	GPIOB->AFR[1] |= 5 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 5 (SPI2)
 
 	// PD15: SPI2_NSS
-//	GPIOD->MODER  &= ~GPIO_MODER_MODE15_0;			// 10: Alternate function mode
-//	GPIOD->AFR[1] |= 6 << GPIO_AFRH_AFSEL15_Pos;	// Alternate Function 6 (SPI2)
 	GPIOD->MODER  &= ~GPIO_MODER_MODE15_1;			// 01: Output mode
 
 
 	// Configure SPI
 	SPI2->CR1 |= SPI_CR1_MSTR;						// Master mode
 	SPI2->CR1 |= SPI_CR1_SSI;						// Internal slave select
-	SPI2->CR1 |= SPI_CR1_BR_2;						// Baud rate 1777: 001: Clk/4; 100: SPI clock/32; *101: SPI clock/64
+	SPI2->CR1 |= SPI_CR1_BR_0 | SPI_CR1_BR_1;		// Baud rate (170Mhz/x): 000: /2; 001: /4; 010: /8; *011: /16; 100: /32; 101: /64
 	SPI2->CR1 |= SPI_CR1_SSM;						// Software NSS management
-	//SPI2->CR1 &= ~SPI_CR1_SSM;						// Hardware NSS management
-	//SPI2->CR2 |= SPI_CR2_SSOE;						// SS output is enabled in master mode and when SPI is enabled
-	//SPI2->CR2 |= SPI_CR2_NSSP;						// NSS pulse management
-	//SPI2->CR2 &= ~SPI_CR2_DS_2;						// Clear Data Size as defaults to 0x7
 	SPI2->CR2 |= 0b111 << SPI_CR2_DS_Pos;			// Data Size: 0b1011 = 12-bit; 0b111 = 8 bit
-	//	SPI2->CR1 |= SPI_CR1_CPHA;					// Clock phase - this setting potentially reduces risk of MOSI line idling high (See p9 of dm00725181)
 
 	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
 
@@ -225,7 +219,7 @@ void InitMidiUART()
 
 	// Set up interrupts
 	UART4->CR1 |= USART_CR1_RXNEIE;
-	NVIC_SetPriority(UART4_IRQn, 3);				// Lower is higher priority
+	NVIC_SetPriority(UART4_IRQn, 1);				// Lower is higher priority
 	NVIC_EnableIRQ(UART4_IRQn);
 
 	UART4->CR1 |= USART_CR1_UE;						// UART Enable
@@ -322,12 +316,12 @@ void InitPWMTimer()
 //	Setup Timer 2 on an interrupt to trigger sample output
 void InitEnvTimer() {
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;			// Enable Timer 2
-	TIM2->PSC = 34;									// Set prescaler
-	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / (PSC + 1) / ARR = ~10kHz
+	TIM2->PSC = 16;									// Set prescaler
+	TIM2->ARR = 500; 								// Set auto reload register - 170Mhz / (PSC + 1) / ARR = ~20kHz
 
 	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
 	NVIC_EnableIRQ(TIM2_IRQn);
-	NVIC_SetPriority(TIM2_IRQn, 0);					// Lower is higher priority
+	NVIC_SetPriority(TIM2_IRQn, 2);					// Lower is higher priority
 
 	TIM2->CR1 |= TIM_CR1_CEN;
 	TIM2->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers

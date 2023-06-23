@@ -11,8 +11,8 @@ volatile ADCValues adc;
 
 /* TODO:
 - Low frequency calibration
-- Option to blank calibration
-- Internal DAC calibration
+- interpolation on calibration offsets
+- Performance optimisation - check usb midi pitchbend refresh rate
 */
 
 int16_t vCalibOffset = 2047;
@@ -35,7 +35,7 @@ int main(void)
 	InitSystemClock();					// Configure the clock and PLL
 	SystemCoreClockUpdate();			// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitSysTick();
-	InitDAC();							// FIXME - calibrate
+	InitDAC();
 	InitIO();
 	InitPWMTimer();
 	InitADC1(&adc.PitchDetect, 2);

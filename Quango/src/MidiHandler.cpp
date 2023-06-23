@@ -90,8 +90,8 @@ void MidiHandler::serialHandler(uint32_t data)
 	}
 
 	Queue[QueueWrite] = data;			// Queue handles MIDI data divided into individual bytes
-	QueueSize++;
-	QueueWrite = (QueueWrite + 1) % SerialQueueSize;
+	++QueueSize;
+	++QueueWrite;			// counter will wrap at 256
 
 	MIDIType type = static_cast<MIDIType>(Queue[QueueRead] >> 4);
 	uint8_t channel = Queue[QueueRead] & 0x0F;
@@ -120,9 +120,8 @@ void MidiHandler::serialHandler(uint32_t data)
 		channel = Queue[QueueRead] & 0x0F;
 	}
 
-	// Clock
+	// Ignore Clock
 	if (QueueSize > 0 && Queue[QueueRead] == 0xF8) {
-		midiEvent(0xF800);
 		QueueInc();
 	}
 
@@ -134,8 +133,8 @@ void MidiHandler::serialHandler(uint32_t data)
 
 
 inline void MidiHandler::QueueInc() {
-	QueueSize--;
-	QueueRead = (QueueRead + 1) % SerialQueueSize;
+	--QueueSize;
+	++QueueRead;			// counter will wrap at 256
 }
 
 /*
