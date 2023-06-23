@@ -228,7 +228,6 @@ void Calib::Activate(bool startTimer)
 }
 
 
-
 void Calib::CalcFreq()
 {
 	float frequency = 0.0f;
@@ -243,9 +242,9 @@ void Calib::CalcFreq()
 		fft.CalcFFT(fft.fftBuffer[0], FFT::fftSamples);			// Carry out FFT on first buffer
 
 		// Find first significant harmonic
-		volatile uint32_t fundMag = 0;
-		volatile uint32_t maxMag = 0;
-		volatile uint32_t maxBin = 0;
+		uint32_t fundMag = 0;
+		uint32_t maxMag = 0;
+		uint32_t maxBin = 0;
 		bool localMax = false;				// True once magnitude of bin is large enough to count as fundamental
 
 		// Locate maximum hypoteneuse
@@ -275,12 +274,12 @@ void Calib::CalcFreq()
 
 		if (maxBin) {
 
-			volatile const float phase0 = atan(fft.cosBuffer[maxBin] / fft.fftBuffer[0][maxBin]);
+			const float phase0 = atan(fft.cosBuffer[maxBin] / fft.fftBuffer[0][maxBin]);
 
 			fft.CalcFFT(fft.fftBuffer[1], FFT::fftSamples);				// Carry out FFT on buffer 2 (overwrites cosine results from first FFT)
 
-			volatile const float phase1 = atan(fft.cosBuffer[maxBin] / fft.fftBuffer[1][maxBin]);
-			volatile float phaseAdj = (phase0 - phase1) / M_PI;			// normalise phase adjustment
+			const float phase1 = atan(fft.cosBuffer[maxBin] / fft.fftBuffer[1][maxBin]);
+			float phaseAdj = (phase0 - phase1) / M_PI;			// normalise phase adjustment
 
 			// handle phase wrapping
 			if (phaseAdj < -0.5f) {
@@ -292,8 +291,8 @@ void Calib::CalcFreq()
 
 			// When a signal is almost exactly between two bins the first and second FFT can disagree
 			// Use the direction of the phase adjustment to correct
-			volatile const uint32_t hyp11 = std::hypot(fft.fftBuffer[1][maxBin + 0], fft.cosBuffer[maxBin + 0]);
-			volatile const uint32_t hyp12 = std::hypot(fft.fftBuffer[1][maxBin + 1], fft.cosBuffer[maxBin + 1]);
+			const uint32_t hyp11 = std::hypot(fft.fftBuffer[1][maxBin + 0], fft.cosBuffer[maxBin + 0]);
+			const uint32_t hyp12 = std::hypot(fft.fftBuffer[1][maxBin + 1], fft.cosBuffer[maxBin + 1]);
 			if (hyp12 > hyp11 && phaseAdj < 0.0f) {		// Correct for situations where each FFT disagrees about the fundamental bin
 				++maxBin;
 			}
@@ -343,7 +342,7 @@ void Calib::CalcFreq()
 		}
 	}
 
-	if (frequency > 0.0f) {		// A below C0 will be 13.75Hz
+	if (frequency > 0.0f) {
 
 		calibFrequencies[calibCount++] = frequency;
 
@@ -431,6 +430,7 @@ uint32_t Calib::StoreConfig(uint8_t* buff)
 
 	return sizeof(calibOffsets);
 }
+
 
 //float Tuner::FreqFromMidiNote(const uint8_t note)
 //{

@@ -10,7 +10,6 @@ volatile ADCValues adc;
 
 
 /* TODO:
-- Low frequency calibration
 - interpolation on calibration offsets
 */
 
