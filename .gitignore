@@ -25,3 +25,4 @@ Hardware/\#auto_saved_files\#
 Hardware/jlcpcb/*
 *.cyclo
 ~$USB_CDC.xlsx
+*.kicad_sch-bak
