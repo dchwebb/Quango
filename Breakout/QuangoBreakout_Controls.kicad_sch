@@ -157,7 +157,7 @@
       (property "Datasheet" "~" (at 0 0.635 90)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (property "ki_keywords" "8P8C RJ female connector" (at 0 0 0)
+      (property "ki_keywords" "8P8C RJ socket connector" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
       (property "ki_description" "RJ connector, 8P8C (8 positions 8 connected)" (at 0 0 0)
