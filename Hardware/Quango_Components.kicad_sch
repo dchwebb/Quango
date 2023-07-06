@@ -5260,7 +5260,7 @@
     (uuid ff8fc764-16f2-4cd7-b83c-85d035fa905d)
   )
 
-  (text "PItch Detection Multiplexer" (at 166.37 180.34 0)
+  (text "Pitch Detection Multiplexer" (at 166.37 180.34 0)
     (effects (font (size 2.54 2.54) (thickness 0.508) bold) (justify left bottom))
     (uuid 2539dd7c-4ea6-4dc6-8975-4535639dda10)
   )
