@@ -1,0 +1,29 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,7.0.5*%
+%TF.CreationDate,2023-07-06T16:17:21+01:00*%
+%TF.ProjectId,QuangoBreakout_Panel,5175616e-676f-4427-9265-616b6f75745f,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Soldermask,Bot*%
+%TF.FilePolarity,Negative*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 7.0.5) date 2023-07-06 16:17:21*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%ADD10C,6.000000*%
+%ADD11O,5.000000X3.200000*%
+%ADD12C,3.200000*%
+G04 APERTURE END LIST*
+D10*
+X59400000Y-154500000D03*
+X54700000Y-141800000D03*
+D11*
+X62000000Y-43900000D03*
+D10*
+X64100000Y-141800000D03*
+D12*
+X59400000Y-90900000D03*
+D11*
+X56700000Y-166400000D03*
+M02*
