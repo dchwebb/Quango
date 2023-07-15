@@ -2363,6 +2363,11 @@
     (effects (font (size 2.54 2.54) (thickness 0.508) bold) (justify left bottom))
     (uuid f92adff9-5ee9-43eb-a9aa-aaa69d816450)
   )
+  (text "V2 Changes: Add Octave Up/Down switch\n- add USB protection IC"
+    (at 187.96 173.99 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid fa315b95-bd71-492b-b597-5da4b2ed7010)
+  )
 
   (label "CV_OUT_A3" (at 87.63 29.21 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))

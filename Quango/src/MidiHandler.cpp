@@ -62,8 +62,6 @@ void MidiHandler::ActivateEP()
 
 void MidiHandler::midiEvent(const uint32_t data)
 {
-	DEBUG_ON2
-
 	auto midiData = MidiData(data);
 	MidiNote midiNote(midiData.db1, midiData.db2);
 
@@ -73,8 +71,6 @@ void MidiHandler::midiEvent(const uint32_t data)
 		pitchBend = static_cast<uint16_t>(midiData.db1) + (midiData.db2 << 7);
 		voiceManager.Pitchbend(pitchBend);
 	}
-
-	DEBUG_OFF2
 }
 
 

@@ -26,12 +26,18 @@ void Envelope::SetEnvelope(const uint32_t value) {
 		// Data: 12 bit
 		// 24 bit message Structure: AAAAA CC X XXXX DDDDDDDDDDDD
 
+		GPIOD->ODR &= ~GPIO_ODR_OD15;					// SPI2 NSS - Low
+
 		// Data must be written as bytes as sending a 32bit word will trigger a 16 bit send
 		volatile uint8_t* spi8Bit = (uint8_t*)(&SPI2->DR);
 
 		*spi8Bit = uint8_t{0};
 		*spi8Bit = (uint8_t)(value >> 8);
 		*spi8Bit = (uint8_t)(value & 0xFF);
+
+		while ((SPI2->SR & SPI_SR_BSY) != 0 || (SPI2->SR & SPI_SR_FTLVL) != 0) {};
+
+		GPIOD->ODR |= GPIO_ODR_OD15;					// SPI2 NSS - High
 	}
 	*envLED = ledBrightness[value];
 }
@@ -154,6 +160,7 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 		break;
 	}
 
+	//if (currentLevel != level || envDAC == nullptr) {			// FIXME - hack to test envB4 DAC
 	if (currentLevel != level) {
 		currentLevel = level;
 		SetEnvelope(static_cast<uint32_t>(currentLevel * static_cast<float>(adsr->level) * reciprocal4096));

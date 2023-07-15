@@ -101,16 +101,12 @@ void VoiceManager::ProcessMidi()
 
 void VoiceManager::CalcEnvelopes()
 {
-	DEBUG_ON1
-
 	ProcessMidi();
 	for (auto& chn: channel) {
 		for (auto& v: chn.voice) {
 			v.envelope.calcEnvelope(chn.adsr);
 		}
 	}
-
-	DEBUG_OFF1
 }
 
 
@@ -129,7 +125,17 @@ void VoiceManager::RetriggerGates()
 
 void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 {
-	float note = std::clamp(static_cast<float>(midiNote) + voiceManager.pitchbend, (float)lowestNote, (float)highestNote);		// limit C1 to C8
+	uint32_t oct = 0;
+	if (chn == channelB) {
+		// Octave Up
+		if ((GPIOD->IDR & GPIO_IDR_ID0) != 0) {
+			oct = 12;
+		}
+		if ((GPIOC->IDR & GPIO_IDR_ID12) != 0) {
+			oct = -12;
+		}
+	}
+	float note = std::clamp(static_cast<float>(midiNote + oct) + voiceManager.pitchbend, (float)lowestNote, (float)highestNote);		// limit C1 to C8
 
 	// apply calibration offsets, locating nearest pitch offset FIXME - use interpolation?
 	uint8_t calibOctave = std::round((note - 33.0f) / 12);

@@ -147,10 +147,11 @@ void InitIO()
 	GPIOB->MODER &= ~GPIO_MODER_MODER11;			// PB11: channel B
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPD11_0;			// Activate pull-up
 
-	// Debug pins PD0, PC12
-	GPIOD->MODER &= ~GPIO_MODER_MODER0_1;			// PD0: Test pin 1
-	GPIOC->MODER &= ~GPIO_MODER_MODER12_1;			// PC12: Test pin 2
-
+	// Octave Switch pins PD0, PC12
+	GPIOD->MODER &= ~GPIO_MODER_MODER0;				// PD0: Octave
+	GPIOD->PUPDR |= GPIO_PUPDR_PUPD0_1;				// Activate pull-down
+	GPIOC->MODER &= ~GPIO_MODER_MODER12;			// PC12: Octave
+	GPIOC->PUPDR |= GPIO_PUPDR_PUPD12_1;			// Activate pull-down
 }
 
 
@@ -211,7 +212,7 @@ void InitSPI2()
 
 	SPI2->CR1 |= SPI_CR1_SPE;						// Enable SPI
 
-	GPIOD->ODR &= ~GPIO_ODR_OD15;					// SPI2 NSS - this can be left low
+	GPIOD->ODR |= GPIO_ODR_OD15;					// SPI2 NSS - initialise high
 }
 
 
