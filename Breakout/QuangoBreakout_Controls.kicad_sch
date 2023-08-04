@@ -1522,6 +1522,11 @@
     (effects (font (size 2.54 2.54) (thickness 0.508) bold) (justify left bottom))
     (uuid 418a46f1-8b13-4ae9-8dfb-31b6762dcd37)
   )
+  (text "v2 fixes: Audio_Mix_A and Audio_Mix_B wrong way round"
+    (at 182.88 171.45 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 54590ebe-9c3f-40cc-b14f-3450f7af75bf)
+  )
   (text "Audio Mixed Output" (at 16.51 193.04 0)
     (effects (font (size 2.54 2.54) (thickness 0.508) bold) (justify left bottom))
     (uuid 93ed1019-f57d-4354-a4a3-f324d3f14861)
