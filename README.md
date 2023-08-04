@@ -30,9 +30,9 @@ A PS508 audio multiplexer switches the 8 audio input channels to a single ADC ch
 
 Construction is a sandwich of three PCBs with a component board, a controls board and a panel. PCBs designed in Kicad v6.
 
-[Components schematic](https://raw.githubusercontent.com/dchwebb/Quango/master/Quango_Components.pdf)
+[Components schematic](https://raw.githubusercontent.com/dchwebb/Quango/master/Hardware/Quango_Components.pdf)
 
-[Controls schematic](https://raw.githubusercontent.com/dchwebb/Quango/master/Quango_Controls.pdf)
+[Controls schematic](https://raw.githubusercontent.com/dchwebb/Quango/master/Hardware/Quango_Controls.pdf)
 
 In addition the the Eurorack +/-12V rails (which have polarity protection and filtering) a 5v rail is supplied using an AMS1117-5.0 LDO. A 3.3v rail is generated with an LM1117-3.3.
 
