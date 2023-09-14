@@ -26,3 +26,4 @@ Hardware/jlcpcb/*
 *.cyclo
 ~$USB_CDC.xlsx
 *.kicad_sch-bak
+*.lck
