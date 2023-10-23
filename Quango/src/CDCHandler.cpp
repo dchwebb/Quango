@@ -35,6 +35,7 @@ void CDCHandler::ProcessCommand()
 				"v1 - v4     -  Monophonic voice selection\r\n"
 				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
 				"savecfg     -  Save config\r\n"
+				"erasecfg    -  Erase config\r\n"
 				"\r\n"
 		);
 
@@ -74,12 +75,14 @@ void CDCHandler::ProcessCommand()
 		}
 
 	} else if (cmd.compare("savecfg") == 0) {			// Save configuration
-		if (configManager.SaveConfig()) {
+		if (config.SaveConfig()) {
 			printf("Config saved\r\n");
 		} else {
 			printf("Error saving config\r\n");
 		}
 
+	} else if (cmd.compare("erasecfg") == 0) {			// Erase config settings
+		config.EraseConfig();
 
 	} else {
 		printf("Unrecognised command: %s\r\nType 'help' for supported commands\r\n", cmd.data());

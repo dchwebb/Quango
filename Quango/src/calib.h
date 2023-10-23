@@ -4,6 +4,7 @@
 #include "fft.h"
 #include "VoiceManager.h"
 #include "CDCHandler.h"
+#include "ConfigManager.h"
 
 class Calib {
 	friend class CDCHandler;
@@ -14,9 +15,13 @@ public:
 	void Activate(bool startTimer);					// Tuning mode started
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
-	uint32_t SerialiseConfig(uint8_t** buff);
-	uint32_t StoreConfig(uint8_t* buff);
-	void ClearOffsets(VoiceManager::channelNo chn, bool animate = false);
+	void ClearOffsets(VoiceManager::channelNo chn, bool animate, bool saveConfig);
+
+	ConfigSaver configSaver = {
+		.settingsAddress = &calibOffsets,
+		.settingsSize = sizeof(calibOffsets),
+		//.validateSettings = &VerifyConfig
+	};
 
 	float calibOffsets[2][4][7];					// Calibration offsets for channel | voice | octave
 	bool running = false;

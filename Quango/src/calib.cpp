@@ -90,7 +90,7 @@ bool Calib::CheckStart()
 			calibchannel = calibBtn[0].downCount ? VoiceManager::channelA : VoiceManager::channelB;		// Prioritise button one if both pressed
 
 			if (calibBtn[calibchannel].longPress) {
-				ClearOffsets(calibchannel, true);				// Blank previous calibration offsets and play animation
+				ClearOffsets(calibchannel, true, true);			// Blank previous calibration offsets, play animation and save
 			} else {
 				started = true;
 			}
@@ -128,21 +128,23 @@ bool Calib::CheckStart()
 		currFreq = 27.5f;					// Guess the frequency
 		calibErrors = 0;
 
-		ClearOffsets(calibchannel);			// Blank previous calibration offsets
+		ClearOffsets(calibchannel, false, false);			// Blank previous calibration offsets
 		Activate(true);						// start tuner
 	}
 	return running;
 }
 
 
-void Calib::ClearOffsets(VoiceManager::channelNo chn, bool animate)
+void Calib::ClearOffsets(VoiceManager::channelNo chn, bool animate, bool saveConfig)
 {
 	for (uint8_t v = 0; v < 4; ++v) {
 		for (uint8_t o = 0; o < VoiceManager::octaves; ++o) {
 			calibOffsets[chn][v][o] = 0.0f;
 		}
 	}
-	configManager.SaveConfig();
+	if (saveConfig) {
+		config.SaveConfig();				// Only save config when cleared from button - no point if calibrating
+	}
 
 	// Clear LEDs
 	if (animate) {
@@ -395,7 +397,7 @@ void Calib::CalcFreq()
 	// Check if calibration complete
 	if (calibVoice == 4) {
 		calibTime = SysTickVal - calibStart;
-		configManager.SaveConfig();
+		config.SaveConfig();
 		End();
 	} else {
 		Activate(true);
@@ -410,22 +412,6 @@ float Calib::FreqFromPos(const uint16_t pos)
 	return static_cast<float>(SystemCoreClock) / (pos * (TIM5->PSC + 1) * (TIM5->ARR + 1));
 }
 
-
-uint32_t Calib::SerialiseConfig(uint8_t** buff)
-{
-	*buff = reinterpret_cast<uint8_t*>(&calibOffsets);
-	return sizeof(calibOffsets);
-}
-
-
-uint32_t Calib::StoreConfig(uint8_t* buff)
-{
-	if (buff != nullptr) {
-		memcpy(&calibOffsets, buff, sizeof(calibOffsets));
-	}
-
-	return sizeof(calibOffsets);
-}
 
 
 //float Tuner::FreqFromMidiNote(const uint8_t note)

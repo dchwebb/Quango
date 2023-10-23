@@ -1,91 +1,117 @@
 #include "configManager.h"
 #include <cmath>
 #include <cstring>
-#include "calib.h"
+#include <cstdio>
 
 
-Config configManager;
+bool Config::SaveConfig()
+{
+	// Write config settings to Flash memory
+	scheduleSave = false;
+	bool result = true;
 
-// called whenever a config setting is changed to schedule a save after waiting to see if any more changes are being made
+	if (currentSettingsOffset == -1) {					// First set in RestoreConfig
+		currentSettingsOffset = 0;
+	} else {
+		currentSettingsOffset += settingsSize;
+		if (currentSettingsOffset > flashPageSize - settingsSize) {
+			currentSettingsOffset = 0;
+		}
+	}
+	uint32_t* flashPos = flashConfigAddr + currentSettingsOffset / 4;
+
+	// Check if flash needs erasing
+	bool eraseFlash = false;
+	for (uint32_t i = 0; i < settingsSize / 4; ++i) {
+		if (flashPos[i] != 0xFFFFFFFF) {
+			eraseFlash = true;
+			currentSettingsOffset = 0;					// Reset offset of current settings to beginning of page
+			flashPos = flashConfigAddr;
+			break;
+		}
+	}
+
+	uint8_t configBuffer[settingsSize];					// Will hold all the data to be written to the
+	memcpy(configBuffer, ConfigHeader, 4);
+
+	// Add individual config settings to buffer after header
+	uint32_t configPos = 4;
+	for (auto& saver : configSavers) {
+		memcpy(&configBuffer[configPos], saver->settingsAddress, saver->settingsSize);
+		configPos += saver->settingsSize;
+	}
+
+	__disable_irq();									// Disable Interrupts
+	FlashUnlock();										// Unlock Flash memory for writing
+	FLASH->SR = flashAllErrors;							// Clear error flags in Status Register
+
+	if (eraseFlash) {
+		FlashErasePage(flashConfigPage - 1);
+	}
+	result = FlashProgram(flashPos, reinterpret_cast<uint32_t*>(&configBuffer), settingsSize);
+
+	FlashLock();						// Lock Flash
+	__enable_irq(); 					// Enable Interrupts
+
+	printf(result ? "Config Saved\r\n" : "Error saving config\r\n");
+	return result;
+}
+
+
+void Config::RestoreConfig()
+{
+	// Locate latest (active) config block
+	uint32_t pos = 0;
+	while (pos < flashPageSize - settingsSize) {
+		if (*(flashConfigAddr + pos / 4) == *(uint32_t*)ConfigHeader) {
+			currentSettingsOffset = pos;
+			pos += settingsSize;
+		} else {
+			break;			// Either reached the end of the page or found the latest valid config block
+		}
+	}
+
+	if (currentSettingsOffset >= 0) {
+		const uint8_t* flashConfig = reinterpret_cast<uint8_t*>(flashConfigAddr) + currentSettingsOffset;
+		uint32_t configPos = sizeof(ConfigHeader);		// Position in buffer to retrieve settings from
+
+		// Restore settings
+		for (auto saver : configSavers) {
+			memcpy(saver->settingsAddress, &flashConfig[configPos], saver->settingsSize);
+			if (saver->validateSettings != nullptr) {
+				saver->validateSettings();
+			}
+			configPos += saver->settingsSize;
+		}
+	}
+}
+
+
+void Config::EraseConfig()
+{
+	__disable_irq();									// Disable Interrupts
+	FlashUnlock();										// Unlock Flash memory for writing
+	FLASH->SR = flashAllErrors;							// Clear error flags in Status Register
+
+	FlashErasePage(flashConfigPage - 1);
+
+	FlashLock();										// Lock Flash
+	__enable_irq();
+	printf("Config Erased\r\n");
+	}
+
+
 void Config::ScheduleSave()
 {
+	// called whenever a config setting is changed to schedule a save after waiting to see if any more changes are being made
 	scheduleSave = true;
 	saveBooked = SysTickVal;
 }
 
 
-// Write config settings to Flash memory
-bool Config::SaveConfig(bool eraseOnly)
-{
-	scheduleSave = false;
-	bool result = true;
-
-	uint32_t cfgSize = SetConfig();
-
-	__disable_irq();					// Disable Interrupts
-	FlashUnlock();						// Unlock Flash memory for writing
-	FLASH->SR = FLASH_ALL_ERRORS;		// Clear error flags in Status Register
-
-	// Check if flash needs erasing
-	for (uint32_t i = 0; i < BufferSize / 4; ++i) {
-		if (flashConfigAddr[i] != 0xFFFFFFFF) {
-			FlashErasePage(flashConfigPage - 1);			// Erase page
-			break;
-		}
-	}
-
-	if (!eraseOnly) {
-		result = FlashProgram(flashConfigAddr, reinterpret_cast<uint32_t*>(&configBuffer), cfgSize);
-	}
-
-	FlashLock();						// Lock Flash
-	__enable_irq(); 					// Enable Interrupts
-
-	return result;
-}
-
-
-uint32_t Config::SetConfig()
-{
-	// Serialise config values into buffer
-	memset(configBuffer, 0xF, sizeof(configBuffer));				// Clear buffer
-	strncpy(reinterpret_cast<char*>(configBuffer), "CFG", 4);		// Header
-	configBuffer[4] = configVersion;
-	uint32_t configPos = 8;											// Position in buffer to store data
-	uint32_t configSize = 0;										// Holds the size of each config buffer
-
-	uint8_t* cfgBuffer = nullptr;
-
-	// Envelope settings
-	configSize = calib.SerialiseConfig(&cfgBuffer);
-	memcpy(&configBuffer[configPos], cfgBuffer, configSize);
-	configPos += configSize;
-
-	// Footer
-	strncpy(reinterpret_cast<char*>(&configBuffer[configPos]), "END", 4);
-	configPos += 4;
-	return configPos;
-}
-
-
-// Restore configuration settings from flash memory
-void Config::RestoreConfig()
-{
-	uint8_t* flashConfig = reinterpret_cast<uint8_t*>(flashConfigAddr);
-
-	// Check for config start and version number
-	if (strcmp((char*)flashConfig, "CFG") == 0 && flashConfig[4] == configVersion) {
-		uint32_t configPos = 8;											// Position in buffer to store data
-
-		// Envelope Settings
-		configPos += calib.StoreConfig(&flashConfig[configPos]);
-	}
-}
-
-
-// Unlock the FLASH control register access
 void Config::FlashUnlock()
 {
+	// Unlock the FLASH control register access
 	if ((FLASH->CR & FLASH_CR_LOCK) != 0)  {
 		FLASH->KEYR = 0x45670123U;					// These magic numbers unlock the flash for programming
 		FLASH->KEYR = 0xCDEF89ABU;
@@ -93,10 +119,9 @@ void Config::FlashUnlock()
 }
 
 
-// Lock the FLASH Registers access
 void Config::FlashLock()
 {
-	FLASH->CR |= FLASH_CR_LOCK;
+	FLASH->CR |= FLASH_CR_LOCK;							// Lock the FLASH Registers access
 }
 
 
@@ -113,8 +138,8 @@ void Config::FlashErasePage(uint8_t page)
 
 bool Config::FlashWaitForLastOperation()
 {
-	if (FLASH->SR & FLASH_ALL_ERRORS) {						// If any error occurred abort
-		FLASH->SR = FLASH_ALL_ERRORS;						// Clear all errors
+	if (FLASH->SR & flashAllErrors) {						// If any error occurred abort
+		FLASH->SR = flashAllErrors;							// Clear all errors
 		return false;
 	}
 
