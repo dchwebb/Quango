@@ -135,25 +135,26 @@ void Envelope::calcEnvelope(volatile ADSR* adsr)
 
 	case gateStates::release:
 		if (level > 0.0f) {
-			const float maxDurationMult = 1.15f;		// to scale maximum delay time
+			if (adsr->release < 4080) { 					// If release is set to max, hold the note indefinitely for drones/calibration etc
+				const float maxDurationMult = 1.15f;		// to scale maximum delay time
 
-			// RC value - decayScale represents R component; maxDurationMult represents capacitor size
-			float rc = std::pow(static_cast<float>(adsr->release) * reciprocal4096, 2.0f) * maxDurationMult;
+				// RC value - decayScale represents R component; maxDurationMult represents capacitor size
+				float rc = std::pow(static_cast<float>(adsr->release) * reciprocal4096, 2.0f) * maxDurationMult;
 
-			if (rc != 0.0f && level > 1.0f) {
-				/*
-				 * Long hand calculations:
-				 * float xPos = -rc * std::log(currentLevel / 4096.0f);
-				 * float newXPos = xPos + timeStep;
-				 * float newYPos = std::exp(-newXPos / rc);
-				 * currentLevel = newYPos * 4096.0f;
-				 */
+				if (rc != 0.0f && level > 1.0f) {
+					/*
+					 * Long hand calculations:
+					 * float xPos = -rc * std::log(currentLevel / 4096.0f);
+					 * float newXPos = xPos + timeStep;
+					 * float newYPos = std::exp(-newXPos / rc);
+					 * currentLevel = newYPos * 4096.0f;
+					 */
 
-				level = level * CordicExp(-timeStep / rc);
-			} else {
-				level = 0.0f;
+					level = level * CordicExp(-timeStep / rc);
+				} else {
+					level = 0.0f;
+				}
 			}
-
 		} else {
 			gateState = gateStates::off;
 		}
