@@ -27,7 +27,7 @@ extern uint16_t calibZeroPos;
 #define SYSTICK 1000						// 1ms
 #define SAMPLERATE 48000.0f
 
-void InitSystemClock();
+void InitClocks();
 void InitHardware();
 void InitSysTick();
 void InitDAC();

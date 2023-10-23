@@ -9,8 +9,6 @@ void Calib::Capture()
 {
 	bool samplesReady = false;
 	if (mode == FFT) {
-
-
 		auto floatBuffer = (float* const)&(fft.fftBuffer);
 		static constexpr uint32_t halfNumSamples = FFT::fftSamples / 2;
 
@@ -72,7 +70,7 @@ bool Calib::CheckStart()
 	bool started = false;
 	for (auto& btn : calibBtn) {
 		if ((*btn.btnIDR & btn.btnPin) == 0) {					// Check for button down
-			if (++btn.downCount > 10000 && !btn.longPress) {	// Check for long press
+			if (++btn.downCount > 15000 && !btn.longPress && !running) {	// Check for long press
 				// Switch on all LEDs to show user in long count mode
 				btn.longPress = true;
 				for (auto& voice : voiceManager.channel[btn.channel].voice) {
@@ -80,10 +78,8 @@ bool Calib::CheckStart()
 				}
 			}
 			btn.upCount = 0;
-		} else {
-			if (btn.downCount) {								// Previously pressed down
-				++btn.upCount;									// Check button has been released long enough to ensure not a bounce
-			}
+		} else if (btn.downCount) {								// Previously pressed down
+			++btn.upCount;										// Check button has been released long enough to ensure not a bounce
 		}
 	}
 

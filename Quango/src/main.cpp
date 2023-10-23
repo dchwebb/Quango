@@ -23,8 +23,7 @@ extern uint32_t SystemCoreClock;
 int main(void)
 {
 	SystemInit();						// Activates floating point coprocessor and resets clock
-	InitSystemClock();					// Configure the clock and PLL
-	SystemCoreClockUpdate();			// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
+	InitClocks();						// Configure the clock and PLL
 	InitHardware();
 	voiceManager.Init();				// Initialises external DACs
 	usb.InitUSB();
