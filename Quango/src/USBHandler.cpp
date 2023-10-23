@@ -1,7 +1,7 @@
 #include "USBHandler.h"
 #include "USB.h"
 
-USBHandler::USBHandler(USB* usb, const uint8_t inEP, const uint8_t outEP, int8_t interface) : usb(usb), inEP(inEP), outEP(outEP), interface(interface) {
+USBHandler::USBHandler(USBMain* usb, const uint8_t inEP, const uint8_t outEP, int8_t interface) : usb(usb), inEP(inEP), outEP(outEP), interface(interface) {
 	if (interface >= 0) {
 		usb->classesByInterface[interface] = this;
 	}
@@ -17,7 +17,7 @@ void USBHandler::EndPointTransfer(const Direction d, const uint8_t ep, const uin
 
 void USBHandler::EndPointActivate(const uint8_t ep, const Direction d, const EndPointType eptype)
 {
-	usb->ActivateEndpoint(ep, d, static_cast<USB::EndPointType>(eptype));
+	usb->ActivateEndpoint(ep, d, static_cast<USBMain::EndPointType>(eptype));
 }
 
 void USBHandler::SetupIn(const uint32_t size, const uint8_t* buff)

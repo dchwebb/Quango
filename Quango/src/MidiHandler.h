@@ -7,7 +7,7 @@ class USB;
 
 class MidiHandler : public USBHandler {
 public:
-	MidiHandler(USB* usb, uint8_t inEP, uint8_t outEP, int8_t interface) : USBHandler(usb, inEP, outEP, interface) {
+	MidiHandler(USBMain* usb, uint8_t inEP, uint8_t outEP, int8_t interface) : USBHandler(usb, inEP, outEP, interface) {
 		outBuff = xfer_buff;
 	}
 

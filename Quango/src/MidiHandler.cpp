@@ -50,10 +50,10 @@ void MidiHandler::DataOut()
 
 void MidiHandler::ActivateEP()
 {
-	EndPointActivate(USB::Midi_In,   Direction::in,  EndPointType::Bulk);
-	EndPointActivate(USB::Midi_Out,  Direction::out, EndPointType::Bulk);
+	EndPointActivate(USBMain::Midi_In,   Direction::in,  EndPointType::Bulk);
+	EndPointActivate(USBMain::Midi_Out,  Direction::out, EndPointType::Bulk);
 
-	EndPointTransfer(Direction::out, USB::Midi_Out, USB::ep_maxPacket);
+	EndPointTransfer(Direction::out, USBMain::Midi_Out, USBMain::ep_maxPacket);
 }
 
 
@@ -168,18 +168,18 @@ void MidiHandler::ClassSetupData(usbRequest& req, const uint8_t* data)
 const uint8_t MidiHandler::Descriptor[] = {
 	// B.3.1 Standard Audio Control standard Interface Descriptor
 	0x09,									// length of descriptor in bytes
-	USB::InterfaceDescriptor,				// interface descriptor type
-	USB::AudioInterface,					// index of this interface
+	USBMain::InterfaceDescriptor,			// interface descriptor type
+	USBMain::AudioInterface,				// index of this interface
 	0x00,									// alternate setting for this interface
 	0x00,									// endpoints excl 0: number of endpoint descriptors to follow
 	0x01,									// AUDIO
 	0x01,									// AUDIO_Control
 	0x00,									// bInterfaceProtocol
-	USB::AudioClass,						// string index for interface
+	USBMain::AudioClass,					// string index for interface
 
 	// B.3.2 Class-specific AC Interface Descriptor
 	0x09,									// length of descriptor in bytes
-	USB::ClassSpecificInterfaceDescriptor,	// descriptor type
+	USBMain::ClassSpecificInterfaceDescriptor,	// descriptor type
 	0x01,									// header functional descriptor
 	0x00, 0x01,								// bcdADC
 	0x09, 0x00,								// wTotalLength
@@ -189,25 +189,25 @@ const uint8_t MidiHandler::Descriptor[] = {
 	// B.4 MIDIStreaming Interface Descriptors
 	// B.4.1 Standard MS Interface Descriptor
 	0x09,									// bLength
-	USB::InterfaceDescriptor,				// bDescriptorType: interface descriptor
-	USB::MidiInterface,						// bInterfaceNumber
+	USBMain::InterfaceDescriptor,			// bDescriptorType: interface descriptor
+	USBMain::MidiInterface,					// bInterfaceNumber
 	0x00,									// bAlternateSetting
 	0x02,									// bNumEndpoints
 	0x01,									// bInterfaceClass: Audio
 	0x03,									// bInterfaceSubClass: MIDIStreaming
 	0x00,									// InterfaceProtocol
-	USB::AudioClass,						// iInterface: String Descriptor
+	USBMain::AudioClass,					// iInterface: String Descriptor
 
 	// B.4.2 Class-specific MS Interface Descriptor
 	0x07,									// length of descriptor in bytes
-	USB::ClassSpecificInterfaceDescriptor,	// bDescriptorType: Class Specific Interface Descriptor
+	USBMain::ClassSpecificInterfaceDescriptor,	// bDescriptorType: Class Specific Interface Descriptor
 	0x01,									// header functional descriptor
 	0x0, 0x01,								// bcdADC
 	MidiHandler::MidiClassDescSize, 0,		// wTotalLength
 
 	// B.4.3 MIDI IN Jack Descriptor (Embedded)
 	0x06,									// bLength
-	USB::ClassSpecificInterfaceDescriptor,	// descriptor type
+	USBMain::ClassSpecificInterfaceDescriptor,	// descriptor type
 	0x02,									// bDescriptorSubtype: MIDI_IN_JACK
 	0x01,									// bJackType: Embedded
 	0x01,									// bJackID
@@ -215,7 +215,7 @@ const uint8_t MidiHandler::Descriptor[] = {
 
 	// Table B4.4 Midi Out Jack Descriptor (Embedded)
 	0x09,									// length of descriptor in bytes
-	USB::ClassSpecificInterfaceDescriptor,	// descriptor type
+	USBMain::ClassSpecificInterfaceDescriptor,	// descriptor type
 	0x03,									// MIDI_OUT_JACK descriptor
 	0x01,									// bJackType: Embedded
 	0x02,									// bJackID
@@ -226,11 +226,11 @@ const uint8_t MidiHandler::Descriptor[] = {
 
 	//B.5.1 Standard Bulk OUT Endpoint Descriptor
 	0x09,									// bLength
-	USB::EndpointDescriptor,				// bDescriptorType = endpoint
-	USB::Midi_Out,							// bEndpointAddress
-	USB::Bulk,								// bmAttributes: 2:Bulk
-	LOBYTE(USB::ep_maxPacket),				// wMaxPacketSize
-	HIBYTE(USB::ep_maxPacket),
+	USBMain::EndpointDescriptor,			// bDescriptorType = endpoint
+	USBMain::Midi_Out,						// bEndpointAddress
+	USBMain::Bulk,							// bmAttributes: 2:Bulk
+	LOBYTE(USBMain::ep_maxPacket),			// wMaxPacketSize
+	HIBYTE(USBMain::ep_maxPacket),
 	0x00,									// bInterval in ms : ignored for bulk
 	0x00,									// bRefresh Unused
 	0x00,									// bSyncAddress Unused
@@ -244,11 +244,11 @@ const uint8_t MidiHandler::Descriptor[] = {
 
 	//B.6.1 Standard Bulk IN Endpoint Descriptor
 	0x09,									// bLength
-	USB::EndpointDescriptor,				// bDescriptorType = endpoint
-	USB::Midi_In,							// bEndpointAddress IN endpoint number 3
-	USB::Bulk,								// bmAttributes: 2: Bulk, 3: Interrupt endpoint
-	LOBYTE(USB::ep_maxPacket),				// wMaxPacketSize
-	HIBYTE(USB::ep_maxPacket),
+	USBMain::EndpointDescriptor,			// bDescriptorType = endpoint
+	USBMain::Midi_In,						// bEndpointAddress IN endpoint number 3
+	USBMain::Bulk,							// bmAttributes: 2: Bulk, 3: Interrupt endpoint
+	LOBYTE(USBMain::ep_maxPacket),			// wMaxPacketSize
+	HIBYTE(USBMain::ep_maxPacket),
 	0x00,									// bInterval in ms
 	0x00,									// bRefresh
 	0x00,									// bSyncAddress
