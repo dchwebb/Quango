@@ -413,6 +413,33 @@ float Calib::FreqFromPos(const uint16_t pos)
 }
 
 
+void Calib::VerifyConfig()
+{
+	// Populate interpolated calibration data from octaves
+	for (uint32_t channel = 0; channel < 2; ++channel) {
+		for (uint32_t voice = 0; voice < 4; ++voice) {
+			for (uint32_t note = 0; note < Calib::midiNoteCount; ++note) {
+				// Calibration from  A0 (33) to A6 (117)
+				// Midi note will be C0 (24) to C7 (108)
+				const uint32_t midiNote = note + VoiceManager::lowestNote;
+				const float calibOctave = static_cast<float>(midiNote - Calib::calibNoteStart) / 12.0f;
+
+				if (midiNote <= Calib::calibNoteStart) {
+					calib.interpolatedOffsets[channel][voice][note] = calib.calibOffsets[channel][voice][0];
+				} else {
+					const uint32_t octaveLow = std::floor(calibOctave);
+					const uint32_t octaveHigh = std::min(octaveLow + 1, VoiceManager::octaves - 1);
+					const float calibLow = calib.calibOffsets[channel][voice][octaveLow];
+					const float calibHigh = calib.calibOffsets[channel][voice][octaveHigh];
+					calib.interpolatedOffsets[channel][voice][note] = std::lerp(calibLow, calibHigh, calibOctave - octaveLow);
+				}
+			}
+		}
+	}
+
+
+}
+
 
 //float Tuner::FreqFromMidiNote(const uint8_t note)
 //{

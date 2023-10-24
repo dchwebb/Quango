@@ -14,7 +14,7 @@ bool Config::SaveConfig()
 		currentSettingsOffset = 0;
 	} else {
 		currentSettingsOffset += settingsSize;
-		if (currentSettingsOffset > flashPageSize - settingsSize) {
+		if ((uint32_t)currentSettingsOffset > flashPageSize - settingsSize) {
 			currentSettingsOffset = 0;
 		}
 	}
@@ -31,12 +31,10 @@ bool Config::SaveConfig()
 		}
 	}
 
-	uint8_t configBuffer[settingsSize];					// Will hold all the data to be written to the
+	uint8_t configBuffer[settingsSize];					// Will hold all the data to be written by config savers
 	memcpy(configBuffer, ConfigHeader, 4);
-
-	// Add individual config settings to buffer after header
 	uint32_t configPos = 4;
-	for (auto& saver : configSavers) {
+	for (auto& saver : configSavers) {					// Add individual config settings to buffer after header
 		memcpy(&configBuffer[configPos], saver->settingsAddress, saver->settingsSize);
 		configPos += saver->settingsSize;
 	}
@@ -50,8 +48,8 @@ bool Config::SaveConfig()
 	}
 	result = FlashProgram(flashPos, reinterpret_cast<uint32_t*>(&configBuffer), settingsSize);
 
-	FlashLock();						// Lock Flash
-	__enable_irq(); 					// Enable Interrupts
+	FlashLock();										// Lock Flash
+	__enable_irq(); 									// Enable Interrupts
 
 	printf(result ? "Config Saved\r\n" : "Error saving config\r\n");
 	return result;
@@ -98,7 +96,7 @@ void Config::EraseConfig()
 	FlashLock();										// Lock Flash
 	__enable_irq();
 	printf("Config Erased\r\n");
-	}
+}
 
 
 void Config::ScheduleSave()
@@ -113,7 +111,7 @@ void Config::FlashUnlock()
 {
 	// Unlock the FLASH control register access
 	if ((FLASH->CR & FLASH_CR_LOCK) != 0)  {
-		FLASH->KEYR = 0x45670123U;					// These magic numbers unlock the flash for programming
+		FLASH->KEYR = 0x45670123U;						// These magic numbers unlock the flash for programming
 		FLASH->KEYR = 0xCDEF89ABU;
 	}
 }
@@ -138,17 +136,15 @@ void Config::FlashErasePage(uint8_t page)
 
 bool Config::FlashWaitForLastOperation()
 {
-	if (FLASH->SR & flashAllErrors) {						// If any error occurred abort
-		FLASH->SR = flashAllErrors;							// Clear all errors
+	if (FLASH->SR & flashAllErrors) {					// If any error occurred abort
+		FLASH->SR = flashAllErrors;						// Clear all errors
 		return false;
 	}
 
-	while ((FLASH->SR & FLASH_SR_BSY) == FLASH_SR_BSY) {
+	while ((FLASH->SR & FLASH_SR_BSY) == FLASH_SR_BSY) {}
 
-	}
-
-	if ((FLASH->SR & FLASH_SR_EOP) == FLASH_SR_EOP) {		// Check End of Operation flag
-		FLASH->SR = FLASH_SR_EOP;							// Clear FLASH End of Operation pending bit
+	if ((FLASH->SR & FLASH_SR_EOP) == FLASH_SR_EOP) {	// Check End of Operation flag
+		FLASH->SR = FLASH_SR_EOP;						// Clear FLASH End of Operation pending bit
 	}
 
 	return true;

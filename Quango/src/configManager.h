@@ -7,7 +7,7 @@
 struct ConfigSaver {
 	void* settingsAddress;
 	uint32_t settingsSize;
-	void (*validateSettings)(void);
+	void (*validateSettings)(void);			// function pointer to method that will validate config settings when restored
 };
 
 
@@ -15,9 +15,10 @@ class Config {
 public:
 	static constexpr uint32_t configVersion = 1;
 	
-	static constexpr uint32_t flashConfigPage = 60;		// Page address: 2048 * (page - 1)
+	// STM32G473 category 3 device 256k Flash in 128 pages of 2048k (though memory browser indicates part actually has 512k??)
+	static constexpr uint32_t flashConfigPage = 60;
 	static constexpr uint32_t flashPageSize = 2048;
-	uint32_t* const flashConfigAddr = reinterpret_cast<uint32_t* const>(0x08000000 + flashPageSize * (flashConfigPage - 1));
+	uint32_t* const flashConfigAddr = reinterpret_cast<uint32_t* const>(FLASH_BASE + flashPageSize * (flashConfigPage - 1));
 
 	bool scheduleSave = false;
 	uint32_t saveBooked = false;
@@ -40,10 +41,10 @@ private:
 	static constexpr uint32_t flashAllErrors = FLASH_SR_OPERR  | FLASH_SR_PROGERR | FLASH_SR_WRPERR | FLASH_SR_PGAERR | FLASH_SR_SIZERR | FLASH_SR_PGSERR | FLASH_SR_MISERR | FLASH_SR_FASTERR | FLASH_SR_RDERR  | FLASH_SR_OPTVERR;
 
 	const std::vector<ConfigSaver*> configSavers;
-	uint32_t settingsSize = 0;
+	uint32_t settingsSize = 0;			// Size of all settings from each config saver module + size of config header
 
 	const char ConfigHeader[4] = {'C', 'F', 'G', configVersion};
-	int32_t currentSettingsOffset = -1;
+	int32_t currentSettingsOffset = -1;		// Offset within flash page to block containing active/latest settings
 
 	void FlashUnlock();
 	void FlashLock();

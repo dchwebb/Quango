@@ -4,13 +4,12 @@
 #include "Envelope.h"
 
 
-
 class VoiceManager
 {
 public:
-	static constexpr uint32_t octaves = 7;										// Highest midi note available (DAC outputs 7.13v)
-	static constexpr uint32_t lowestNote = 24;									// Lowest midi note available (DAC outputs 0v)
-	static constexpr uint32_t highestNote = lowestNote + (12 * octaves);
+	static constexpr uint32_t octaves = 7;
+	static constexpr uint32_t lowestNote = 24;								// Lowest midi note available C0 (DAC outputs 0v)
+	static constexpr uint32_t highestNote = lowestNote + (12 * octaves);	// Highest midi note available 108 = C7 (DAC outputs 7.13v)
 
 	enum channelNo {channelA = 0, channelB = 1};
 

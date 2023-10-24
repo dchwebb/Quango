@@ -47,7 +47,7 @@ void CDCHandler::ProcessCommand()
 			buffPos += sprintf(buffPos, "\r\nChannel %c", chn ? 'B' : 'A');
 			for (uint8_t v = 0; v < 4; ++v) {
 				buffPos += sprintf(buffPos, "\r\nVoice %d\r\n", v + 1);
-				for (uint8_t octave = 0; octave < 6; ++octave) {
+				for (uint8_t octave = 0; octave < VoiceManager::octaves; ++octave) {
 					buffPos += sprintf(buffPos, "%f  ", calib.calibOffsets[chn][v][octave]);
 				}
 			}
@@ -75,11 +75,7 @@ void CDCHandler::ProcessCommand()
 		}
 
 	} else if (cmd.compare("savecfg") == 0) {			// Save configuration
-		if (config.SaveConfig()) {
-			printf("Config saved\r\n");
-		} else {
-			printf("Error saving config\r\n");
-		}
+		config.SaveConfig();
 
 	} else if (cmd.compare("erasecfg") == 0) {			// Erase config settings
 		config.EraseConfig();

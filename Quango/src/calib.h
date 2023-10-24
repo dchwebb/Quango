@@ -16,14 +16,20 @@ public:
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
 	void ClearOffsets(VoiceManager::channelNo chn, bool animate, bool saveConfig);
+	static void VerifyConfig();
 
 	ConfigSaver configSaver = {
 		.settingsAddress = &calibOffsets,
 		.settingsSize = sizeof(calibOffsets),
-		//.validateSettings = &VerifyConfig
+		.validateSettings = &VerifyConfig
 	};
 
-	float calibOffsets[2][4][7];					// Calibration offsets for channel | voice | octave
+	// Calibration offsets for channel | voice | octave (and interpolated to note)
+	float calibOffsets[2][4][VoiceManager::octaves];
+
+	static constexpr uint32_t midiNoteCount = VoiceManager::highestNote - VoiceManager::lowestNote + 1;
+	float interpolatedOffsets[2][4][midiNoteCount];
+
 	bool running = false;
 	tunerMode mode = FFT;
 
