@@ -12,7 +12,7 @@ void VoiceManager::Init()
 }
 
 
-void VoiceManager::NoteOnOff(uint8_t midiNote, bool on)
+void VoiceManager::NoteOnOff(const uint8_t midiNote, const bool on)
 {
 	// Queue midi notes for playback on envelope trigger
 	midiQueue[midiQueueWrite].noteVal = midiNote;
@@ -123,7 +123,7 @@ void VoiceManager::RetriggerGates()
 }
 
 
-void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
+void VoiceManager::Channel::Voice::SetPitch(const channelNo chn)
 {
 	uint32_t oct = 0;
 	if (chn == channelB) {
@@ -137,9 +137,8 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 	}
 	float note = std::clamp(static_cast<float>(midiNote + oct) + voiceManager.pitchbend, (float)lowestNote, (float)highestNote);		// limit C1 to C8
 
-	// apply calibration offsets, locating nearest pitch offset FIXME - use interpolation?
-	uint8_t calibOctave = std::round((note - 33.0f) / 12);
-	note = note + calib.calibOffsets[chn][index][calibOctave];
+	const uint8_t calibOffset = std::round(note - lowestNote);
+	note = note + calib.interpolatedOffsets[chn][index][calibOffset];
 
 	// CV DAC outputs 5v which is amplified to 7.13v. This gives a range of 7.13 * 12 = 85.56 notes
 	uint16_t dacOutput = std::min((uint32_t)(65536.0f * (note - (float)lowestNote) / 85.56f), 0xFFFFUL);
@@ -147,7 +146,7 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn)
 }
 
 
-void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
+void VoiceManager::Channel::Voice::SetPitch(const channelNo chn, const uint16_t dacOutput)
 {
 	// AD5676 command structure:
 	// CCCC AAAA DDDDDDD DDDDDDDD
@@ -171,7 +170,7 @@ void VoiceManager::Channel::Voice::SetPitch(channelNo chn, uint16_t dacOutput)
 }
 
 
-void VoiceManager::Pitchbend(uint16_t pitch)
+void VoiceManager::Pitchbend(const uint16_t pitch)
 {
 	// Raw pitchbend data is 0-16384 centered at 8192
 	pitchbend = (static_cast<float>(pitch - 8192) / 8192.0f) * pitchbendSemitones;

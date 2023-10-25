@@ -87,7 +87,7 @@ void USBMain::ProcessSetupPacket()
 			break;
 
 		case Request::SetAddress:
-			devAddress = static_cast<uint8_t>(req.Value) & 0x7F;			// Address address is set on the next interrupt - hold in temp storage
+			devAddress = static_cast<uint8_t>(req.Value) & 0x7F;	// Address address is set on the next interrupt - hold in temp storage
 
 			EPStartXfer(Direction::in, 0, 0);
 			devState = DeviceState::Addressed;
@@ -131,7 +131,7 @@ void USBMain::EPStartXfer(const Direction direction, const uint8_t endpoint, uin
 {
 	const uint8_t epIndex = (endpoint & epAddrMask);
 
-	if (direction == Direction::in) {						// IN endpoint
+	if (direction == Direction::in) {							// IN endpoint
 		if (len > ep_maxPacket) {
 			len = ep_maxPacket;
 		}
@@ -148,13 +148,13 @@ void USBMain::EPStartXfer(const Direction direction, const uint8_t endpoint, uin
 #endif
 
 		SetTxStatus(epIndex, USB_EP_TX_VALID);
-	} else {												// OUT endpoint
+	} else {													// OUT endpoint
 		SetRxStatus(0, USB_EP_RX_VALID);
 	}
 }
 
 
-void USBMain::USBInterruptHandler()							// Originally in Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pcd.c
+void USBMain::USBInterruptHandler()								// Originally in Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pcd.c
 {
 	// Handle spurious interrupt
 	USBP->ISTR &= ~(USB_ISTR_SOF | USB_ISTR_ESOF);
@@ -164,15 +164,15 @@ void USBMain::USBInterruptHandler()							// Originally in Drivers\STM32F4xx_HAL
 
 
 	/////////// 	8000 		USB_ISTR_CTR: Correct Transfer
-	while (ReadInterrupts(USB_ISTR_CTR)) {					// Originally PCD_EP_ISR_Handler
-		const uint8_t epIndex = USBP->ISTR & USB_ISTR_EP_ID;		// Extract highest priority endpoint number
+	while (ReadInterrupts(USB_ISTR_CTR)) {						// Originally PCD_EP_ISR_Handler
+		const uint8_t epIndex = USBP->ISTR & USB_ISTR_EP_ID;	// Extract highest priority endpoint number
 
 #if (USB_DEBUG)
 		usbDebug[usbDebugNo].endpoint = epIndex;
 #endif
 
 		if (epIndex == 0) {
-			if ((USBP->ISTR & USB_ISTR_DIR) == 0) {			// DIR = 0: Direction IN
+			if ((USBP->ISTR & USB_ISTR_DIR) == 0) {				// DIR = 0: Direction IN
 				ClearTxInterrupt(0);
 
 				const uint16_t txBytes = USB_PMA[0].GetTXCount();
@@ -193,7 +193,7 @@ void USBMain::USBInterruptHandler()							// Originally in Drivers\STM32F4xx_HAL
 					devAddress = 0;
 				}
 
-			} else {										// DIR = 1: Setup or OUT interrupt
+			} else {											// DIR = 1: Setup or OUT interrupt
 
 				if ((USBP->EP0R & USB_EP_SETUP) != 0) {
 					classByEP[0]->outBuffCount = USB_PMA[0].GetRXCount();

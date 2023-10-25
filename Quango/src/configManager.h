@@ -7,7 +7,7 @@
 struct ConfigSaver {
 	void* settingsAddress;
 	uint32_t settingsSize;
-	void (*validateSettings)(void);			// function pointer to method that will validate config settings when restored
+	void (*validateSettings)(void);		// function pointer to method that will validate config settings when restored
 };
 
 
@@ -44,7 +44,7 @@ private:
 	uint32_t settingsSize = 0;			// Size of all settings from each config saver module + size of config header
 
 	const char ConfigHeader[4] = {'C', 'F', 'G', configVersion};
-	int32_t currentSettingsOffset = -1;		// Offset within flash page to block containing active/latest settings
+	int32_t currentSettingsOffset = -1;	// Offset within flash page to block containing active/latest settings
 
 	void FlashUnlock();
 	void FlashLock();

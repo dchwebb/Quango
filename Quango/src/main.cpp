@@ -1,17 +1,11 @@
 #include "calib.h"
 #include "initialisation.h"
 #include "usb.h"
-#include "MidiHandler.h"
 #include "VoiceManager.h"
 #include "configManager.h"
 
 volatile uint32_t SysTickVal;
 volatile ADCValues adc;
-
-
-/* TODO:
-- interpolation on calibration offsets
-*/
 
 
 Config config{&calib.configSaver};		// Initialise configuration to handle saving and restoring calibration settings

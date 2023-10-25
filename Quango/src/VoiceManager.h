@@ -14,11 +14,11 @@ public:
 	enum channelNo {channelA = 0, channelB = 1};
 
 	void Init();
-	void NoteOnOff(uint8_t midiNote, bool on);
+	void NoteOnOff(const uint8_t midiNote, const bool on);
 	void CalcEnvelopes();
 	void RetriggerGates();
 	void ProcessMidi();
-	void Pitchbend(uint16_t pitch);
+	void Pitchbend(const uint16_t pitch);
 
 	float pitchbend = 0.0f;
 	static constexpr float pitchbendSemitones = 12.0f;
@@ -37,8 +37,8 @@ public:
 			uint8_t midiNote = 0;
 			uint32_t startTime = 0;		// time that note was started (for note stealing)
 
-			void SetPitch(channelNo chn);
-			void SetPitch(channelNo chn, uint16_t dacOutput);
+			void SetPitch(const channelNo chn);
+			void SetPitch(const channelNo chn, const uint16_t dacOutput);
 		} voice[4];
 
 		Channel(channelNo chn, volatile ADSR* adsr, Voice v1, Voice v2, Voice v3, Voice v4)

@@ -16,12 +16,12 @@ public:
 	void CalcFreq();								// Processes samples once collected
 	bool CheckStart();								// check if calibration button is pressed
 	void ClearOffsets(VoiceManager::channelNo chn, bool animate, bool saveConfig);
-	static void VerifyConfig();
+	static void InterpolateOffsets();				// Create an array of note-by-note offsets interpolated from octaves
 
 	ConfigSaver configSaver = {
 		.settingsAddress = &calibOffsets,
 		.settingsSize = sizeof(calibOffsets),
-		.validateSettings = &VerifyConfig
+		.validateSettings = &InterpolateOffsets
 	};
 
 	// Calibration offsets for channel | voice | octave (and interpolated to note)
