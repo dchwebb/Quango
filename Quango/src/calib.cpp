@@ -137,11 +137,9 @@ bool Calib::CheckStart()
 
 void Calib::ClearOffsets(VoiceManager::channelNo chn, bool animate, bool saveConfig)
 {
-	for (uint8_t v = 0; v < 4; ++v) {
-		for (uint8_t o = 0; o < VoiceManager::octaves; ++o) {
-			calibOffsets[chn][v][o] = 0.0f;
-		}
-	}
+	memset(calibOffsets[chn], 0, sizeof(calibOffsets[chn]));
+	memset(interpolatedOffsets[chn], 0, sizeof(interpolatedOffsets[chn]));
+
 	if (saveConfig) {
 		config.SaveConfig();				// Only save config when cleared from button - no point if calibrating
 	}
