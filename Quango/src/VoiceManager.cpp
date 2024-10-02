@@ -17,8 +17,8 @@ void VoiceManager::NoteOnOff(const uint8_t midiNote, const bool on)
 	// Queue midi notes for playback on envelope trigger
 	midiQueue[midiQueueWrite].noteVal = midiNote;
 	midiQueue[midiQueueWrite].on = on;
-	if (++midiQueueWrite > midiQueueSize) {
-		midiQueueWrite -= midiQueueSize;
+	if (++midiQueueWrite >= midiQueueSize) {
+		midiQueueWrite = 0;
 	}
 }
 
@@ -27,8 +27,8 @@ void VoiceManager::ProcessMidi()
 {
 	while (midiQueueRead != midiQueueWrite)	{
 		auto& note = midiQueue[midiQueueRead];
-		if (++midiQueueRead > midiQueueSize) {
-			midiQueueRead -= midiQueueSize;
+		if (++midiQueueRead >= midiQueueSize) {
+			midiQueueRead = 0;
 		}
 
 		uint8_t chnVoice = 255;

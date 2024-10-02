@@ -24,7 +24,7 @@ struct ADCValues {
 extern volatile ADCValues adc;
 extern uint16_t calibZeroPos;
 
-#define SYSTICK 1000						// 1ms
+#define sysTickInterval 1000						// 1ms
 #define SAMPLERATE 48000.0f
 
 void InitClocks();

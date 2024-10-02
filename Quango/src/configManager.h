@@ -16,9 +16,9 @@ public:
 	static constexpr uint32_t configVersion = 1;
 	
 	// STM32G473 category 3 device 256k Flash in 128 pages of 2048k (though memory browser indicates part actually has 512k??)
-	static constexpr uint32_t flashConfigPage = 60;
-	static constexpr uint32_t flashPageSize = 2048;
-	uint32_t* const flashConfigAddr = reinterpret_cast<uint32_t* const>(FLASH_BASE + flashPageSize * (flashConfigPage - 1));
+	static constexpr uint32_t flashConfigSector = 60;
+	static constexpr uint32_t flashSectorSize = 2048;
+	uint32_t* const flashConfigAddr = reinterpret_cast<uint32_t* const>(FLASH_BASE + flashSectorSize * (flashConfigSector - 1));
 
 	bool scheduleSave = false;
 	uint32_t saveBooked = false;

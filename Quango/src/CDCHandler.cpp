@@ -33,7 +33,7 @@ void CDCHandler::ProcessCommand()
 				"fft         -  Use FFT for calibration tuner\r\n"
 				"zc          -  Use zero crossing count for calibration tuner\r\n"
 				"v1 - v4     -  Monophonic voice selection\r\n"
-				"poly        -  Polyphonic mode (disable monophonic mode\r\n"
+				"poly        -  Polyphonic mode (disable monophonic mode)\r\n"
 				"savecfg     -  Save config\r\n"
 				"erasecfg    -  Erase config\r\n"
 				"\r\n"

@@ -14,7 +14,7 @@ bool Config::SaveConfig()
 		currentSettingsOffset = 0;
 	} else {
 		currentSettingsOffset += settingsSize;
-		if ((uint32_t)currentSettingsOffset > flashPageSize - settingsSize) {
+		if ((uint32_t)currentSettingsOffset > flashSectorSize - settingsSize) {
 			currentSettingsOffset = 0;
 		}
 	}
@@ -44,14 +44,18 @@ bool Config::SaveConfig()
 	FLASH->SR = flashAllErrors;							// Clear error flags in Status Register
 
 	if (eraseFlash) {
-		FlashErasePage(flashConfigPage - 1);
+		FlashErasePage(flashConfigSector - 1);
 	}
 	result = FlashProgram(flashPos, reinterpret_cast<uint32_t*>(&configBuffer), settingsSize);
 
 	FlashLock();										// Lock Flash
 	__enable_irq(); 									// Enable Interrupts
 
-	printf(result ? "Config Saved\r\n" : "Error saving config\r\n");
+	if (result) {
+		printf("Config Saved (%lu bytes at %#010lx)\r\n", settingsSize, (uint32_t)flashPos);
+	} else {
+		printf("Error saving config\r\n");
+	}
 	return result;
 }
 
@@ -60,7 +64,7 @@ void Config::RestoreConfig()
 {
 	// Locate latest (active) config block
 	uint32_t pos = 0;
-	while (pos < flashPageSize - settingsSize) {
+	while (pos < flashSectorSize - settingsSize) {
 		if (*(flashConfigAddr + pos / 4) == *(uint32_t*)ConfigHeader) {
 			currentSettingsOffset = pos;
 			pos += settingsSize;
@@ -91,7 +95,7 @@ void Config::EraseConfig()
 	FlashUnlock();										// Unlock Flash memory for writing
 	FLASH->SR = flashAllErrors;							// Clear error flags in Status Register
 
-	FlashErasePage(flashConfigPage - 1);
+	FlashErasePage(flashConfigSector - 1);
 
 	FlashLock();										// Lock Flash
 	__enable_irq();

@@ -62,7 +62,7 @@ void InitHardware()
 
 void InitSysTick()
 {
-	SysTick_Config(SystemCoreClock / SYSTICK);		// gives 1ms
+	SysTick_Config(SystemCoreClock / sysTickInterval);		// gives 1ms
 	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
@@ -340,7 +340,7 @@ void InitEnvTimer() {
 
 	TIM2->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
 	NVIC_EnableIRQ(TIM2_IRQn);
-	NVIC_SetPriority(TIM2_IRQn, 2);					// Lower is higher priority
+	NVIC_SetPriority(TIM2_IRQn, 3);					// Lower is higher priority
 
 	TIM2->CR1 |= TIM_CR1_CEN;
 	TIM2->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers

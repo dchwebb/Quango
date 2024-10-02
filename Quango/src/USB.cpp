@@ -140,11 +140,11 @@ void USBMain::EPStartXfer(const Direction direction, const uint8_t endpoint, uin
 		USB_PMA[epIndex].COUNT_TX = len;
 
 #if (USB_DEBUG)
-				usbDebug[usbDebugNo].PacketSize = len;
-				if (len > 0) {
-					usbDebug[usbDebugNo].xferBuff0 = ((uint32_t*)classByEP[epIndex]->inBuff)[0];
-					usbDebug[usbDebugNo].xferBuff1 = ((uint32_t*)classByEP[epIndex]->inBuff)[1];
-				}
+		usbDebug[usbDebugNo].PacketSize = len;
+		if (len > 0) {
+			usbDebug[usbDebugNo].xferBuff0 = ((uint32_t*)classByEP[epIndex]->inBuff)[0];
+			usbDebug[usbDebugNo].xferBuff1 = ((uint32_t*)classByEP[epIndex]->inBuff)[1];
+		}
 #endif
 
 		SetTxStatus(epIndex, USB_EP_TX_VALID);
@@ -387,7 +387,8 @@ void USBMain::EP0In(const uint8_t* buff, const uint32_t size)
 	EPStartXfer(Direction::in, 0, ep0.inBuffSize);		// sends blank request back
 
 #if (USB_DEBUG)
-	USBUpdateDbg({}, {}, {}, ep0.inBuffSize, {}, (uint32_t*)ep0.inBuff);
+	usbDebug[usbDebugNo].PacketSize = ep0.inBuffSize;
+	usbDebug[usbDebugNo].xferBuff0 = *(uint32_t*)ep0.inBuff;
 #endif
 }
 
@@ -609,7 +610,7 @@ void USBMain::OutputDebug()
 {
 	USBDebug = false;
 
-	uartSendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
+	SendString("Event,Interrupt,Name,Desc,Endpoint,mRequest,Request,Value,Index,Length,PacketSize,XferBuff,\n");
 	uint16_t evNo = usbDebugEvent % USB_DEBUG_COUNT;
 	std::string interrupt, subtype;
 
